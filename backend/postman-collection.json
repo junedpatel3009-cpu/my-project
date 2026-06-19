@@ -1,0 +1,63 @@
+{
+  "info": {
+    "name": "Skill Shine Backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+    },
+    {
+      "name": "Register Client",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"role\":\"CLIENT\",\"name\":\"Jane Client\",\"email\":\"client@example.com\",\"password\":\"password123\"}"
+        },
+        "url": "{{baseUrl}}/api/auth/register"
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"client@example.com\",\"password\":\"password123\"}"
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      }
+    },
+    {
+      "name": "Create Client Profile",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"companyName\":\"Acme Inc\",\"contactName\":\"Jane Client\",\"phone\":\"+15550001111\",\"address\":\"New York\",\"industry\":\"Technology\",\"notes\":\"Needs trusted service providers\"}"
+        },
+        "url": "{{baseUrl}}/api/clients"
+      }
+    },
+    {
+      "name": "List Professionals",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/professionals"
+      }
+    }
+  ]
+}

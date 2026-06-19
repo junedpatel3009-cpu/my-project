@@ -1,0 +1,16 @@
+{
+  "name": "skill-shine-backend-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.mjs",
+    "api": "node src/server.mjs",
+    "socket": "cd .. && npm run backend:socket",
+    "health": "node -e \"fetch('http://localhost:5000/health').then(async r => { console.log(r.status); console.log(await r.text()); }).catch(error => { console.error(error.message); process.exit(1); })\"",
+    "db:generate": "cd .. && npm run prisma:generate",
+    "db:push": "cd .. && npm run prisma:push",
+    "db:studio": "cd .. && npm run prisma:studio"
+  }
+}
+
+
