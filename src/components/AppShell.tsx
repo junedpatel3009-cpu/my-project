@@ -215,6 +215,7 @@ export function AppShell({
   const displayedNotificationKeyRef = useRef<string | null>(null);
   const notificationStorageKeyRef = useRef<string | null>(null);
   const notificationSnapshotSignatureRef = useRef<string | null>(null);
+  const notificationQueueTimeoutRef = useRef<number | null>(null);
 
   const showNotificationAlert = useCallback(
     (
@@ -285,13 +286,29 @@ export function AppShell({
           window.localStorage.setItem(notificationStorageKeyRef.current, next.key);
         }
         showNotificationAlert(next, preferences);
-        window.setTimeout(showNext, NOTIFICATION_POPUP_MS + 250);
+        notificationQueueTimeoutRef.current = window.setTimeout(
+          showNext,
+          NOTIFICATION_POPUP_MS + 250,
+        );
       };
 
       showNext();
     },
     [showNotificationAlert],
   );
+
+  useEffect(() => {
+    return () => {
+      if (notificationPopupTimeoutRef.current) {
+        window.clearTimeout(notificationPopupTimeoutRef.current);
+      }
+      if (notificationQueueTimeoutRef.current) {
+        window.clearTimeout(notificationQueueTimeoutRef.current);
+      }
+      notificationQueueRef.current = [];
+      notificationQueueActiveRef.current = false;
+    };
+  }, []);
 
   const refreshNotifications = useCallback(
     async (showToast = false) => {
