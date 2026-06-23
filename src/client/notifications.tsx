@@ -118,7 +118,12 @@ function Notifications() {
   const unreadCount = notifications.filter((notification) => !notification.readAt).length;
   const userName =
     `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email || "User";
-  const userRole = data.viewer.role === "PROFESSIONAL" ? "Professional" : "Client";
+  const userRole =
+    data.viewer.role === "ADMIN"
+      ? "Admin"
+      : data.viewer.role === "PROFESSIONAL"
+        ? "Professional"
+        : "Client";
   const browserAlertsOn =
     data.preferences.browserNotificationsEnabled &&
     data.preferences.projectActivityNotificationsEnabled &&

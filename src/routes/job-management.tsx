@@ -57,7 +57,7 @@ type JobQuickFilter =
   | "COMPLETED"
   | "CANCELLED"
   | "DISPUTED";
-type DisputeQuickFilter = "TOTAL" | "NEW" | "UNDER_REVIEW" | "WAITING_CUSTOMER" | "WAITING_PROVIDER" | "RESOLVED" | "CLOSED";
+type DisputeQuickFilter = "TOTAL" | "OPEN_ALL" | "NEW" | "UNDER_REVIEW" | "WAITING_CUSTOMER" | "WAITING_PROVIDER" | "RESOLVED" | "CLOSED";
 
 type JobFilters = {
   customer: string;
@@ -194,14 +194,14 @@ function JobManagement() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard icon={BriefcaseBusiness} label="Total jobs" value={stats.totalJobs} caption={`${stats.openJobs} open jobs`} active={jobQuickFilter === "TOTAL"} onClick={() => setJobQuickFilter("TOTAL")} />
-        <SummaryCard icon={ListChecks} label="Assigned jobs" value={stats.assignedJobs} caption={`${stats.inProgressJobs} in progress`} active={jobQuickFilter === "ASSIGNED"} onClick={() => setJobQuickFilter("ASSIGNED")} />
-        <SummaryCard icon={AlertTriangle} label="Open disputes" value={stats.openDisputes} caption={`${stats.highPriorityDisputes} high priority`} active={disputeQuickFilter === "UNDER_REVIEW"} onClick={() => setDisputeQuickFilter("UNDER_REVIEW")} />
-        <SummaryCard icon={CheckCircle2} label="Completed jobs" value={stats.completedJobs} caption={`${stats.resolvedDisputes} disputes resolved`} active={jobQuickFilter === "COMPLETED"} onClick={() => setJobQuickFilter("COMPLETED")} />
+        <SummaryCard icon={BriefcaseBusiness} label="Total jobs" value={stats.totalJobs} caption={`${stats.openJobs} open jobs`} active={jobQuickFilter === "TOTAL"} onClick={() => { setDisputeQuickFilter(null); setJobQuickFilter("TOTAL"); }} />
+        <SummaryCard icon={ListChecks} label="Assigned jobs" value={stats.assignedJobs} caption={`${stats.inProgressJobs} in progress`} active={jobQuickFilter === "ASSIGNED"} onClick={() => { setDisputeQuickFilter(null); setJobQuickFilter("ASSIGNED"); }} />
+        <SummaryCard icon={AlertTriangle} label="Open disputes" value={stats.openDisputes} caption={`${stats.highPriorityDisputes} high priority`} active={disputeQuickFilter === "OPEN_ALL"} onClick={() => { setJobQuickFilter(null); setDisputeQuickFilter("OPEN_ALL"); }} />
+        <SummaryCard icon={CheckCircle2} label="Completed jobs" value={stats.completedJobs} caption={`${stats.resolvedDisputes} disputes resolved`} active={jobQuickFilter === "COMPLETED"} onClick={() => { setDisputeQuickFilter(null); setJobQuickFilter("COMPLETED"); }} />
       </div>
 
       <div className="mt-6 space-y-6">
-        <DisputeSection
+        {!jobQuickFilter ? <DisputeSection
           disputes={visibleDisputes}
           query={disputeQuery}
           filters={disputeFilters}
@@ -210,8 +210,8 @@ function JobManagement() {
           onFiltersChange={setDisputeFilters}
           onQuickFilterClear={() => setDisputeQuickFilter(null)}
           onOpenDispute={setSelectedDispute}
-        />
-        <JobSection
+        /> : null}
+        {!disputeQuickFilter ? <JobSection
           jobs={visibleJobs}
           query={jobQuery}
           filters={jobFilters}
@@ -221,7 +221,7 @@ function JobManagement() {
           onFiltersChange={setJobFilters}
           onQuickFilterClear={() => setJobQuickFilter(null)}
           onOpenJob={setSelectedJob}
-        />
+        /> : null}
       </div>
       {selectedJob ? <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} /> : null}
       {selectedDispute ? (
@@ -1107,6 +1107,7 @@ function matchesJobQuickFilter(job: AdminJobRecord, quickFilter: JobQuickFilter 
 
 function matchesDisputeQuickFilter(dispute: AdminDisputeRecord, quickFilter: DisputeQuickFilter | null) {
   if (!quickFilter || quickFilter === "TOTAL") return true;
+  if (quickFilter === "OPEN_ALL") return dispute.status === "OPEN" || dispute.status === "UNDER_REVIEW";
   if (quickFilter === "NEW") return dispute.status === "OPEN";
   if (quickFilter === "UNDER_REVIEW") return dispute.status === "UNDER_REVIEW";
   if (quickFilter === "WAITING_CUSTOMER" || quickFilter === "WAITING_PROVIDER") return false;

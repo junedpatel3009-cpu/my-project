@@ -6,7 +6,9 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useLocation,
 } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { useEffect, useRef } from "react";
 import { Provider } from "react-redux";
 import { toast } from "sonner";
@@ -14,6 +16,14 @@ import { toast } from "sonner";
 import appCss from "../styles.css?url";
 import { store } from "@/store";
 import { Toaster } from "@/components/ui/sonner";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import type { WebsitePageRecord } from "@/lib/website-page-cms.server";
+
+const loadPublishedEditorPages = createServerFn({ method: "GET" }).handler(async () => {
+  const { listPublishedWebsitePages } = await import("@/lib/website-page-cms.server");
+  return listPublishedWebsitePages();
+});
 
 function NotFoundComponent() {
   return (
@@ -73,6 +83,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: () => loadPublishedEditorPages(),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -115,15 +126,32 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pages = Route.useLoaderData() as WebsitePageRecord[];
+  const location = useLocation();
+  // Home contains live jobs and professionals. Its CMS content is integrated
+  // inside the real route instead of replacing the complete React page.
+  const editorPage = location.pathname === "/"
+    ? undefined
+    : pages.find((page) => page.path === location.pathname);
 
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <ActivityToastListener />
-        <Outlet />
+        {editorPage ? <PublishedEditorPage page={editorPage} /> : <Outlet />}
         <Toaster position="bottom-right" richColors closeButton />
       </QueryClientProvider>
     </Provider>
+  );
+}
+
+function PublishedEditorPage({ page }: { page: WebsitePageRecord }) {
+  return (
+    <div className="min-h-screen bg-background">
+      <SiteHeader />
+      <main className="cms-old" dangerouslySetInnerHTML={{ __html: page.content }} />
+      <SiteFooter />
+    </div>
   );
 }
 

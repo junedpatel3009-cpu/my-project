@@ -14,8 +14,11 @@ const getCurrentUserFn = createServerFn({ method: "GET" }).handler(async () => {
 
 const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
   const user = getCurrentUser();
+  const { getPublishedWebsitePage } = await import("@/lib/website-page-cms.server");
+  const editorPage = getPublishedWebsitePage("home");
 
   return {
+    homeIntroHtml: editorPage ? extractFirstSection(editorPage.content) : null,
     openJobs: getOpenClientJobs(),
     favoriteJobIds: user ? getFavoriteJobIds(user.id) : [],
     professionals: getProfessionalUsers().map((professional) => ({
@@ -24,6 +27,11 @@ const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
     })),
   };
 });
+
+function extractFirstSection(content: string) {
+  const section = content.match(/<section\b[\s\S]*?<\/section>/i)?.[0];
+  return section || content;
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({

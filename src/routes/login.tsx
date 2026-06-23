@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { createSessionCookie } from "@/lib/auth-session.server";
+import { hashPassword, verifyPassword } from "@/lib/password.server";
 import { loginSchema, type LoginInput } from "@/lib/validation/login";
 import {
   clearLoginFeedback,
@@ -64,13 +65,8 @@ const submitLogin = createServerFn({ method: "POST" })
         };
       }
 
-      const passwordBuffer = new TextEncoder().encode(data.password);
-      const passwordDigest = await crypto.subtle.digest("SHA-256", passwordBuffer);
-      const passwordHash = Array.from(new Uint8Array(passwordDigest))
-        .map((value) => value.toString(16).padStart(2, "0"))
-        .join("");
-
-      if (passwordHash !== user.passwordHash) {
+      const passwordCheck = await verifyPassword(data.password, user.passwordHash);
+      if (!passwordCheck.valid) {
         return {
           ok: false as const,
           fieldErrors: {
@@ -78,6 +74,11 @@ const submitLogin = createServerFn({ method: "POST" })
           },
           formError: null,
         };
+      }
+
+      if (passwordCheck.needsUpgrade) {
+        const { updateUserPasswordByEmail } = await import("@/lib/user-db.server");
+        updateUserPasswordByEmail(email, hashPassword(data.password));
       }
 
       recordUserLogin(user.id);

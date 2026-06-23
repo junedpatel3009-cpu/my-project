@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
+import { hashPassword } from "@/lib/password.server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,13 +107,7 @@ const updateManagedUserPassword = createServerFn({ method: "POST" })
       throw new Error(passwordError);
     }
 
-    const passwordBuffer = new TextEncoder().encode(data.password);
-    const passwordDigest = await crypto.subtle.digest("SHA-256", passwordBuffer);
-    const passwordHash = Array.from(new Uint8Array(passwordDigest))
-      .map((value) => value.toString(16).padStart(2, "0"))
-      .join("");
-
-    updateUserPasswordByAdmin(data.userId, passwordHash);
+    updateUserPasswordByAdmin(data.userId, hashPassword(data.password));
     return { ok: true as const };
   });
 
@@ -129,6 +124,7 @@ function UserManagement() {
   const [professionalQuery, setProfessionalQuery] = useState("");
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [summaryFilter, setSummaryFilter] = useState<"clients" | "professionals" | "verified" | "inactive" | null>(null);
 
   if (!data.viewer || data.viewer.role !== "ADMIN") {
     return (
@@ -150,8 +146,18 @@ function UserManagement() {
   const users = data.users as AdminUserRecord[];
   const clients = users.filter((user) => user.role === "CLIENT");
   const professionals = users.filter((user) => user.role === "PROFESSIONAL");
-  const visibleClients = filterUsers(clients, clientQuery);
-  const visibleProfessionals = filterUsers(professionals, professionalQuery);
+  const visibleClients = filterUsers(
+    summaryFilter === "inactive" ? clients.filter((user) => !user.isActive) : clients,
+    clientQuery,
+  );
+  const visibleProfessionals = filterUsers(
+    summaryFilter === "verified"
+      ? professionals.filter((user) => user.isVerified)
+      : summaryFilter === "inactive"
+        ? professionals.filter((user) => !user.isActive)
+        : professionals,
+    professionalQuery,
+  );
   const displayName = `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
   const selectedUser = users.find((user) => user.id === selectedUserId) || null;
   const selectedUserDetail = selectedUserId
@@ -210,29 +216,42 @@ function UserManagement() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard icon={Users} label="Clients" value={clients.length} caption={`${activeCount(clients)} active`} />
+        <SummaryCard icon={Users} label="Clients" value={clients.length} caption={`${activeCount(clients)} active`} active={summaryFilter === "clients"} onClick={() => setSummaryFilter(summaryFilter === "clients" ? null : "clients")} />
         <SummaryCard
           icon={BriefcaseBusiness}
           label="Professionals"
           value={professionals.length}
           caption={`${activeCount(professionals)} active`}
+          active={summaryFilter === "professionals"}
+          onClick={() => setSummaryFilter(summaryFilter === "professionals" ? null : "professionals")}
         />
         <SummaryCard
           icon={BadgeCheck}
           label="Verified pros"
           value={professionals.filter((user) => user.isVerified).length}
           caption="Approved professionals"
+          active={summaryFilter === "verified"}
+          onClick={() => setSummaryFilter(summaryFilter === "verified" ? null : "verified")}
         />
         <SummaryCard
           icon={UserRound}
           label="Inactive users"
           value={users.filter((user) => !user.isActive).length}
           caption="Clients and professionals"
+          active={summaryFilter === "inactive"}
+          onClick={() => setSummaryFilter(summaryFilter === "inactive" ? null : "inactive")}
         />
       </div>
 
+      {summaryFilter ? (
+        <div className="mt-4 flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+          <span className="font-medium">Showing: {summaryFilter === "verified" ? "Verified professionals" : summaryFilter === "inactive" ? "Inactive users" : summaryFilter}</span>
+          <Button type="button" size="sm" variant="outline" onClick={() => setSummaryFilter(null)}>Show all</Button>
+        </div>
+      ) : null}
+
       <div className="mt-6 grid gap-5 xl:grid-cols-2">
-        <UserSection
+        {summaryFilter !== "professionals" && summaryFilter !== "verified" ? <UserSection
           title="Clients"
           description="People or companies posting jobs and hiring professionals."
           icon={Users}
@@ -243,8 +262,8 @@ function UserManagement() {
           pendingAction={pendingAction}
           onStatusChange={handleStatusChange}
           onUserSelect={setSelectedUserId}
-        />
-        <UserSection
+        /> : null}
+        {summaryFilter !== "clients" ? <UserSection
           title="Professionals"
           description="Service providers, verification, rates, and availability."
           icon={BriefcaseBusiness}
@@ -256,7 +275,7 @@ function UserManagement() {
           onStatusChange={handleStatusChange}
           onVerificationChange={handleVerificationChange}
           onUserSelect={setSelectedUserId}
-        />
+        /> : null}
       </div>
 
       <UserDetailDialog
@@ -747,19 +766,23 @@ function SummaryCard({
   label,
   value,
   caption,
+  active,
+  onClick,
 }: {
   icon: typeof Users;
   label: string;
   value: number;
   caption: string;
+  active?: boolean;
+  onClick: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-soft">
+    <button type="button" onClick={onClick} className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}>
       <Icon className="h-5 w-5 text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value.toLocaleString()}</p>
       <p className="text-xs text-muted-foreground">{caption}</p>
-    </div>
+    </button>
   );
 }
 

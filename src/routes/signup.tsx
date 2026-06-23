@@ -12,6 +12,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createSessionCookie } from "@/lib/auth-session.server";
+import { hashPassword } from "@/lib/password.server";
 import { normalizePhone, signupSchema, type SignupInput } from "@/lib/validation/signup";
 import {
   clearSignupFeedback,
@@ -89,11 +90,7 @@ const submitSignup = createServerFn({ method: "POST" })
         };
       }
 
-      const passwordBuffer = new TextEncoder().encode(data.password);
-      const passwordDigest = await crypto.subtle.digest("SHA-256", passwordBuffer);
-      const passwordHash = Array.from(new Uint8Array(passwordDigest))
-        .map((value) => value.toString(16).padStart(2, "0"))
-        .join("");
+      const passwordHash = hashPassword(data.password);
 
       const createdUser = createUserRecord({
         role: data.accountType === "client" ? "CLIENT" : "PROFESSIONAL",

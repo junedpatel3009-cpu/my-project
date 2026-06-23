@@ -155,11 +155,11 @@ function VerificationManagement() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <SummaryCard icon={UserRound} label="Professionals" value={records.length} caption="Total accounts" />
-        <SummaryCard icon={Clock3} label="Pending" value={counts.pending} caption="Need admin review" />
-        <SummaryCard icon={CheckCircle2} label="Approved" value={counts.approved} caption="Verified providers" />
-        <SummaryCard icon={XCircle} label="Rejected" value={counts.rejected} caption="Needs correction" />
-        <SummaryCard icon={FileText} label="Not started" value={counts.not_started} caption="No review yet" />
+        <SummaryCard icon={UserRound} label="Professionals" value={records.length} caption="Total accounts" active={statusFilter === "all"} onClick={() => setStatusFilter("all")} />
+        <SummaryCard icon={Clock3} label="Pending" value={counts.pending} caption="Need admin review" active={statusFilter === "pending"} onClick={() => setStatusFilter("pending")} />
+        <SummaryCard icon={CheckCircle2} label="Approved" value={counts.approved} caption="Verified providers" active={statusFilter === "approved"} onClick={() => setStatusFilter("approved")} />
+        <SummaryCard icon={XCircle} label="Rejected" value={counts.rejected} caption="Needs correction" active={statusFilter === "rejected"} onClick={() => setStatusFilter("rejected")} />
+        <SummaryCard icon={FileText} label="Not started" value={counts.not_started} caption="No review yet" active={statusFilter === "not_started"} onClick={() => setStatusFilter("not_started")} />
       </div>
 
       <section className="mt-6 rounded-xl border border-border bg-card p-4 shadow-soft">
@@ -453,19 +453,23 @@ function SummaryCard({
   label,
   value,
   caption,
+  active,
+  onClick,
 }: {
   icon: typeof UserRound;
   label: string;
   value: number;
   caption: string;
+  active?: boolean;
+  onClick: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-soft">
+    <button type="button" onClick={onClick} className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}>
       <Icon className="h-5 w-5 text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value.toLocaleString()}</p>
       <p className="text-xs text-muted-foreground">{caption}</p>
-    </div>
+    </button>
   );
 }
 

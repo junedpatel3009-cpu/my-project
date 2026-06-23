@@ -383,17 +383,21 @@ function ensureNotificationTables(db: BetterSqlite3Database) {
   }
 }
 
-export function getUserNotifications(userId: number, role: "CLIENT" | "PROFESSIONAL") {
+export function getUserNotifications(userId: number, role: "CLIENT" | "PROFESSIONAL" | "ADMIN") {
   const db = getDatabase();
   const notifications = [
     ...getManualNotifications(db, userId),
-    ...getMessageNotifications(db, userId, role),
-    ...getProjectRequestNotifications(db, userId, role),
-    ...getHireContractNotifications(db, userId, role),
-    ...getWorkUploadNotifications(db, userId, role),
-    ...getRevisionNotifications(db, userId, role),
-    ...getMilestoneNotifications(db, userId, role),
-    ...getCompletionNotifications(db, userId, role),
+    ...(role === "ADMIN"
+      ? getAdminActivityNotifications(db)
+      : [
+          ...getMessageNotifications(db, userId, role),
+          ...getProjectRequestNotifications(db, userId, role),
+          ...getHireContractNotifications(db, userId, role),
+          ...getWorkUploadNotifications(db, userId, role),
+          ...getRevisionNotifications(db, userId, role),
+          ...getMilestoneNotifications(db, userId, role),
+          ...getCompletionNotifications(db, userId, role),
+        ]),
   ];
 
   const states = getNotificationStates(db, userId);
@@ -415,7 +419,7 @@ export function getUserNotifications(userId: number, role: "CLIENT" | "PROFESSIO
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function markUserNotificationsRead(userId: number, role: "CLIENT" | "PROFESSIONAL") {
+export function markUserNotificationsRead(userId: number, role: "CLIENT" | "PROFESSIONAL" | "ADMIN") {
   const db = getDatabase();
   const now = new Date().toISOString();
   const notifications = getUserNotifications(userId, role);
@@ -441,7 +445,7 @@ export function markUserNotificationsRead(userId: number, role: "CLIENT" | "PROF
   transaction();
 }
 
-export function clearUserNotifications(userId: number, role: "CLIENT" | "PROFESSIONAL") {
+export function clearUserNotifications(userId: number, role: "CLIENT" | "PROFESSIONAL" | "ADMIN") {
   const db = getDatabase();
   const now = new Date().toISOString();
   const notifications = getUserNotifications(userId, role);
@@ -467,6 +471,85 @@ export function clearUserNotifications(userId: number, role: "CLIENT" | "PROFESS
   });
 
   transaction();
+}
+
+function getAdminActivityNotifications(db: BetterSqlite3Database): UserNotification[] {
+  const users = db.prepare(`
+    SELECT id, firstName, lastName, email, role, createdAt
+    FROM "User"
+    WHERE role != 'ADMIN'
+    ORDER BY datetime(createdAt) DESC
+    LIMIT 30
+  `).all() as Array<{ id: number; firstName: string; lastName: string; email: string; role: string; createdAt: string }>;
+
+  const jobs = db.prepare(`
+    SELECT ClientJob.id, ClientJob.title, ClientJob.createdAt,
+      TRIM(User.firstName || ' ' || User.lastName) AS clientName
+    FROM "ClientJob"
+    LEFT JOIN "User" ON User.id = ClientJob.userId
+    ORDER BY datetime(ClientJob.createdAt) DESC
+    LIMIT 30
+  `).all() as Array<{ id: number; title: string; createdAt: string; clientName: string | null }>;
+
+  const disputes = db.prepare(`
+    SELECT ProjectDispute.id, ProjectDispute.status, ProjectDispute.priority,
+      ProjectDispute.createdAt, COALESCE(ClientJob.title, 'Project') AS jobTitle
+    FROM "ProjectDispute"
+    LEFT JOIN "ProjectTracking" ON ProjectTracking.id = ProjectDispute.trackingId
+    LEFT JOIN "ClientJob" ON ClientJob.id = ProjectTracking.jobId
+    ORDER BY datetime(ProjectDispute.createdAt) DESC
+    LIMIT 30
+  `).all() as Array<{ id: number; status: string; priority: string; createdAt: string; jobTitle: string }>;
+
+  const payments = db.prepare(`
+    SELECT ProjectTransaction.id, ProjectTransaction.amount, ProjectTransaction.currency,
+      ProjectTransaction.createdAt, COALESCE(ClientJob.title, ProjectTransaction.description, 'Project') AS jobTitle
+    FROM "ProjectTransaction"
+    LEFT JOIN "ProjectTracking" ON ProjectTracking.id = ProjectTransaction.trackingId
+    LEFT JOIN "ClientJob" ON ClientJob.id = ProjectTracking.jobId
+    WHERE ProjectTransaction.status = 'COMPLETED'
+    ORDER BY datetime(ProjectTransaction.createdAt) DESC
+    LIMIT 30
+  `).all() as Array<{ id: number; amount: number; currency: string; createdAt: string; jobTitle: string }>;
+
+  return [
+    ...users.map((user) => ({
+      key: `admin:user:${user.id}`,
+      type: "review" as const,
+      title: "New user registered",
+      description: `${`${user.firstName} ${user.lastName}`.trim() || user.email} joined as ${user.role.toLowerCase()}.`,
+      href: "/user-management",
+      createdAt: user.createdAt,
+      readAt: null,
+    })),
+    ...jobs.map((job) => ({
+      key: `admin:job:${job.id}`,
+      type: "project" as const,
+      title: "New job posted",
+      description: `${job.clientName || "A client"} posted “${job.title}”.`,
+      href: "/job-management",
+      createdAt: job.createdAt,
+      readAt: null,
+    })),
+    ...disputes.map((dispute) => ({
+      key: `admin:dispute:${dispute.id}`,
+      type: "review" as const,
+      title: "New dispute raised",
+      description: `${dispute.priority.toLowerCase()} priority dispute for “${dispute.jobTitle}”.`,
+      href: "/job-management",
+      createdAt: dispute.createdAt,
+      readAt: null,
+    })),
+    ...payments.map((payment) => ({
+      key: `admin:payment:${payment.id}`,
+      type: "payment" as const,
+      title: "Payment completed",
+      description: `${payment.currency} ${payment.amount.toLocaleString()} paid for “${payment.jobTitle}”.`,
+      href: "/earnings-reports",
+      createdAt: payment.createdAt,
+      readAt: null,
+    })),
+  ];
 }
 
 function getManualNotifications(db: BetterSqlite3Database, userId: number) {

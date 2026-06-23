@@ -35,6 +35,7 @@ const getNotificationSnapshot = createServerFn({ method: "GET" }).handler(async 
   if (!viewer) {
     return {
       viewerId: null,
+      viewerRole: null,
       unreadCount: 0,
       latest: null,
       unread: [],
@@ -46,16 +47,16 @@ const getNotificationSnapshot = createServerFn({ method: "GET" }).handler(async 
     };
   }
 
-  const notificationRole = viewer.role === "ADMIN" ? "CLIENT" : viewer.role;
-  const notifications = getUserNotifications(viewer.id, notificationRole);
+  const notifications = getUserNotifications(viewer.id, viewer.role);
   const preferences = getUserNotificationPreferences(viewer.id);
   const unread = notifications.filter((notification) => !notification.readAt);
 
   return {
     viewerId: viewer.id,
+    viewerRole: viewer.role,
     unreadCount: unread.length,
     latest: unread[0] ?? notifications[0] ?? null,
-    unread: unread.slice(0, 3),
+    unread: unread.slice(0, 100),
     preferences,
   };
 });
@@ -140,6 +141,7 @@ const professionalItems = [
 
 const adminItems = [
   { to: "/admin", icon: ShieldCheck, label: "Admin panel" },
+  { to: "/admin-notifications", icon: BellRing, label: "Notifications" },
   { to: "/user-management", icon: UserCog, label: "User management" },
   { to: "/verification-management", icon: BadgeCheck, label: "Verification" },
   { to: "/job-management", icon: Briefcase, label: "Job & Dispute Management" },
@@ -165,6 +167,7 @@ const professionalMobileItems = [
 
 const adminMobileItems = [
   { to: "/admin", icon: ShieldCheck, label: "Admin" },
+  { to: "/admin-notifications", icon: BellRing, label: "Alerts" },
   { to: "/user-management", icon: UserCog, label: "Users" },
   { to: "/verification-management", icon: BadgeCheck, label: "Verify" },
   { to: "/job-management", icon: Briefcase, label: "Jobs" },
@@ -207,6 +210,11 @@ export function AppShell({
   const [incomingCall, setIncomingCall] = useState<CallSignalPayload | null>(null);
   const latestNotificationKeyRef = useRef<string | null>(null);
   const notificationPopupTimeoutRef = useRef<number | null>(null);
+  const notificationQueueRef = useRef<NotificationPopup[]>([]);
+  const notificationQueueActiveRef = useRef(false);
+  const displayedNotificationKeyRef = useRef<string | null>(null);
+  const notificationStorageKeyRef = useRef<string | null>(null);
+  const notificationSnapshotSignatureRef = useRef<string | null>(null);
 
   const showNotificationAlert = useCallback(
     (
@@ -220,6 +228,7 @@ export function AppShell({
 
       setBellBurst(true);
       setNotificationPopup(notification);
+      displayedNotificationKeyRef.current = notification.key;
       toast.info(notification.title, {
         description: notification.description,
         duration: NOTIFICATION_POPUP_MS,
@@ -241,10 +250,47 @@ export function AppShell({
       window.setTimeout(() => setBellBurst(false), 900);
       notificationPopupTimeoutRef.current = window.setTimeout(() => {
         setNotificationPopup((current) => (current?.key === notification.key ? null : current));
+        if (displayedNotificationKeyRef.current === notification.key) {
+          displayedNotificationKeyRef.current = null;
+        }
         notificationPopupTimeoutRef.current = null;
       }, NOTIFICATION_POPUP_MS);
     },
     [],
+  );
+
+  const showQueuedNotificationAlerts = useCallback(
+    (notifications: NotificationPopup[], preferences: NotificationPreferences) => {
+      const queuedKeys = new Set(
+        notificationQueueRef.current.map((notification) => notification.key),
+      );
+      notificationQueueRef.current.push(
+        ...notifications.filter(
+          (notification) =>
+            notification.key !== displayedNotificationKeyRef.current &&
+            !queuedKeys.has(notification.key),
+        ),
+      );
+
+      if (notificationQueueActiveRef.current || notificationQueueRef.current.length === 0) return;
+      notificationQueueActiveRef.current = true;
+
+      const showNext = () => {
+        const next = notificationQueueRef.current.shift();
+        if (!next) {
+          notificationQueueActiveRef.current = false;
+          return;
+        }
+        if (notificationStorageKeyRef.current) {
+          window.localStorage.setItem(notificationStorageKeyRef.current, next.key);
+        }
+        showNotificationAlert(next, preferences);
+        window.setTimeout(showNext, NOTIFICATION_POPUP_MS + 250);
+      };
+
+      showNext();
+    },
+    [showNotificationAlert],
   );
 
   const refreshNotifications = useCallback(
@@ -252,10 +298,14 @@ export function AppShell({
       try {
         const snapshot = await getNotificationSnapshot();
         const latest = snapshot.latest;
-        const newestUnread = snapshot.unread[0] ?? null;
 
         setUnreadNotifications(snapshot.unreadCount);
         notificationPreferencesRef.current = snapshot.preferences;
+        const signature = `${snapshot.unreadCount}:${snapshot.latest?.key || "none"}`;
+        if (notificationSnapshotSignatureRef.current !== signature) {
+          notificationSnapshotSignatureRef.current = signature;
+          window.dispatchEvent(new CustomEvent("servio:notifications-refreshed"));
+        }
 
         if (!latest) {
           latestNotificationKeyRef.current = null;
@@ -265,39 +315,43 @@ export function AppShell({
         const storageKey = snapshot.viewerId
           ? `servio:last-notification-key:${snapshot.viewerId}`
           : null;
+        notificationStorageKeyRef.current = storageKey;
         const lastSeenKey = storageKey
           ? window.localStorage.getItem(storageKey)
           : latestNotificationKeyRef.current;
-        const shouldShowMissed =
-          newestUnread &&
-          newestUnread.key !== latestNotificationKeyRef.current &&
-          (showToast || (lastSeenKey !== null && newestUnread.key !== lastSeenKey));
+        const lastSeenIndex = lastSeenKey
+          ? snapshot.unread.findIndex((notification) => notification.key === lastSeenKey)
+          : -1;
+        const missed = lastSeenKey
+          ? lastSeenIndex >= 0
+            ? snapshot.unread.slice(0, lastSeenIndex)
+            : snapshot.unread
+          : snapshot.viewerRole === "ADMIN"
+            ? snapshot.unread
+            : [];
 
         latestNotificationKeyRef.current = latest.key;
 
-        if (storageKey) {
-          window.localStorage.setItem(storageKey, latest.key);
-        }
-
-        if (!shouldShowMissed) {
+        if (!missed.length && !showToast) {
           return;
         }
 
-        showNotificationAlert(
-          {
-            key: newestUnread.key,
-            title: newestUnread.title,
-            description: newestUnread.description,
-            href: newestUnread.href,
-            type: newestUnread.type,
-          },
-          snapshot.preferences,
-        );
+        const alerts = (missed.length ? missed : snapshot.unread.slice(0, 1))
+          .slice()
+          .reverse()
+          .map(({ key, title, description, href, type }) => ({
+            key,
+            title,
+            description,
+            href,
+            type,
+          }));
+        showQueuedNotificationAlerts(alerts, snapshot.preferences);
       } catch {
         setUnreadNotifications(0);
       }
     },
-    [showNotificationAlert],
+    [showQueuedNotificationAlerts],
   );
 
   useEffect(() => {
@@ -352,8 +406,18 @@ export function AppShell({
       role: realtimeViewer.role,
     });
 
+    if (realtimeViewer.role === "ADMIN") {
+      socket.emit("admin:subscribe");
+    }
+
     socket.on("notifications:refresh", () => {
       void refreshNotifications(false);
+    });
+
+    socket.on("admin:refresh", () => {
+      if (realtimeViewer.role === "ADMIN") {
+        void refreshNotifications(true);
+      }
     });
 
     socket.on("project:activity", (payload: ProjectActivityPayload) => {
@@ -547,7 +611,7 @@ export function AppShell({
             </Link>
           ) : null}
           <Link
-            to="/notifications"
+            to={isAdmin ? "/admin-notifications" : "/notifications"}
             className={`relative grid h-9 w-9 place-items-center rounded-lg hover:bg-muted ${
               unreadNotifications ? "text-cta" : ""
             }`}

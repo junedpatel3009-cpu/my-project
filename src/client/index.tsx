@@ -81,7 +81,7 @@ const saveFavoriteJob = createServerFn({ method: "POST" })
 
 export function Landing() {
   const { user } = indexRoute.useRouteContext();
-  const { openJobs, professionals, favoriteJobIds } = indexRoute.useLoaderData();
+  const { openJobs, professionals, favoriteJobIds, homeIntroHtml } = indexRoute.useLoaderData();
   const welcomeName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
   const isProfessional = user?.role === "PROFESSIONAL";
   const [selectedProfessional, setSelectedProfessional] = useState<any | null>(null);
@@ -306,7 +306,9 @@ export function Landing() {
       <SiteHeader user={user} onLogout={logout} />
 
       <main>
-        <section className="border-b border-border bg-surface">
+        {homeIntroHtml ? (
+          <div dangerouslySetInnerHTML={{ __html: homeIntroHtml }} />
+        ) : <section className="border-b border-border bg-surface">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-4">
               <h1 className="text-2xl font-semibold tracking-tight text-primary">
@@ -314,7 +316,7 @@ export function Landing() {
               </h1>
             </div>
           </div>
-        </section>
+        </section>}
 
         <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           <div className="rounded-xl border border-border bg-card p-4 shadow-soft">

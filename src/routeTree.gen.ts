@@ -41,6 +41,7 @@ import { Route as EarningsRouteImport } from './routes/earnings'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
+import { Route as AdminNotificationsRouteImport } from './routes/admin-notifications'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutUsRouteImport } from './routes/about-us'
 import { Route as LegalPageSlugRouteImport } from './routes/$legalPageSlug'
@@ -212,6 +213,11 @@ const ContactUsRoute = ContactUsRouteImport.update({
   path: '/contact-us',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/admin-notifications',
+  path: '/admin-notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/$legalPageSlug': typeof LegalPageSlugRoute
   '/about-us': typeof AboutUsRoute
   '/admin': typeof AdminRoute
+  '/admin-notifications': typeof AdminNotificationsRoute
   '/contact-us': typeof ContactUsRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
@@ -313,6 +320,7 @@ export interface FileRoutesByTo {
   '/$legalPageSlug': typeof LegalPageSlugRoute
   '/about-us': typeof AboutUsRoute
   '/admin': typeof AdminRoute
+  '/admin-notifications': typeof AdminNotificationsRoute
   '/contact-us': typeof ContactUsRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
@@ -358,6 +366,7 @@ export interface FileRoutesById {
   '/$legalPageSlug': typeof LegalPageSlugRoute
   '/about-us': typeof AboutUsRoute
   '/admin': typeof AdminRoute
+  '/admin-notifications': typeof AdminNotificationsRoute
   '/contact-us': typeof ContactUsRoute
   '/dashboard': typeof DashboardRoute
   '/discover': typeof DiscoverRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/$legalPageSlug'
     | '/about-us'
     | '/admin'
+    | '/admin-notifications'
     | '/contact-us'
     | '/dashboard'
     | '/discover'
@@ -448,6 +458,7 @@ export interface FileRouteTypes {
     | '/$legalPageSlug'
     | '/about-us'
     | '/admin'
+    | '/admin-notifications'
     | '/contact-us'
     | '/dashboard'
     | '/discover'
@@ -492,6 +503,7 @@ export interface FileRouteTypes {
     | '/$legalPageSlug'
     | '/about-us'
     | '/admin'
+    | '/admin-notifications'
     | '/contact-us'
     | '/dashboard'
     | '/discover'
@@ -537,6 +549,7 @@ export interface RootRouteChildren {
   LegalPageSlugRoute: typeof LegalPageSlugRoute
   AboutUsRoute: typeof AboutUsRoute
   AdminRoute: typeof AdminRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
   ContactUsRoute: typeof ContactUsRoute
   DashboardRoute: typeof DashboardRoute
   DiscoverRoute: typeof DiscoverRoute
@@ -802,6 +815,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactUsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-notifications': {
+      id: '/admin-notifications'
+      path: '/admin-notifications'
+      fullPath: '/admin-notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -891,6 +911,7 @@ const rootRouteChildren: RootRouteChildren = {
   LegalPageSlugRoute: LegalPageSlugRoute,
   AboutUsRoute: AboutUsRoute,
   AdminRoute: AdminRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
   ContactUsRoute: ContactUsRoute,
   DashboardRoute: DashboardRoute,
   DiscoverRoute: DiscoverRoute,

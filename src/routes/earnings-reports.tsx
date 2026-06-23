@@ -87,6 +87,7 @@ function EarningsReports() {
   const [transactionStatus, setTransactionStatus] = useState("ALL");
   const [payoutStatus, setPayoutStatus] = useState("ALL");
   const [pendingPayoutId, setPendingPayoutId] = useState<number | null>(null);
+  const [summaryResult, setSummaryResult] = useState<"transactions" | "payouts" | "balances" | null>(null);
 
   if (!data.viewer || data.viewer.role !== "ADMIN" || !data.report) {
     return (
@@ -153,12 +154,19 @@ function EarningsReports() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <SummaryCard icon={CircleDollarSign} label="Gross earnings" value={formatMoney(report.totals.grossEarnings)} caption={`${report.totals.transactionCount} transaction records`} />
-        <SummaryCard icon={Percent} label="Commission" value={formatMoney(report.totals.commissionAmount)} caption={`${Math.round(report.commissionRate * 100)}% platform share`} />
-        <SummaryCard icon={Wallet} label="Net payable" value={formatMoney(report.totals.netEarnings)} caption="After commission" />
-        <SummaryCard icon={ArrowDownToLine} label="Requested payouts" value={formatMoney(report.totals.requestedPayouts)} caption={`${report.totals.payoutCount} payout records`} />
-        <SummaryCard icon={BadgeDollarSign} label="Available balance" value={formatMoney(report.totals.availableBalance)} caption="Net minus non-rejected payouts" />
+        <SummaryCard icon={CircleDollarSign} label="Gross earnings" value={formatMoney(report.totals.grossEarnings)} caption={`${report.totals.transactionCount} transaction records`} active={summaryResult === "transactions"} onClick={() => setSummaryResult("transactions")} />
+        <SummaryCard icon={Percent} label="Commission" value={formatMoney(report.totals.commissionAmount)} caption={`${Math.round(report.commissionRate * 100)}% platform share`} active={summaryResult === "transactions"} onClick={() => setSummaryResult("transactions")} />
+        <SummaryCard icon={Wallet} label="Net payable" value={formatMoney(report.totals.netEarnings)} caption="After commission" active={summaryResult === "transactions"} onClick={() => setSummaryResult("transactions")} />
+        <SummaryCard icon={ArrowDownToLine} label="Requested payouts" value={formatMoney(report.totals.requestedPayouts)} caption={`${report.totals.payoutCount} payout records`} active={summaryResult === "payouts"} onClick={() => setSummaryResult("payouts")} />
+        <SummaryCard icon={BadgeDollarSign} label="Available balance" value={formatMoney(report.totals.availableBalance)} caption="Net minus non-rejected payouts" active={summaryResult === "balances"} onClick={() => setSummaryResult("balances")} />
       </div>
+
+      {summaryResult ? (
+        <div className="mt-4 flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+          <span className="font-medium">Showing {summaryResult === "balances" ? "professional balances" : summaryResult}</span>
+          <Button type="button" size="sm" variant="outline" onClick={() => setSummaryResult(null)}>Show all</Button>
+        </div>
+      ) : null}
 
       <ReportControls
         period={reportPeriod}
@@ -180,23 +188,23 @@ function EarningsReports() {
       <FinanceOverview report={report} />
 
       <div className="mt-6 grid gap-5">
-        <ProfessionalSummarySection
+        {(!summaryResult || summaryResult === "balances") && <ProfessionalSummarySection
           professionals={visibleProfessionals}
           query={professionalQuery}
           onQueryChange={setProfessionalQuery}
-        />
-        <PayoutSection
+        />}
+        {(!summaryResult || summaryResult === "payouts") && <PayoutSection
           payouts={visiblePayouts}
           query={payoutQuery}
           pendingPayoutId={pendingPayoutId}
           onQueryChange={setPayoutQuery}
           onStatusChange={handlePayoutStatus}
-        />
-        <TransactionSection
+        />}
+        {(!summaryResult || summaryResult === "transactions") && <TransactionSection
           transactions={visibleTransactions}
           query={transactionQuery}
           onQueryChange={setTransactionQuery}
-        />
+        />}
       </div>
     </AppShell>
   );
@@ -600,19 +608,23 @@ function SummaryCard({
   label,
   value,
   caption,
+  active,
+  onClick,
 }: {
   icon: ComponentType<{ className?: string }>;
   label: string;
   value: string;
   caption: string;
+  active?: boolean;
+  onClick: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-soft">
+    <button type="button" onClick={onClick} className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}>
       <Icon className="h-5 w-5 text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value}</p>
       <p className="text-xs text-muted-foreground">{caption}</p>
-    </div>
+    </button>
   );
 }
 

@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { handleBackendApi } from "./backend/api.server";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -82,6 +83,11 @@ export default {
       const url = new URL(request.url);
       if (url.pathname === "/api/health") {
         return healthResponse();
+      }
+
+      const apiResponse = await handleBackendApi(request);
+      if (apiResponse) {
+        return apiResponse;
       }
 
       const handler = await getServerEntry();

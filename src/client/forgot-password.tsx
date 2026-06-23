@@ -8,6 +8,7 @@ import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { hashPassword, verifyPassword } from "@/lib/password.server";
 import {
   forgotPasswordRequestSchema,
   resetPasswordSchema,
@@ -74,13 +75,7 @@ const resetPassword = createServerFn({ method: "POST" })
         };
       }
 
-      const passwordBuffer = new TextEncoder().encode(data.password);
-      const passwordDigest = await crypto.subtle.digest("SHA-256", passwordBuffer);
-      const passwordHash = Array.from(new Uint8Array(passwordDigest))
-        .map((value) => value.toString(16).padStart(2, "0"))
-        .join("");
-
-      if (user.passwordHash === passwordHash) {
+      if ((await verifyPassword(data.password, user.passwordHash)).valid) {
         fieldErrors.password = "This password is the same as your old password. Please write another password.";
         return {
           ok: false as const,
@@ -89,7 +84,7 @@ const resetPassword = createServerFn({ method: "POST" })
         };
       }
 
-      const updated = updateUserPasswordByEmail(email, passwordHash);
+      const updated = updateUserPasswordByEmail(email, hashPassword(data.password));
 
       if (!updated) {
         return {

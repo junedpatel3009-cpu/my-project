@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
+import { verifyPassword } from "@/lib/password.server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,11 +54,9 @@ import {
 import { createSessionCookie } from "@/lib/auth-session.server";
 import { getCurrentUser } from "@/lib/current-user.server";
 import {
-  createUserRecord,
   findUserByEmail,
   getAdminUsers,
   getAdminUserStats,
-  updateUserPasswordByEmail,
   updateUserActiveStatusByAdmin,
   updateUserRoleByAdmin,
   type AdminUserRecord,
@@ -66,9 +65,7 @@ import {
   type UserRole,
 } from "@/lib/user-db.server";
 
-const ADMIN_USERNAME = "juned";
-const ADMIN_EMAIL = "juned@admin.local";
-const ADMIN_PASSWORD = "2412";
+const ADMIN_USERNAME = "";
 
 const getAdminPageData = createServerFn({ method: "GET" }).handler(async () => {
   const viewer = getCurrentUser();
@@ -111,45 +108,18 @@ const getAdminPageData = createServerFn({ method: "GET" }).handler(async () => {
 const submitAdminLogin = createServerFn({ method: "POST" })
   .inputValidator((input: { username: string; password: string }) => input)
   .handler(async ({ data }) => {
-    const username = data.username.trim().toLowerCase();
+    const email = data.username.trim().toLowerCase();
+    const existingAdmin = findUserByEmail(email);
+    const passwordCheck = await verifyPassword(data.password, existingAdmin?.passwordHash ?? null);
 
-    if (username !== ADMIN_USERNAME || data.password !== ADMIN_PASSWORD) {
+    if (!existingAdmin || existingAdmin.role !== "ADMIN" || !existingAdmin.isActive || !passwordCheck.valid) {
       return {
         ok: false as const,
         formError: "Invalid admin username or password.",
       };
     }
 
-    const passwordHash = await hashPassword(data.password);
-    const existingAdmin = findUserByEmail(ADMIN_EMAIL);
-    let adminUser: PublicUser | undefined = existingAdmin;
-
-    if (existingAdmin) {
-      if (existingAdmin.role !== "ADMIN") {
-        updateUserRoleByAdmin(existingAdmin.id, "ADMIN");
-      }
-
-      updateUserActiveStatusByAdmin(existingAdmin.id, true);
-      updateUserPasswordByEmail(ADMIN_EMAIL, passwordHash);
-      adminUser = findUserByEmail(ADMIN_EMAIL);
-    } else {
-      adminUser = createUserRecord({
-        role: "ADMIN",
-        firstName: "Juned",
-        lastName: "Admin",
-        email: ADMIN_EMAIL,
-        phone: null,
-        passwordHash,
-        authProvider: "LOCAL",
-      });
-    }
-
-    if (!adminUser) {
-      return {
-        ok: false as const,
-        formError: "Could not prepare admin account.",
-      };
-    }
+    const adminUser: PublicUser = existingAdmin;
 
     setResponseHeader(
       "Set-Cookie",
@@ -221,6 +191,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 type ShortcutKey = "overview" | "jobs" | "users" | "payments";
+type OverviewResult = "total-users" | "today-jobs" | "today-transactions" | "open-disputes";
 
 const shortcutConfig = [
   { key: "overview", label: "Overview", icon: TrendingUp, description: "Live platform metrics" },
@@ -247,6 +218,27 @@ function Admin() {
   const [jobQuery, setJobQuery] = useState("");
   const [disputeQuery, setDisputeQuery] = useState("");
   const [paymentQuery, setPaymentQuery] = useState("");
+  const [overviewResult, setOverviewResult] = useState<OverviewResult | null>(null);
+
+  function selectTab(nextTab: ShortcutKey) {
+    setOverviewResult(null);
+    setTab(nextTab);
+  }
+
+  function showOverviewResult(result: OverviewResult) {
+    setOverviewResult(result);
+    setQuery("");
+    setJobQuery("");
+    setDisputeQuery("");
+    setPaymentQuery("");
+    setTab(
+      result === "total-users"
+        ? "users"
+        : result === "today-transactions"
+          ? "payments"
+          : "jobs",
+    );
+  }
 
   useEffect(() => {
     const handleShortcutKeyDown = (event: KeyboardEvent) => {
@@ -263,7 +255,7 @@ function Admin() {
 
         if (index >= 0 && index < tabs.length) {
           event.preventDefault();
-          setTab(tabs[index].key);
+          selectTab(tabs[index].key);
         }
       }
 
@@ -282,7 +274,18 @@ function Admin() {
 
   const filteredJobs = useMemo(() => {
     const term = jobQuery.trim().toLowerCase();
-    const jobs = data.jobRecords as JobRecord[];
+    let jobs = data.jobRecords as JobRecord[];
+
+    if (overviewResult === "today-jobs") {
+      jobs = jobs.filter((job) => isOnDashboardDay(job.createdAt, data.dashboard.generatedAt));
+    } else if (overviewResult === "open-disputes") {
+      const disputedJobIds = new Set(
+        (data.disputeRecords as DisputeRecord[])
+          .filter((dispute) => dispute.status === "OPEN" || dispute.status === "UNDER_REVIEW")
+          .map((dispute) => dispute.jobId),
+      );
+      jobs = jobs.filter((job) => disputedJobIds.has(job.id));
+    }
 
     if (!term) {
       return jobs;
@@ -306,11 +309,17 @@ function Admin() {
 
       return haystack.includes(term);
     });
-  }, [data.jobRecords, jobQuery]);
+  }, [data.dashboard.generatedAt, data.disputeRecords, data.jobRecords, jobQuery, overviewResult]);
 
   const filteredDisputes = useMemo(() => {
     const term = disputeQuery.trim().toLowerCase();
-    const disputes = data.disputeRecords as DisputeRecord[];
+    let disputes = data.disputeRecords as DisputeRecord[];
+
+    if (overviewResult === "open-disputes") {
+      disputes = disputes.filter(
+        (dispute) => dispute.status === "OPEN" || dispute.status === "UNDER_REVIEW",
+      );
+    }
 
     if (!term) {
       return disputes;
@@ -336,11 +345,19 @@ function Admin() {
 
       return haystack.includes(term);
     });
-  }, [data.disputeRecords, disputeQuery]);
+  }, [data.disputeRecords, disputeQuery, overviewResult]);
 
   const filteredPayments = useMemo(() => {
     const term = paymentQuery.trim().toLowerCase();
-    const payments = data.paymentTransactions as PaymentRecord[];
+    let payments = data.paymentTransactions as PaymentRecord[];
+
+    if (overviewResult === "today-transactions") {
+      payments = payments.filter(
+        (payment) =>
+          payment.status === "COMPLETED" &&
+          isOnDashboardDay(payment.dateTime, data.dashboard.generatedAt),
+      );
+    }
 
     if (!term) {
       return payments;
@@ -360,7 +377,7 @@ function Admin() {
 
       return haystack.includes(term);
     });
-  }, [data.paymentTransactions, paymentQuery]);
+  }, [data.dashboard.generatedAt, data.paymentTransactions, overviewResult, paymentQuery]);
 
   useEffect(() => {
     if (!data?.viewer || data.viewer.role !== "ADMIN") {
@@ -474,7 +491,7 @@ function Admin() {
                 <button
                   key={item.key}
                   type="button"
-                  onClick={() => setTab(item.key)}
+                  onClick={() => selectTab(item.key)}
                   className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors ${
                     isActive
                       ? "border-primary bg-primary/10 text-primary"
@@ -510,9 +527,12 @@ function Admin() {
         </div>
 
         <div className="p-4">
-          {tab === "overview" && <Overview dashboard={data.dashboard} onSelectTab={setTab} />}
+          {tab === "overview" && <Overview dashboard={data.dashboard} onSelectResult={showOverviewResult} />}
           {tab === "users" && (
             <div className="space-y-4">
+              {overviewResult === "total-users" && (
+                <ResultNotice label="Total users" count={filteredUsers.length} onClear={() => selectTab("users")} />
+              )}
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 p-4">
                 <div>
                   <h2 className="font-semibold">User Management</h2>
@@ -533,6 +553,12 @@ function Admin() {
               shortcut={activeShortcut}
               stats={shortcutStats[activeShortcut.key]}
             >
+              {overviewResult === "today-jobs" && (
+                <ResultNotice label="Jobs posted today" count={filteredJobs.length} onClear={() => selectTab("jobs")} />
+              )}
+              {overviewResult === "open-disputes" && (
+                <ResultNotice label="Open disputes" count={filteredDisputes.length} onClear={() => selectTab("jobs")} />
+              )}
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background p-4">
                 <div>
                   <h3 className="font-semibold">Job & Dispute Management</h3>
@@ -551,6 +577,7 @@ function Admin() {
                 disputeQuery={disputeQuery}
                 onJobQueryChange={setJobQuery}
                 onDisputeQueryChange={setDisputeQuery}
+                resultMode={overviewResult === "today-jobs" ? "jobs" : overviewResult === "open-disputes" ? "disputes" : "all"}
               />
             </ShortcutPanel>
           )}
@@ -560,6 +587,9 @@ function Admin() {
               shortcut={activeShortcut}
               stats={shortcutStats[activeShortcut.key]}
             >
+              {overviewResult === "today-transactions" && (
+                <ResultNotice label="Today transactions" count={filteredPayments.length} onClear={() => selectTab("payments")} />
+              )}
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background p-4">
                 <div>
                   <h3 className="font-semibold">Earnings, Commission & Payout Reports</h3>
@@ -709,6 +739,7 @@ function JobDisputeManagement({
   disputeQuery,
   onJobQueryChange,
   onDisputeQueryChange,
+  resultMode,
 }: {
   jobs: JobRecord[];
   disputes: DisputeRecord[];
@@ -716,6 +747,7 @@ function JobDisputeManagement({
   disputeQuery: string;
   onJobQueryChange: (value: string) => void;
   onDisputeQueryChange: (value: string) => void;
+  resultMode: "all" | "jobs" | "disputes";
 }) {
   const openDisputes = disputes.filter((dispute) => dispute.status !== "RESOLVED").length;
   const highPriorityDisputes = disputes.filter((dispute) => dispute.priority === "HIGH" && dispute.status !== "RESOLVED").length;
@@ -740,8 +772,12 @@ function JobDisputeManagement({
         </div>
       </div>
 
-      <DisputesTable disputes={disputes} query={disputeQuery} onQueryChange={onDisputeQueryChange} />
-      <JobsTable jobs={jobs} query={jobQuery} onQueryChange={onJobQueryChange} />
+      {resultMode !== "jobs" && (
+        <DisputesTable disputes={disputes} query={disputeQuery} onQueryChange={onDisputeQueryChange} />
+      )}
+      {resultMode !== "disputes" && (
+        <JobsTable jobs={jobs} query={jobQuery} onQueryChange={onJobQueryChange} />
+      )}
     </div>
   );
 }
@@ -1092,10 +1128,10 @@ function AdminLogin() {
 
 function Overview({
   dashboard,
-  onSelectTab,
+  onSelectResult,
 }: {
   dashboard: AdminDashboardSnapshot;
-  onSelectTab: (tab: ShortcutKey) => void;
+  onSelectResult: (result: OverviewResult) => void;
 }) {
   const stats = dashboard.stats;
 
@@ -1107,28 +1143,28 @@ function Overview({
           label="Total users"
           value={stats.totalUsers}
           caption={`${stats.activeUsers} active / ${stats.todayUsers} joined today`}
-          onClick={() => onSelectTab("users")}
+          onClick={() => onSelectResult("total-users")}
         />
         <MetricCard
           icon={ClipboardList}
           label="Jobs posted today"
           value={stats.todayJobs}
           caption={`${stats.openJobs} open / ${stats.totalJobs} total jobs`}
-          onClick={() => onSelectTab("jobs")}
+          onClick={() => onSelectResult("today-jobs")}
         />
         <MetricCard
           icon={DollarSign}
           label="Today transactions"
           value={formatMoney(stats.todayRevenue)}
           caption={`${stats.todayTransactions} completed payments`}
-          onClick={() => onSelectTab("payments")}
+          onClick={() => onSelectResult("today-transactions")}
         />
         <MetricCard
           icon={AlertTriangle}
           label="Open disputes"
           value={stats.openDisputes}
           caption={`${stats.pendingRequests} pending project requests`}
-          onClick={() => onSelectTab("jobs")}
+          onClick={() => onSelectResult("open-disputes")}
         />
       </div>
 
@@ -1231,6 +1267,39 @@ function MetricCard({
       </p>
       <p className="text-xs text-muted-foreground">{caption}</p>
     </button>
+  );
+}
+
+function ResultNotice({
+  label,
+  count,
+  onClear,
+}: {
+  label: string;
+  count: number;
+  onClear: () => void;
+}) {
+  return (
+    <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">Showing card results</p>
+        <p className="mt-1 font-semibold">{label}: {count.toLocaleString()}</p>
+      </div>
+      <Button type="button" variant="outline" size="sm" onClick={onClear}>
+        Show all
+      </Button>
+    </div>
+  );
+}
+
+function isOnDashboardDay(value: string, generatedAt: string) {
+  const date = new Date(value);
+  const dashboardDate = new Date(generatedAt);
+
+  return (
+    date.getFullYear() === dashboardDate.getFullYear() &&
+    date.getMonth() === dashboardDate.getMonth() &&
+    date.getDate() === dashboardDate.getDate()
   );
 }
 
@@ -1454,13 +1523,4 @@ function getSocketUrl() {
     import.meta.env.VITE_SOCKET_URL ||
     `${window.location.protocol}//${window.location.hostname}:4001`
   );
-}
-
-async function hashPassword(password: string) {
-  const passwordBuffer = new TextEncoder().encode(password);
-  const passwordDigest = await crypto.subtle.digest("SHA-256", passwordBuffer);
-
-  return Array.from(new Uint8Array(passwordDigest))
-    .map((value) => value.toString(16).padStart(2, "0"))
-    .join("");
 }

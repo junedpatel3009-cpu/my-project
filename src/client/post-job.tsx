@@ -29,8 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { categories } from "@/lib/mock-data";
 import { createClientJob, getClientJobById, updateClientJob } from "@/lib/job-db.server";
+import { getServiceCategories } from "@/lib/services-db.server";
 import { formatApproximateCoordinates, formatApproximateLocation } from "@/lib/location-privacy";
 import { requireCurrentUserRole } from "@/lib/current-user.server";
 import { getClientProfileByUserId } from "@/lib/user-db.server";
@@ -65,6 +65,7 @@ const getPostJobAccess = createServerFn({ method: "GET" }).handler(async () => {
   return {
     viewer,
     clientProfile,
+    categories: getServiceCategories(),
   };
 });
 
@@ -167,7 +168,7 @@ const timingTypes = [
 ] as const;
 
 function PostJob() {
-  const { viewer, clientProfile } = useLoaderData({ from: "/post-job" });
+  const { viewer, clientProfile, categories } = useLoaderData({ from: "/post-job" });
   const search = useSearch({ from: "/post-job" }) as { draftId?: string };
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
@@ -433,7 +434,7 @@ function PostJob() {
               ) : null}
 
               {activeStep.id === "basics" ? (
-                <BasicsStep form={form} updateField={updateField} />
+                <BasicsStep form={form} updateField={updateField} categories={categories} />
               ) : null}
 
               {activeStep.id === "files" ? (
@@ -553,9 +554,11 @@ function StepButton({
 function BasicsStep({
   form,
   updateField,
+  categories,
 }: {
   form: ClientJobInput;
   updateField: <K extends keyof ClientJobInput>(key: K, value: ClientJobInput[K]) => void;
+  categories: Array<{ name: string }>;
 }) {
   return (
     <>
@@ -570,7 +573,7 @@ function BasicsStep({
                 form.category === category.name ? "border-primary bg-primary/5 text-primary" : "border-border hover:bg-muted"
               }`}
             >
-              <category.icon className="h-4 w-4 shrink-0" />
+              <BriefcaseBusiness className="h-4 w-4 shrink-0" />
               <span>{category.name}</span>
             </button>
           ))}
