@@ -180,19 +180,26 @@ export function Landing() {
         professional.professionalCity,
       ],
       name: [fullName],
-      skill: [professional.industry, professional.professionalCategory, professional.companyDescription],
+      skill: [
+        professional.industry,
+        professional.professionalCategory,
+        professional.companyDescription,
+      ],
       company: [professional.companyName, professional.companyDescription],
       location: [professional.address, professional.professionalCity],
     };
 
-    return (searchableProfessionalFields[professionalSearchFilter] || searchableProfessionalFields.all)
+    return (
+      searchableProfessionalFields[professionalSearchFilter] || searchableProfessionalFields.all
+    )
       .filter(Boolean)
       .some((value) => String(value).toLowerCase().includes(query));
   });
   const selectedVerificationMeta = getVerificationMeta(selectedProfessional?.verification?.status);
   const selectedVerificationBadges = getVerificationBadges(selectedProfessional?.verification);
   const selectedMapJob =
-    filteredOpenJobs.find((job) => job.id === selectedMapJobId) || filteredOpenJobs.find((job) => job.locationAddress);
+    filteredOpenJobs.find((job) => job.id === selectedMapJobId) ||
+    filteredOpenJobs.find((job) => job.locationAddress);
   const jobsMapQuery =
     selectedMapJob?.locationAddress ||
     selectedMapJob?.locationLabel ||
@@ -308,15 +315,17 @@ export function Landing() {
       <main>
         {homeIntroHtml ? (
           <div dangerouslySetInnerHTML={{ __html: homeIntroHtml }} />
-        ) : <section className="border-b border-border bg-surface">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-4">
-              <h1 className="text-2xl font-semibold tracking-tight text-primary">
-                {user ? `Welcome, ${welcomeName || "there"}` : "Welcome to Servio"}
-              </h1>
+        ) : (
+          <section className="border-b border-border bg-surface">
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+              <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-4">
+                <h1 className="text-2xl font-semibold tracking-tight text-primary">
+                  {user ? `Welcome, ${welcomeName || "there"}` : "Welcome to Servio"}
+                </h1>
+              </div>
             </div>
-          </div>
-        </section>}
+          </section>
+        )}
 
         <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           <div className="rounded-xl border border-border bg-card p-4 shadow-soft">
@@ -330,7 +339,12 @@ export function Landing() {
                   className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                 />
               </label>
-              <Button type="button" variant="outline" className="h-11 gap-2" onClick={() => setIsJobFilterOpen(true)}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 gap-2"
+                onClick={() => setIsJobFilterOpen(true)}
+              >
                 <SlidersHorizontal className="h-4 w-4" />
                 Filters
                 {activeJobFilterCount ? (
@@ -339,13 +353,23 @@ export function Landing() {
                   </span>
                 ) : null}
               </Button>
-              <Button type="button" variant="outline" className="h-11" onClick={clearJobFilters} disabled={!hasJobFilters}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11"
+                onClick={clearJobFilters}
+                disabled={!hasJobFilters}
+              >
                 Clear
               </Button>
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
               <div className="flex flex-wrap items-center gap-3">
-                {activeJobFilterCount ? <span>{activeJobFilterCount} filter{activeJobFilterCount === 1 ? "" : "s"} active</span> : null}
+                {activeJobFilterCount ? (
+                  <span>
+                    {activeJobFilterCount} filter{activeJobFilterCount === 1 ? "" : "s"} active
+                  </span>
+                ) : null}
               </div>
               {favoriteMessage ? (
                 <span className="animate-in fade-in slide-in-from-bottom-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
@@ -369,7 +393,9 @@ export function Landing() {
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                   <p className="text-sm font-medium">Saved filters</p>
-                  <p className="text-xs text-muted-foreground">{savedJobFilters.length}/5 saved on home page</p>
+                  <p className="text-xs text-muted-foreground">
+                    {savedJobFilters.length}/5 saved on home page
+                  </p>
                 </div>
                 <Button type="button" size="sm" className="gap-2" onClick={saveCurrentJobFilter}>
                   <Save className="h-4 w-4" />
@@ -512,316 +538,367 @@ export function Landing() {
         </Dialog>
 
         <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-          <div className={isProfessional ? "" : "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]"}>
-          <div className="rounded-xl border border-border bg-card p-5 shadow-soft">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {isProfessional ? "Client job feed" : "Active job posts"}
-                </h2>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {isProfessional
-                    ? "Review client requirements, budget, deadline, files, and location before opening a job."
-                    : "These records come from the saved jobs table and are visible to professionals."}
-                </p>
+          <div
+            className={
+              isProfessional ? "" : "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]"
+            }
+          >
+            <div className="rounded-xl border border-border bg-card p-5 shadow-soft">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div>
+                  <h2 className="text-xl font-semibold">
+                    {isProfessional ? "Client job feed" : "Active job posts"}
+                  </h2>
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    {isProfessional
+                      ? "Review client requirements, budget, deadline, files, and location before opening a job."
+                      : "These records come from the saved jobs table and are visible to professionals."}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => setShowJobsMap((value) => !value)}
+                >
+                  <Map className="h-4 w-4" />
+                  {showJobsMap ? "Hide Map" : "View Jobs on Map"}
+                </Button>
               </div>
-              <Button type="button" variant="outline" className="gap-2" onClick={() => setShowJobsMap((value) => !value)}>
-                <Map className="h-4 w-4" />
-                {showJobsMap ? "Hide Map" : "View Jobs on Map"}
-              </Button>
-            </div>
 
-            {openJobs.length ? (
-              filteredOpenJobs.length ? (
-                showJobsMap ? (
-                  <div className="mt-5 overflow-hidden rounded-xl border border-border bg-background">
-                    <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
-                      <div className="min-h-[420px]">
-                        <iframe
-                          title="Jobs map"
-                          src={`https://www.google.com/maps?q=${encodeURIComponent(jobsMapQuery)}&z=12&output=embed`}
-                          className="h-[420px] w-full border-0"
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                        />
-                      </div>
-                      <div className="max-h-[420px] overflow-y-auto border-t border-border bg-card p-3 lg:border-l lg:border-t-0">
-                        <div className="mb-3 flex items-center justify-between gap-3">
-                          <p className="text-sm font-semibold">Map results</p>
-                          <Badge variant="secondary">{filteredOpenJobs.length}</Badge>
+              {openJobs.length ? (
+                filteredOpenJobs.length ? (
+                  showJobsMap ? (
+                    <div className="mt-5 overflow-hidden rounded-xl border border-border bg-background">
+                      <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
+                        <div className="min-h-[420px]">
+                          <iframe
+                            title="Jobs map"
+                            src={`https://www.google.com/maps?q=${encodeURIComponent(jobsMapQuery)}&z=12&output=embed`}
+                            className="h-[420px] w-full border-0"
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
                         </div>
-                        <div className="grid gap-3">
-                          {filteredOpenJobs.map((job) => (
-                            <div
-                              key={job.id}
-                              role="button"
-                              tabIndex={0}
-                              onClick={() => setSelectedMapJobId(job.id)}
-                              onKeyDown={(event) => {
-                                if (event.key === "Enter" || event.key === " ") {
-                                  event.preventDefault();
-                                  setSelectedMapJobId(job.id);
-                                }
-                              }}
-                              className={`rounded-lg border p-3 text-left transition-colors ${
-                                selectedMapJob?.id === job.id
-                                  ? "border-primary bg-primary/5"
-                                  : "border-border bg-background hover:border-primary/40 hover:bg-primary/5"
-                              }`}
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="line-clamp-2 text-sm font-semibold">{job.title}</p>
-                                  <p className="mt-1 truncate text-xs text-muted-foreground">
-                                    {job.category} · {formatBudget(job.budgetMin, job.budgetMax, job.timingType)}
-                                  </p>
+                        <div className="max-h-[420px] overflow-y-auto border-t border-border bg-card p-3 lg:border-l lg:border-t-0">
+                          <div className="mb-3 flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold">Map results</p>
+                            <Badge variant="secondary">{filteredOpenJobs.length}</Badge>
+                          </div>
+                          <div className="grid gap-3">
+                            {filteredOpenJobs.map((job) => (
+                              <div
+                                key={job.id}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => setSelectedMapJobId(job.id)}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    setSelectedMapJobId(job.id);
+                                  }
+                                }}
+                                className={`rounded-lg border p-3 text-left transition-colors ${
+                                  selectedMapJob?.id === job.id
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border bg-background hover:border-primary/40 hover:bg-primary/5"
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="line-clamp-2 text-sm font-semibold">
+                                      {job.title}
+                                    </p>
+                                    <p className="mt-1 truncate text-xs text-muted-foreground">
+                                      {job.category} ·{" "}
+                                      {formatBudget(job.budgetMin, job.budgetMax, job.timingType)}
+                                    </p>
+                                  </div>
+                                  <div className="flex shrink-0 items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        void toggleFavoriteJob(job.id);
+                                      }}
+                                      className={`grid h-8 w-8 place-items-center rounded-md border transition-colors ${
+                                        favoriteIds.includes(job.id)
+                                          ? "border-primary bg-primary/10 text-primary"
+                                          : "border-border bg-card text-muted-foreground hover:text-primary"
+                                      }`}
+                                      aria-label={
+                                        favoriteIds.includes(job.id)
+                                          ? "Remove favorite job"
+                                          : "Save favorite job"
+                                      }
+                                    >
+                                      <Heart
+                                        className={`h-4 w-4 ${favoriteIds.includes(job.id) ? "fill-current" : ""}`}
+                                      />
+                                    </button>
+                                    <Badge
+                                      variant={job.urgency === "HIGH" ? "destructive" : "outline"}
+                                    >
+                                      {formatEnum(job.urgency)}
+                                    </Badge>
+                                  </div>
                                 </div>
-                                <div className="flex shrink-0 items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      void toggleFavoriteJob(job.id);
-                                    }}
-                                    className={`grid h-8 w-8 place-items-center rounded-md border transition-colors ${
-                                      favoriteIds.includes(job.id)
-                                        ? "border-primary bg-primary/10 text-primary"
-                                        : "border-border bg-card text-muted-foreground hover:text-primary"
-                                    }`}
-                                    aria-label={favoriteIds.includes(job.id) ? "Remove favorite job" : "Save favorite job"}
-                                  >
-                                    <Heart className={`h-4 w-4 ${favoriteIds.includes(job.id) ? "fill-current" : ""}`} />
-                                  </button>
-                                  <Badge variant={job.urgency === "HIGH" ? "destructive" : "outline"}>
-                                    {formatEnum(job.urgency)}
-                                  </Badge>
+                                <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                  <span className="truncate">{formatJobLocation(job)}</span>
                                 </div>
+                                <Button asChild variant="outline" size="sm" className="mt-3 w-full">
+                                  <Link to="/job/$jobId" params={{ jobId: String(job.id) }}>
+                                    View job
+                                  </Link>
+                                </Button>
                               </div>
-                              <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <MapPin className="h-3.5 w-3.5 shrink-0" />
-                                <span className="truncate">{formatJobLocation(job)}</span>
-                              </div>
-                              <Button asChild variant="outline" size="sm" className="mt-3 w-full">
-                                <Link to="/job/$jobId" params={{ jobId: String(job.id) }}>
-                                  View job
-                                </Link>
-                              </Button>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="mt-5 grid auto-rows-fr gap-4 xl:grid-cols-2">
-                    {filteredOpenJobs.map((job) => (
-                      <Link
-                        key={job.id}
-                        to="/job/$jobId"
-                        params={{ jobId: String(job.id) }}
-                        className="relative flex min-h-[230px] flex-col rounded-xl border border-border bg-background p-5 pr-16 transition-colors hover:border-primary/50 hover:bg-primary/5"
-                      >
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant="secondary">{job.category}</Badge>
-                          <Badge variant={job.urgency === "HIGH" ? "destructive" : "outline"}>
-                            {formatEnum(job.urgency)}
-                          </Badge>
-                          <Badge>{formatWorkMode(job.workMode)}</Badge>
-                          {favoriteIds.includes(job.id) ? <Badge variant="secondary">Saved</Badge> : null}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            void toggleFavoriteJob(job.id);
-                          }}
-                          className={`absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-lg border transition-colors ${
-                            favoriteIds.includes(job.id)
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border bg-card text-muted-foreground hover:text-primary"
-                          }`}
-                          aria-label={favoriteIds.includes(job.id) ? "Remove favorite job" : "Save favorite job"}
+                  ) : (
+                    <div className="mt-5 grid auto-rows-fr gap-4 xl:grid-cols-2">
+                      {filteredOpenJobs.map((job) => (
+                        <Link
+                          key={job.id}
+                          to="/job/$jobId"
+                          params={{ jobId: String(job.id) }}
+                          className="relative flex min-h-[230px] flex-col rounded-xl border border-border bg-background p-5 pr-16 transition-colors hover:border-primary/50 hover:bg-primary/5"
                         >
-                          <Heart className={`h-4 w-4 ${favoriteIds.includes(job.id) ? "fill-current" : ""}`} />
-                        </button>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary">{job.category}</Badge>
+                            <Badge variant={job.urgency === "HIGH" ? "destructive" : "outline"}>
+                              {formatEnum(job.urgency)}
+                            </Badge>
+                            <Badge>{formatWorkMode(job.workMode)}</Badge>
+                            {favoriteIds.includes(job.id) ? (
+                              <Badge variant="secondary">Saved</Badge>
+                            ) : null}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              void toggleFavoriteJob(job.id);
+                            }}
+                            className={`absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-lg border transition-colors ${
+                              favoriteIds.includes(job.id)
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-card text-muted-foreground hover:text-primary"
+                            }`}
+                            aria-label={
+                              favoriteIds.includes(job.id)
+                                ? "Remove favorite job"
+                                : "Save favorite job"
+                            }
+                          >
+                            <Heart
+                              className={`h-4 w-4 ${favoriteIds.includes(job.id) ? "fill-current" : ""}`}
+                            />
+                          </button>
 
-                        <h3 className="mt-3 line-clamp-2 text-lg font-semibold">{job.title}</h3>
-                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{job.description}</p>
+                          <h3 className="mt-3 line-clamp-2 text-lg font-semibold">{job.title}</h3>
+                          <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                            {job.description}
+                          </p>
 
-                        <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                          <span>{formatBudget(job.budgetMin, job.budgetMax, job.timingType)}</span>
-                          <span className="flex items-center gap-1.5">
-                            <CalendarClock className="h-4 w-4" />
-                            {formatDate(job.deadline)}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Paperclip className="h-4 w-4" />
-                            {job.attachments.length} files
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <MapPin className="h-4 w-4" />
-                            <span className="truncate">{formatJobLocation(job)}</span>
-                          </span>
-                        </div>
+                          <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                            <span>
+                              {formatBudget(job.budgetMin, job.budgetMax, job.timingType)}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <CalendarClock className="h-4 w-4" />
+                              {formatDate(job.deadline)}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Paperclip className="h-4 w-4" />
+                              {job.attachments.length} files
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <MapPin className="h-4 w-4" />
+                              <span className="truncate">{formatJobLocation(job)}</span>
+                            </span>
+                          </div>
 
-                        <p className="mt-auto border-t border-border pt-3 text-xs text-muted-foreground">
-                          Posted by {job.clientCompanyName || job.clientName}
-                        </p>
-                      </Link>
-                    ))}
+                          <p className="mt-auto border-t border-border pt-3 text-xs text-muted-foreground">
+                            Posted by {job.clientCompanyName || job.clientName}
+                          </p>
+                        </Link>
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center">
+                    <Search className="mx-auto h-9 w-9 text-muted-foreground" />
+                    <h3 className="mt-3 font-semibold">Job not available</h3>
+                    <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                      No available job matches "{jobSearch.trim()}". Try searching another title,
+                      category, location, budget, or client.
+                    </p>
                   </div>
                 )
               ) : (
                 <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center">
-                  <Search className="mx-auto h-9 w-9 text-muted-foreground" />
-                  <h3 className="mt-3 font-semibold">Job not available</h3>
+                  <Briefcase className="mx-auto h-9 w-9 text-muted-foreground" />
+                  <h3 className="mt-3 font-semibold">No available jobs</h3>
                   <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-                    No available job matches "{jobSearch.trim()}". Try searching another title, category, location, budget, or client.
+                    When a client posts an active job, it will appear here automatically.
                   </p>
+                  {user?.role === "CLIENT" ? (
+                    <Button className="mt-4" asChild>
+                      <Link to="/post-job">Post your first job</Link>
+                    </Button>
+                  ) : null}
                 </div>
-              )
-            ) : (
-              <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center">
-                <Briefcase className="mx-auto h-9 w-9 text-muted-foreground" />
-                <h3 className="mt-3 font-semibold">No available jobs</h3>
-                <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-                  When a client posts an active job, it will appear here automatically.
-                </p>
-                {user?.role === "CLIENT" ? (
-                  <Button className="mt-4" asChild>
-                    <Link to="/post-job">Post your first job</Link>
-                  </Button>
-                ) : null}
-              </div>
-            )}
-          </div>
-          {!isProfessional ? (
-            <aside className="rounded-xl border border-border bg-card p-5 shadow-soft lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
-              <div className="flex flex-col gap-4">
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-xl font-semibold">Professionals</h2>
+              )}
+            </div>
+            {!isProfessional ? (
+              <aside className="rounded-xl border border-border bg-card p-5 shadow-soft lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-xl font-semibold">Professionals</h2>
+                      </div>
+                      <Badge variant="secondary">{filteredProfessionals.length} results</Badge>
                     </div>
-                    <Badge variant="secondary">{filteredProfessionals.length} results</Badge>
+
+                    <label className="mt-4 flex h-11 items-center gap-2 rounded-xl border border-input bg-background px-3 text-sm shadow-soft">
+                      <Search className="h-4 w-4 text-muted-foreground" />
+                      <input
+                        value={professionalSearch}
+                        onChange={(event) => setProfessionalSearch(event.target.value)}
+                        placeholder="Search name, skill, location"
+                        className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+                      />
+                    </label>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[
+                        ["all", "All"],
+                        ["name", "Name"],
+                        ["skill", "Skill"],
+                        ["company", "Company"],
+                        ["location", "Location"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setProfessionalSearchFilter(value)}
+                          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                            professionalSearchFilter === value
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  <label className="mt-4 flex h-11 items-center gap-2 rounded-xl border border-input bg-background px-3 text-sm shadow-soft">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <input
-                      value={professionalSearch}
-                      onChange={(event) => setProfessionalSearch(event.target.value)}
-                      placeholder="Search name, skill, location"
-                      className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
-                    />
-                  </label>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {[
-                      ["all", "All"],
-                      ["name", "Name"],
-                      ["skill", "Skill"],
-                      ["company", "Company"],
-                      ["location", "Location"],
-                    ].map(([value, label]) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setProfessionalSearchFilter(value)}
-                        className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                          professionalSearchFilter === value
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                  {professionals.length ? (
+                    filteredProfessionals.length ? (
+                      <div className="grid gap-4">
+                        {filteredProfessionals.map((professional) => {
+                          const fullName =
+                            `${professional.firstName} ${professional.lastName}`.trim();
+                          const verificationMeta = getVerificationMeta(
+                            professional.verification?.status,
+                          );
 
-                {professionals.length ? (
-                  filteredProfessionals.length ? (
-                    <div className="grid gap-4">
-                      {filteredProfessionals.map((professional) => {
-                        const fullName = `${professional.firstName} ${professional.lastName}`.trim();
-                        const verificationMeta = getVerificationMeta(professional.verification?.status);
-
-                        return (
-                          <div
-                            key={professional.id}
-                            className="rounded-xl border border-border bg-background p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
-                          >
-                            <button
-                              type="button"
-                              aria-label={`Open ${fullName || "professional"} side profile`}
-                              onClick={() => {
-                                setSelectedProfessional(professional);
-                                setIsSheetOpen(true);
-                              }}
-                              className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                          return (
+                            <div
+                              key={professional.id}
+                              className="rounded-xl border border-border bg-background p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
                             >
-                              <div className="flex items-start gap-3">
-                                <img
-                                  src={professional.avatarUrl || `https://i.pravatar.cc/100?u=pro-${professional.id}`}
-                                  alt={fullName}
-                                  className="h-12 w-12 rounded-xl object-cover"
-                                />
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex min-w-0 items-center gap-2">
-                                    <h3 className="truncate font-semibold">{fullName || "Professional"}</h3>
-                                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${verificationMeta.badgeClass}`}>
-                                      {verificationMeta.shortLabel}
-                                    </span>
+                              <button
+                                type="button"
+                                aria-label={`Open ${fullName || "professional"} side profile`}
+                                onClick={() => {
+                                  setSelectedProfessional(professional);
+                                  setIsSheetOpen(true);
+                                }}
+                                className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                              >
+                                <div className="flex items-start gap-3">
+                                  <img
+                                    src={
+                                      professional.avatarUrl ||
+                                      `https://i.pravatar.cc/100?u=pro-${professional.id}`
+                                    }
+                                    alt={fullName}
+                                    className="h-12 w-12 rounded-xl object-cover"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                      <h3 className="truncate font-semibold">
+                                        {fullName || "Professional"}
+                                      </h3>
+                                      <span
+                                        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${verificationMeta.badgeClass}`}
+                                      >
+                                        {verificationMeta.shortLabel}
+                                      </span>
+                                    </div>
+                                    <p className="truncate text-sm text-muted-foreground">
+                                      {professional.industry ||
+                                        professional.companyName ||
+                                        "Professional account"}
+                                    </p>
                                   </div>
-                                  <p className="truncate text-sm text-muted-foreground">
-                                    {professional.industry || professional.companyName || "Professional account"}
-                                  </p>
                                 </div>
-                              </div>
-                              <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                                <MapPin className="h-4 w-4 shrink-0" />
-                                <span className="truncate">{getProfessionalLocation(professional)}</span>
-                              </div>
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
+                                <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                                  <MapPin className="h-4 w-4 shrink-0" />
+                                  <span className="truncate">
+                                    {getProfessionalLocation(professional)}
+                                  </span>
+                                </div>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center">
+                        <Search className="mx-auto h-8 w-8 text-muted-foreground" />
+                        <h3 className="mt-3 font-semibold">No professionals found</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">Try another search.</p>
+                      </div>
+                    )
                   ) : (
                     <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center">
                       <Search className="mx-auto h-8 w-8 text-muted-foreground" />
-                      <h3 className="mt-3 font-semibold">No professionals found</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">Try another search.</p>
+                      <h3 className="mt-3 font-semibold">No professionals saved yet</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Professional accounts will appear here.
+                      </p>
                     </div>
-                  )
-                ) : (
-                  <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center">
-                    <Search className="mx-auto h-8 w-8 text-muted-foreground" />
-                    <h3 className="mt-3 font-semibold">No professionals saved yet</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Professional accounts will appear here.</p>
-                  </div>
-                )}
+                  )}
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setProfessionalSearch("")}
-                  disabled={!professionalSearch}
-                >
-                  Clear search
-                </Button>
-              </div>
-            </aside>
-          ) : null}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setProfessionalSearch("")}
+                    disabled={!professionalSearch}
+                  >
+                    Clear search
+                  </Button>
+                </div>
+              </aside>
+            ) : null}
           </div>
         </section>
-
       </main>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="right" className="flex h-dvh w-full max-w-none flex-col overflow-hidden p-0 sm:max-w-none md:w-[min(760px,100vw)]">
+        <SheetContent
+          side="right"
+          className="flex h-dvh w-full max-w-none flex-col overflow-hidden p-0 sm:max-w-none md:w-[min(760px,100vw)]"
+        >
           <SheetTitle className="sr-only">Professional profile preview</SheetTitle>
           <SheetDescription className="sr-only">
             Preview professional details and open the full profile.
@@ -833,7 +910,10 @@ export function Landing() {
               <div className="grid gap-5 p-5 sm:grid-cols-[132px_minmax(0,1fr)] sm:items-start">
                 <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-2xl bg-muted shadow-lg ring-4 ring-background">
                   <img
-                    src={selectedProfessional?.avatarUrl || `https://i.pravatar.cc/160?u=pro-${selectedProfessional?.id}`}
+                    src={
+                      selectedProfessional?.avatarUrl ||
+                      `https://i.pravatar.cc/160?u=pro-${selectedProfessional?.id}`
+                    }
                     alt={getProfessionalName(selectedProfessional)}
                     className="h-full w-full object-cover"
                   />
@@ -844,7 +924,9 @@ export function Landing() {
                     <h2 className="min-w-0 truncate text-2xl font-semibold tracking-tight text-foreground">
                       {getProfessionalName(selectedProfessional)}
                     </h2>
-                    <Badge className={`rounded-full border-0 ${selectedVerificationMeta.badgeClass}`}>
+                    <Badge
+                      className={`rounded-full border-0 ${selectedVerificationMeta.badgeClass}`}
+                    >
                       {selectedVerificationMeta.label}
                     </Badge>
                   </div>
@@ -855,14 +937,34 @@ export function Landing() {
                       "Professional services"}
                   </p>
                   <div className="mt-4 grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
-                      <ProfileMetric icon={Star} label="Rating" value={getRatingLabel(selectedProfessional)} accent="text-warning" />
-                      <ProfileMetric icon={MapPin} label="Location" value={getProfessionalLocation(selectedProfessional)} />
-                      <ProfileMetric icon={Clock} label="Status" value={formatAvailability(selectedProfessional?.availabilityStatus || selectedProfessional?.availability)} />
+                    <ProfileMetric
+                      icon={Star}
+                      label="Rating"
+                      value={getRatingLabel(selectedProfessional)}
+                      accent="text-warning"
+                    />
+                    <ProfileMetric
+                      icon={MapPin}
+                      label="Location"
+                      value={getProfessionalLocation(selectedProfessional)}
+                    />
+                    <ProfileMetric
+                      icon={Clock}
+                      label="Status"
+                      value={formatAvailability(
+                        selectedProfessional?.availabilityStatus ||
+                          selectedProfessional?.availability,
+                      )}
+                    />
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {selectedVerificationBadges.length ? (
                       selectedVerificationBadges.map((badge) => (
-                        <VerificationBadge key={badge.label} icon={badge.icon} label={badge.label} />
+                        <VerificationBadge
+                          key={badge.label}
+                          icon={badge.icon}
+                          label={badge.label}
+                        />
                       ))
                     ) : (
                       <span className="rounded-full border border-dashed border-border px-3 py-1.5 text-xs font-medium text-muted-foreground">
@@ -879,18 +981,50 @@ export function Landing() {
                 <section className="rounded-xl border border-border bg-card p-5 shadow-soft">
                   <h3 className="text-base font-semibold">About</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                    {selectedProfessional?.companyDescription || selectedProfessional?.bio || "This professional has not added a description yet. Open the full profile or message them to discuss services, availability, and fit."}
+                    {selectedProfessional?.companyDescription ||
+                      selectedProfessional?.bio ||
+                      "This professional has not added a description yet. Open the full profile or message them to discuss services, availability, and fit."}
                   </p>
                 </section>
 
                 <section className="rounded-xl border border-border bg-card p-5 shadow-soft">
                   <h3 className="text-base font-semibold">Profile highlights</h3>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <DetailTile label="Main service" value={selectedProfessional?.professionalCategory || selectedProfessional?.industry || "Professional services"} />
-                    <DetailTile label="Experience" value={selectedProfessional?.experienceYears != null ? `${selectedProfessional.experienceYears} years` : "Not specified"} />
-                    <DetailTile label="Work mode" value={formatWorkModeLabel(selectedProfessional?.workMode)} />
-                    <DetailTile label="Service radius" value={selectedProfessional?.serviceRadiusKm ? `${selectedProfessional.serviceRadiusKm} km` : "Not set"} />
-                    <DetailTile label="Service area" value={formatApproximateLocation(selectedProfessional?.serviceArea, getProfessionalLocation(selectedProfessional))} />
+                    <DetailTile
+                      label="Main service"
+                      value={
+                        selectedProfessional?.professionalCategory ||
+                        selectedProfessional?.industry ||
+                        "Professional services"
+                      }
+                    />
+                    <DetailTile
+                      label="Experience"
+                      value={
+                        selectedProfessional?.experienceYears != null
+                          ? `${selectedProfessional.experienceYears} years`
+                          : "Not specified"
+                      }
+                    />
+                    <DetailTile
+                      label="Work mode"
+                      value={formatWorkModeLabel(selectedProfessional?.workMode)}
+                    />
+                    <DetailTile
+                      label="Service radius"
+                      value={
+                        selectedProfessional?.serviceRadiusKm
+                          ? `${selectedProfessional.serviceRadiusKm} km`
+                          : "Not set"
+                      }
+                    />
+                    <DetailTile
+                      label="Service area"
+                      value={formatApproximateLocation(
+                        selectedProfessional?.serviceArea,
+                        getProfessionalLocation(selectedProfessional),
+                      )}
+                    />
                     <DetailTile label="Verification" value={selectedVerificationMeta.label} />
                   </div>
                 </section>
@@ -900,7 +1034,10 @@ export function Landing() {
                     <h3 className="text-base font-semibold">Skills</h3>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {selectedProfessional.skills.map((skill: string) => (
-                        <span key={skill} className="rounded-full border border-border bg-muted px-3 py-1.5 text-sm font-medium text-foreground">
+                        <span
+                          key={skill}
+                          className="rounded-full border border-border bg-muted px-3 py-1.5 text-sm font-medium text-foreground"
+                        >
                           {skill}
                         </span>
                       ))}
@@ -912,38 +1049,59 @@ export function Landing() {
                   <section className="rounded-xl border border-border bg-card p-5 shadow-soft">
                     <h3 className="text-base font-semibold">Work photos</h3>
                     <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      {selectedProfessional.workPhotos.slice(0, 6).map((photo: string, index: number) => (
-                        <img
-                          key={`${photo}-${index}`}
-                          src={photo}
-                          alt=""
-                          className="aspect-[4/3] w-full rounded-lg border border-border object-cover"
-                        />
-                      ))}
+                      {selectedProfessional.workPhotos
+                        .slice(0, 6)
+                        .map((photo: string, index: number) => (
+                          <img
+                            key={`${photo}-${index}`}
+                            src={photo}
+                            alt=""
+                            className="aspect-[4/3] w-full rounded-lg border border-border object-cover"
+                          />
+                        ))}
                     </div>
                   </section>
                 ) : null}
 
-                {selectedProfessional?.portfolioUrl || selectedProfessional?.certifications?.length || selectedProfessional?.tradeLicenseUrl ? (
+                {selectedProfessional?.portfolioUrl ||
+                selectedProfessional?.certifications?.length ||
+                selectedProfessional?.tradeLicenseUrl ? (
                   <section className="rounded-xl border border-border bg-card p-5 shadow-soft">
                     <h3 className="text-base font-semibold">Documents and links</h3>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       {selectedProfessional?.portfolioUrl ? (
-                        <a className="rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-primary/5" href={selectedProfessional.portfolioUrl} target="_blank" rel="noreferrer">
+                        <a
+                          className="rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
+                          href={selectedProfessional.portfolioUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           <ExternalLink className="mb-3 h-4 w-4 text-primary" />
                           <p className="font-medium">Portfolio link</p>
-                          <p className="mt-1 truncate text-sm text-muted-foreground">{selectedProfessional.portfolioUrl}</p>
+                          <p className="mt-1 truncate text-sm text-muted-foreground">
+                            {selectedProfessional.portfolioUrl}
+                          </p>
                         </a>
                       ) : null}
                       {selectedProfessional?.tradeLicenseUrl ? (
-                        <a className="rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-primary/5" href={selectedProfessional.tradeLicenseUrl} target="_blank" rel="noreferrer">
+                        <a
+                          className="rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
+                          href={selectedProfessional.tradeLicenseUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           <ShieldCheck className="mb-3 h-4 w-4 text-primary" />
                           <p className="font-medium">Trade license</p>
-                          <p className="mt-1 truncate text-sm text-muted-foreground">View uploaded license</p>
+                          <p className="mt-1 truncate text-sm text-muted-foreground">
+                            View uploaded license
+                          </p>
                         </a>
                       ) : null}
                       {selectedProfessional?.certifications?.map((cert: string, index: number) => (
-                        <div key={`${cert}-${index}`} className="rounded-lg border border-border p-4">
+                        <div
+                          key={`${cert}-${index}`}
+                          className="rounded-lg border border-border p-4"
+                        >
                           <Award className="mb-3 h-4 w-4 text-primary" />
                           <p className="font-medium">Certification</p>
                           <p className="mt-1 truncate text-sm text-muted-foreground">{cert}</p>
@@ -956,8 +1114,16 @@ export function Landing() {
                 <section className="rounded-xl border border-border bg-card p-5 shadow-soft">
                   <h3 className="text-base font-semibold">Contact preview</h3>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <DetailTile label="Email" value={selectedProfessional?.email || "Not added"} icon={Mail} />
-                    <DetailTile label="Phone" value={selectedProfessional?.phone || "Not added"} icon={Phone} />
+                    <DetailTile
+                      label="Email"
+                      value={selectedProfessional?.email || "Not added"}
+                      icon={Mail}
+                    />
+                    <DetailTile
+                      label="Phone"
+                      value={selectedProfessional?.phone || "Not added"}
+                      icon={Phone}
+                    />
                   </div>
                 </section>
 
@@ -966,9 +1132,14 @@ export function Landing() {
                     <h3 className="text-base font-semibold">Portfolio</h3>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       {selectedProfessional.portfolio.slice(0, 4).map((p: any, i: number) => (
-                        <div key={i} className="min-h-24 rounded-lg border border-border bg-muted/40 p-4">
+                        <div
+                          key={i}
+                          className="min-h-24 rounded-lg border border-border bg-muted/40 p-4"
+                        >
                           <div className="text-xs text-muted-foreground">{p?.tag || "Project"}</div>
-                          <div className="mt-2 font-medium leading-5">{p?.title || "Portfolio item"}</div>
+                          <div className="mt-2 font-medium leading-5">
+                            {p?.title || "Portfolio item"}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -983,22 +1154,30 @@ export function Landing() {
                     {selectedProfessional?.hourlyRate ? (
                       <div className="rounded-lg border border-border px-3 py-2">
                         <div className="text-muted-foreground">Hourly consulting</div>
-                        <div className="mt-1 font-medium">${selectedProfessional.hourlyRate}/hr</div>
+                        <div className="mt-1 font-medium">
+                          ${selectedProfessional.hourlyRate}/hr
+                        </div>
                       </div>
                     ) : null}
                     {selectedProfessional?.weeklyRate ? (
                       <div className="rounded-lg border border-border px-3 py-2">
                         <div className="text-muted-foreground">Weekly retainer</div>
-                        <div className="mt-1 font-medium">${selectedProfessional.weeklyRate}/wk</div>
+                        <div className="mt-1 font-medium">
+                          ${selectedProfessional.weeklyRate}/wk
+                        </div>
                       </div>
                     ) : null}
                     {selectedProfessional?.fixedRate ? (
                       <div className="rounded-lg border border-border px-3 py-2">
                         <div className="text-muted-foreground">Fixed scope project</div>
-                        <div className="mt-1 font-medium">From ${selectedProfessional.fixedRate}</div>
+                        <div className="mt-1 font-medium">
+                          From ${selectedProfessional.fixedRate}
+                        </div>
                       </div>
                     ) : null}
-                    {!selectedProfessional?.hourlyRate && !selectedProfessional?.weeklyRate && !selectedProfessional?.fixedRate ? (
+                    {!selectedProfessional?.hourlyRate &&
+                    !selectedProfessional?.weeklyRate &&
+                    !selectedProfessional?.fixedRate ? (
                       <p className="rounded-lg border border-dashed border-border px-3 py-3 text-muted-foreground">
                         Pricing is not added yet.
                       </p>
@@ -1009,9 +1188,21 @@ export function Landing() {
                 <section className="rounded-xl border border-border bg-card p-5 shadow-soft">
                   <h3 className="text-base font-semibold">Service coverage</h3>
                   <div className="mt-4 space-y-3 text-sm">
-                    <DetailTile label="Area" value={formatApproximateLocation(selectedProfessional?.serviceArea, getProfessionalLocation(selectedProfessional))} />
-                    <DetailTile label="Approx. location" value={getProfessionalLocation(selectedProfessional)} />
-                    <DetailTile label="Work mode" value={formatWorkModeLabel(selectedProfessional?.workMode)} />
+                    <DetailTile
+                      label="Area"
+                      value={formatApproximateLocation(
+                        selectedProfessional?.serviceArea,
+                        getProfessionalLocation(selectedProfessional),
+                      )}
+                    />
+                    <DetailTile
+                      label="Approx. location"
+                      value={getProfessionalLocation(selectedProfessional)}
+                    />
+                    <DetailTile
+                      label="Work mode"
+                      value={formatWorkModeLabel(selectedProfessional?.workMode)}
+                    />
                   </div>
                 </section>
 
@@ -1019,9 +1210,13 @@ export function Landing() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-base font-semibold">Verification badges</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{selectedVerificationMeta.description}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedVerificationMeta.description}
+                      </p>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${selectedVerificationMeta.badgeClass}`}>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${selectedVerificationMeta.badgeClass}`}
+                    >
                       {selectedVerificationMeta.shortLabel}
                     </span>
                   </div>
@@ -1040,7 +1235,9 @@ export function Landing() {
             </div>
 
             <div className="sticky bottom-0 -mx-5 mt-6 flex flex-col gap-3 border-t border-border bg-background/95 px-5 py-4 backdrop-blur sm:-mx-7 sm:flex-row sm:items-center sm:justify-end sm:px-7">
-              <Button variant="outline" onClick={() => setIsSheetOpen(false)}>Close</Button>
+              <Button variant="outline" onClick={() => setIsSheetOpen(false)}>
+                Close
+              </Button>
               <Button
                 type="button"
                 variant="outline"
@@ -1053,7 +1250,10 @@ export function Landing() {
                 onClick={async () => {
                   setIsSheetOpen(false);
                   if (selectedProfessional?.id) {
-                    await navigate({ to: "/pro/$proId", params: { proId: String(selectedProfessional.id) } });
+                    await navigate({
+                      to: "/pro/$proId",
+                      params: { proId: String(selectedProfessional.id) },
+                    });
                   }
                 }}
               >
@@ -1182,16 +1382,20 @@ function VerificationBadgeRow({
   done: boolean;
 }) {
   return (
-    <div className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${
-      done ? "border-primary/15 bg-primary/5" : "border-border bg-muted/40"
-    }`}>
+    <div
+      className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${
+        done ? "border-primary/15 bg-primary/5" : "border-border bg-muted/40"
+      }`}
+    >
       <span className="inline-flex min-w-0 items-center gap-2">
         <Icon className={`h-4 w-4 shrink-0 ${done ? "text-primary" : "text-muted-foreground"}`} />
         <span className="truncate font-medium text-foreground">{label}</span>
       </span>
-      <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
-        done ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
-      }`}>
+      <span
+        className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+          done ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+        }`}
+      >
         {done ? "Displayed" : "Not added"}
       </span>
     </div>
@@ -1223,7 +1427,11 @@ function getProfessionalLocation(professional: any | null) {
   );
 }
 
-function formatJobLocation(job: { locationAddress?: string | null; locationLabel?: string | null; workMode?: string | null }) {
+function formatJobLocation(job: {
+  locationAddress?: string | null;
+  locationLabel?: string | null;
+  workMode?: string | null;
+}) {
   if (job.workMode === "REMOTE") {
     return "Remote job";
   }
@@ -1327,7 +1535,11 @@ function getVerificationBadges(verification?: Parameters<typeof getVerificationB
   return getVerificationBadgeRows(verification).filter((badge) => badge.done);
 }
 
-function openProfessionalMessage(user: { id?: number; role?: string } | null, professional: any | null, navigate: ReturnType<typeof useNavigate>) {
+function openProfessionalMessage(
+  user: { id?: number; role?: string } | null,
+  professional: any | null,
+  navigate: ReturnType<typeof useNavigate>,
+) {
   if (!professional?.id) {
     return;
   }
@@ -1349,7 +1561,8 @@ function openProfessionalMessage(user: { id?: number; role?: string } | null, pr
 }
 
 function buildProfessionalMessageSearch(clientId: number, professional: any) {
-  const fullName = `${professional.firstName || ""} ${professional.lastName || ""}`.trim() || "this professional";
+  const fullName =
+    `${professional.firstName || ""} ${professional.lastName || ""}`.trim() || "this professional";
   return {
     conversationId: buildConversationId(clientId, professional.id),
     toUserId: String(professional.id),

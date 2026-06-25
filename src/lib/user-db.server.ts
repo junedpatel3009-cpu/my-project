@@ -1064,7 +1064,8 @@ export function getAdminUserStats() {
     admins: users.filter((user) => user.role === "ADMIN").length,
     clients: users.filter((user) => user.role === "CLIENT").length,
     professionals: users.filter((user) => user.role === "PROFESSIONAL").length,
-    pendingVerifications: users.filter((user) => user.role === "PROFESSIONAL" && !user.isVerified).length,
+    pendingVerifications: users.filter((user) => user.role === "PROFESSIONAL" && !user.isVerified)
+      .length,
   } satisfies AdminUserStats;
 }
 
@@ -1426,7 +1427,9 @@ export function updateUserNotificationPreferencesByUserId(input: {
     ).run(
       (input.emailNotificationsEnabled ?? current.emailNotificationsEnabled) ? 1 : 0,
       (input.browserNotificationsEnabled ?? current.browserNotificationsEnabled) ? 1 : 0,
-      (input.projectActivityNotificationsEnabled ?? current.projectActivityNotificationsEnabled) ? 1 : 0,
+      (input.projectActivityNotificationsEnabled ?? current.projectActivityNotificationsEnabled)
+        ? 1
+        : 0,
       timestamp,
       input.userId,
     );
@@ -1558,10 +1561,7 @@ export function updateProfessionalProfileByUserId(input: {
   });
 }
 
-export function updateProfessionalAvatarByUserId(input: {
-  userId: number;
-  avatarUrl: string;
-}) {
+export function updateProfessionalAvatarByUserId(input: { userId: number; avatarUrl: string }) {
   const db = getDatabase();
   const timestamp = new Date().toISOString();
 

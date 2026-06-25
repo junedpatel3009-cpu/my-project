@@ -23,7 +23,10 @@ const loadWebsiteCmsData = createServerFn({ method: "GET" }).handler(async () =>
 });
 
 const saveWebsiteCmsPage = createServerFn({ method: "POST" })
-  .inputValidator((input: { slug: LegalPageSlug; title: string; content: string; status: LegalPageStatus }) => input)
+  .inputValidator(
+    (input: { slug: LegalPageSlug; title: string; content: string; status: LegalPageStatus }) =>
+      input,
+  )
   .handler(async ({ data }) => {
     const viewer = getCurrentUser();
     if (!viewer || viewer.role !== "ADMIN") {
@@ -77,7 +80,9 @@ function WebsiteCms() {
       <div className="grid min-h-screen place-items-center bg-muted/30 px-4">
         <div className="w-full max-w-sm rounded-lg border border-border bg-white p-6 text-center shadow-soft">
           <h1 className="mt-4 text-xl font-semibold">Admin access required</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Sign in from the admin panel to manage website pages.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Sign in from the admin panel to manage website pages.
+          </p>
           <Button asChild className="mt-5 w-full bg-primary hover:bg-primary/90">
             <Link to="/admin">Open admin panel</Link>
           </Button>
@@ -86,7 +91,8 @@ function WebsiteCms() {
     );
   }
 
-  const displayName = `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
+  const displayName =
+    `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
 
   const handleSave = async () => {
     setSaving(true);
@@ -119,7 +125,9 @@ function WebsiteCms() {
     <AppShell userName={displayName} userRole="Admin" userAvatarUrl={data.viewer.avatarUrl}>
       <div className="space-y-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Admin / Website CMS</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            Admin / Website CMS
+          </p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">Website Pages CMS</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Edit FAQ, Terms & Conditions, and Privacy Policy only.
@@ -167,7 +175,11 @@ function WebsiteCms() {
               <p className="font-medium text-foreground">Status</p>
               <p>{status}</p>
               <p className="mt-2 font-medium text-foreground">Last updated</p>
-              <p>{selectedPage?.updatedAt ? new Date(selectedPage.updatedAt).toLocaleString() : "Never"}</p>
+              <p>
+                {selectedPage?.updatedAt
+                  ? new Date(selectedPage.updatedAt).toLocaleString()
+                  : "Never"}
+              </p>
             </div>
           </div>
 
@@ -177,14 +189,24 @@ function WebsiteCms() {
                 <label className="text-sm font-medium" htmlFor="legal-page-title">
                   Page title
                 </label>
-                <Input id="legal-page-title" className="mt-2" value={title} onChange={(event) => setTitle(event.target.value)} />
+                <Input
+                  id="legal-page-title"
+                  className="mt-2"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                />
               </div>
               {isCreating ? (
                 <div>
                   <label className="text-sm font-medium" htmlFor="legal-page-slug">
                     Page slug
                   </label>
-                  <Input id="legal-page-slug" className="mt-2" value={slug} onChange={(event) => setSlug(event.target.value)} />
+                  <Input
+                    id="legal-page-slug"
+                    className="mt-2"
+                    value={slug}
+                    onChange={(event) => setSlug(event.target.value)}
+                  />
                 </div>
               ) : null}
               <div>
@@ -216,7 +238,11 @@ function WebsiteCms() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
                 {saving ? "Saving..." : isCreating ? "Create page" : "Save page"}
               </Button>
               {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}

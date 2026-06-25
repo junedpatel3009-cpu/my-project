@@ -190,10 +190,10 @@ export function upsertProfessionalVerification(input: ProfessionalVerificationIn
   const timestamp = new Date().toISOString();
   const hasSubmittedDocument = Boolean(
     input.governmentIdUrl ||
-      input.licenseUrl ||
-      input.insuranceUrl ||
-      input.selfieUrl ||
-      input.certifications?.length,
+    input.licenseUrl ||
+    input.insuranceUrl ||
+    input.selfieUrl ||
+    input.certifications?.length,
   );
 
   db.prepare(
@@ -278,7 +278,9 @@ function parseStringList(value: string | null | undefined) {
 
   try {
     const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter((entry): entry is string => typeof entry === "string") : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((entry): entry is string => typeof entry === "string")
+      : [];
   } catch {
     return [];
   }

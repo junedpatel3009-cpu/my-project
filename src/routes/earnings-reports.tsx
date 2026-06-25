@@ -87,7 +87,9 @@ function EarningsReports() {
   const [transactionStatus, setTransactionStatus] = useState("ALL");
   const [payoutStatus, setPayoutStatus] = useState("ALL");
   const [pendingPayoutId, setPendingPayoutId] = useState<number | null>(null);
-  const [summaryResult, setSummaryResult] = useState<"transactions" | "payouts" | "balances" | null>(null);
+  const [summaryResult, setSummaryResult] = useState<
+    "transactions" | "payouts" | "balances" | null
+  >(null);
 
   if (!data.viewer || data.viewer.role !== "ADMIN" || !data.report) {
     return (
@@ -108,7 +110,8 @@ function EarningsReports() {
 
   const report = data.report as AdminEarningsReport;
   const visibleTransactions = useMemo(
-    () => filterTransactions(report.transactions, transactionQuery, reportPeriod, transactionStatus),
+    () =>
+      filterTransactions(report.transactions, transactionQuery, reportPeriod, transactionStatus),
     [report.transactions, transactionQuery, reportPeriod, transactionStatus],
   );
   const visiblePayouts = useMemo(
@@ -119,7 +122,8 @@ function EarningsReports() {
     () => filterProfessionals(report.professionals, professionalQuery),
     [report.professionals, professionalQuery],
   );
-  const displayName = `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
+  const displayName =
+    `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
 
   async function handlePayoutStatus(payout: AdminPayoutRecord, status: PayoutStatus) {
     setPendingPayoutId(payout.id);
@@ -137,9 +141,12 @@ function EarningsReports() {
       <div className="mb-6 flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-primary">Admin panel</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Earnings, Commission & Payout Reports</h1>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+            Earnings, Commission & Payout Reports
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Complete database view of project payments, Servio commission, net payable balances, and payout requests.
+            Complete database view of project payments, Servio commission, net payable balances, and
+            payout requests.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -154,17 +161,56 @@ function EarningsReports() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <SummaryCard icon={CircleDollarSign} label="Gross earnings" value={formatMoney(report.totals.grossEarnings)} caption={`${report.totals.transactionCount} transaction records`} active={summaryResult === "transactions"} onClick={() => setSummaryResult("transactions")} />
-        <SummaryCard icon={Percent} label="Commission" value={formatMoney(report.totals.commissionAmount)} caption={`${Math.round(report.commissionRate * 100)}% platform share`} active={summaryResult === "transactions"} onClick={() => setSummaryResult("transactions")} />
-        <SummaryCard icon={Wallet} label="Net payable" value={formatMoney(report.totals.netEarnings)} caption="After commission" active={summaryResult === "transactions"} onClick={() => setSummaryResult("transactions")} />
-        <SummaryCard icon={ArrowDownToLine} label="Requested payouts" value={formatMoney(report.totals.requestedPayouts)} caption={`${report.totals.payoutCount} payout records`} active={summaryResult === "payouts"} onClick={() => setSummaryResult("payouts")} />
-        <SummaryCard icon={BadgeDollarSign} label="Available balance" value={formatMoney(report.totals.availableBalance)} caption="Net minus non-rejected payouts" active={summaryResult === "balances"} onClick={() => setSummaryResult("balances")} />
+        <SummaryCard
+          icon={CircleDollarSign}
+          label="Gross earnings"
+          value={formatMoney(report.totals.grossEarnings)}
+          caption={`${report.totals.transactionCount} transaction records`}
+          active={summaryResult === "transactions"}
+          onClick={() => setSummaryResult("transactions")}
+        />
+        <SummaryCard
+          icon={Percent}
+          label="Commission"
+          value={formatMoney(report.totals.commissionAmount)}
+          caption={`${Math.round(report.commissionRate * 100)}% platform share`}
+          active={summaryResult === "transactions"}
+          onClick={() => setSummaryResult("transactions")}
+        />
+        <SummaryCard
+          icon={Wallet}
+          label="Net payable"
+          value={formatMoney(report.totals.netEarnings)}
+          caption="After commission"
+          active={summaryResult === "transactions"}
+          onClick={() => setSummaryResult("transactions")}
+        />
+        <SummaryCard
+          icon={ArrowDownToLine}
+          label="Requested payouts"
+          value={formatMoney(report.totals.requestedPayouts)}
+          caption={`${report.totals.payoutCount} payout records`}
+          active={summaryResult === "payouts"}
+          onClick={() => setSummaryResult("payouts")}
+        />
+        <SummaryCard
+          icon={BadgeDollarSign}
+          label="Available balance"
+          value={formatMoney(report.totals.availableBalance)}
+          caption="Net minus non-rejected payouts"
+          active={summaryResult === "balances"}
+          onClick={() => setSummaryResult("balances")}
+        />
       </div>
 
       {summaryResult ? (
         <div className="mt-4 flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
-          <span className="font-medium">Showing {summaryResult === "balances" ? "professional balances" : summaryResult}</span>
-          <Button type="button" size="sm" variant="outline" onClick={() => setSummaryResult(null)}>Show all</Button>
+          <span className="font-medium">
+            Showing {summaryResult === "balances" ? "professional balances" : summaryResult}
+          </span>
+          <Button type="button" size="sm" variant="outline" onClick={() => setSummaryResult(null)}>
+            Show all
+          </Button>
         </div>
       ) : null}
 
@@ -188,23 +234,29 @@ function EarningsReports() {
       <FinanceOverview report={report} />
 
       <div className="mt-6 grid gap-5">
-        {(!summaryResult || summaryResult === "balances") && <ProfessionalSummarySection
-          professionals={visibleProfessionals}
-          query={professionalQuery}
-          onQueryChange={setProfessionalQuery}
-        />}
-        {(!summaryResult || summaryResult === "payouts") && <PayoutSection
-          payouts={visiblePayouts}
-          query={payoutQuery}
-          pendingPayoutId={pendingPayoutId}
-          onQueryChange={setPayoutQuery}
-          onStatusChange={handlePayoutStatus}
-        />}
-        {(!summaryResult || summaryResult === "transactions") && <TransactionSection
-          transactions={visibleTransactions}
-          query={transactionQuery}
-          onQueryChange={setTransactionQuery}
-        />}
+        {(!summaryResult || summaryResult === "balances") && (
+          <ProfessionalSummarySection
+            professionals={visibleProfessionals}
+            query={professionalQuery}
+            onQueryChange={setProfessionalQuery}
+          />
+        )}
+        {(!summaryResult || summaryResult === "payouts") && (
+          <PayoutSection
+            payouts={visiblePayouts}
+            query={payoutQuery}
+            pendingPayoutId={pendingPayoutId}
+            onQueryChange={setPayoutQuery}
+            onStatusChange={handlePayoutStatus}
+          />
+        )}
+        {(!summaryResult || summaryResult === "transactions") && (
+          <TransactionSection
+            transactions={visibleTransactions}
+            query={transactionQuery}
+            onQueryChange={setTransactionQuery}
+          />
+        )}
       </div>
     </AppShell>
   );
@@ -300,7 +352,9 @@ function FinanceOverview({ report }: { report: AdminEarningsReport }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="font-semibold">Finance reconciliation</h2>
-            <p className="text-sm text-muted-foreground">Checks net earnings against paid, queued, and available funds.</p>
+            <p className="text-sm text-muted-foreground">
+              Checks net earnings against paid, queued, and available funds.
+            </p>
           </div>
           {isBalanced ? (
             <CheckCircle2 className="h-5 w-5 text-emerald-600" />
@@ -330,7 +384,15 @@ function PipelineMetric({ label, value }: { label: string; value: number }) {
   );
 }
 
-function ReconciliationRow({ label, value, strong }: { label: string; value: number; strong?: boolean }) {
+function ReconciliationRow({
+  label,
+  value,
+  strong,
+}: {
+  label: string;
+  value: number;
+  strong?: boolean;
+}) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
       <span className="text-muted-foreground">{label}</span>
@@ -406,7 +468,10 @@ function ProfessionalSummarySection({
         </thead>
         <tbody>
           {professionals.map((professional) => (
-            <tr key={professional.professionalId} className="border-b border-border/60 last:border-0">
+            <tr
+              key={professional.professionalId}
+              className="border-b border-border/60 last:border-0"
+            >
               <td className="py-3 pr-4">
                 <p className="font-medium">{professional.professionalName}</p>
                 <p className="text-xs text-muted-foreground">{professional.professionalEmail}</p>
@@ -459,20 +524,29 @@ function PayoutSection({
       <div className="divide-y divide-border rounded-lg border border-border">
         {payouts.length ? (
           payouts.map((payout) => (
-            <article key={payout.id} className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start">
+            <article
+              key={payout.id}
+              className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start"
+            >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-semibold">{payout.professionalName}</p>
-                  <Badge variant={getPayoutStatusVariant(payout.status)}>{formatEnum(payout.status)}</Badge>
+                  <Badge variant={getPayoutStatusVariant(payout.status)}>
+                    {formatEnum(payout.status)}
+                  </Badge>
                   <Badge variant="outline">{formatEnum(payout.destinationType)}</Badge>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{payout.professionalEmail}</p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Destination: <span className="font-medium text-foreground">{payout.destinationLabel}</span>
+                  Destination:{" "}
+                  <span className="font-medium text-foreground">{payout.destinationLabel}</span>
                 </p>
-                {payout.note ? <p className="mt-1 text-sm text-muted-foreground">Note: {payout.note}</p> : null}
+                {payout.note ? (
+                  <p className="mt-1 text-sm text-muted-foreground">Note: {payout.note}</p>
+                ) : null}
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Requested {formatDateTime(payout.createdAt)} / Updated {formatDateTime(payout.updatedAt)}
+                  Requested {formatDateTime(payout.createdAt)} / Updated{" "}
+                  {formatDateTime(payout.updatedAt)}
                 </p>
               </div>
               <div className="space-y-2">
@@ -492,12 +566,17 @@ function PayoutSection({
                     <SelectItem value="REJECTED">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
-                {pendingPayoutId === payout.id ? <p className="text-xs text-muted-foreground">Saving payout...</p> : null}
+                {pendingPayoutId === payout.id ? (
+                  <p className="text-xs text-muted-foreground">Saving payout...</p>
+                ) : null}
               </div>
             </article>
           ))
         ) : (
-          <EmptyState title="No payout requests found" description="Professional withdrawal requests will appear here." />
+          <EmptyState
+            title="No payout requests found"
+            description="Professional withdrawal requests will appear here."
+          />
         )}
       </div>
     </section>
@@ -555,12 +634,16 @@ function TransactionSection({
                 <Badge variant={transaction.status === "COMPLETED" ? "default" : "outline"}>
                   {formatEnum(transaction.status)}
                 </Badge>
-                <p className="mt-1 text-xs text-muted-foreground">{formatEnum(transaction.paymentType)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formatEnum(transaction.paymentType)}
+                </p>
               </td>
               <MoneyCell value={transaction.amount} />
               <MoneyCell value={transaction.commissionAmount} tone="danger" />
               <MoneyCell value={transaction.netPayoutAmount} strong />
-              <td className="py-3 text-right text-sm text-muted-foreground">{formatDate(transaction.dateTime)}</td>
+              <td className="py-3 text-right text-sm text-muted-foreground">
+                {formatDate(transaction.dateTime)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -597,7 +680,12 @@ function SectionHeader({
       </div>
       <div className="relative w-full lg:max-w-xs">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder={placeholder} className="pl-9" />
+        <Input
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          placeholder={placeholder}
+          className="pl-9"
+        />
       </div>
     </div>
   );
@@ -619,7 +707,11 @@ function SummaryCard({
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}
+    >
       <Icon className="h-5 w-5 text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value}</p>
@@ -658,7 +750,9 @@ function EmptyState({ title, description }: { title: string; description: string
 
 function MoneyCell({ value, tone, strong }: { value: number; tone?: "danger"; strong?: boolean }) {
   return (
-    <td className={`py-3 pr-4 text-right ${strong ? "font-semibold" : ""} ${tone === "danger" ? "text-destructive" : ""}`}>
+    <td
+      className={`py-3 pr-4 text-right ${strong ? "font-semibold" : ""} ${tone === "danger" ? "text-destructive" : ""}`}
+    >
       {tone === "danger" && value > 0 ? "-" : ""}
       {formatMoney(value)}
     </td>
@@ -679,19 +773,19 @@ function filterTransactions(
     if (!term) return true;
 
     return [
-        transaction.jobTitle,
-        transaction.projectCategory,
-        transaction.clientName,
-        transaction.clientEmail,
-        transaction.professionalName,
-        transaction.professionalEmail,
-        transaction.paymentType,
-        transaction.status,
-        transaction.description,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(term);
+      transaction.jobTitle,
+      transaction.projectCategory,
+      transaction.clientName,
+      transaction.clientEmail,
+      transaction.professionalName,
+      transaction.professionalEmail,
+      transaction.paymentType,
+      transaction.status,
+      transaction.description,
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(term);
   });
 }
 
@@ -709,16 +803,16 @@ function filterPayouts(
     if (!term) return true;
 
     return [
-        payout.professionalName,
-        payout.professionalEmail,
-        payout.destinationType,
-        payout.destinationLabel,
-        payout.status,
-        payout.note,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(term);
+      payout.professionalName,
+      payout.professionalEmail,
+      payout.destinationType,
+      payout.destinationLabel,
+      payout.status,
+      payout.note,
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(term);
   });
 }
 
@@ -743,7 +837,10 @@ function filterProfessionals(professionals: AdminProfessionalEarningsSummary[], 
   }
 
   return professionals.filter((professional) =>
-    [professional.professionalName, professional.professionalEmail].join(" ").toLowerCase().includes(term),
+    [professional.professionalName, professional.professionalEmail]
+      .join(" ")
+      .toLowerCase()
+      .includes(term),
   );
 }
 
@@ -771,7 +868,18 @@ function downloadCsv(report: AdminEarningsReport) {
     ["Totals", "Net", report.totals.netEarnings],
     [],
     ["Transactions"],
-    ["ID", "Project", "Client", "Professional", "Type", "Status", "Gross", "Commission", "Net", "Date"],
+    [
+      "ID",
+      "Project",
+      "Client",
+      "Professional",
+      "Type",
+      "Status",
+      "Gross",
+      "Commission",
+      "Net",
+      "Date",
+    ],
     ...report.transactions.map((transaction) => [
       transaction.id,
       transaction.jobTitle,

@@ -1,9 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Loader2, Search, Command, User, BriefcaseBusiness, AlertTriangle, ReceiptText } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  Command,
+  User,
+  BriefcaseBusiness,
+  AlertTriangle,
+  ReceiptText,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { adminGlobalSearch, type GlobalSearchResultItem, type GlobalSearchResult } from "@/lib/admin-global-search.server";
+import {
+  adminGlobalSearch,
+  type GlobalSearchResultItem,
+  type GlobalSearchResult,
+} from "@/lib/admin-global-search.server";
 
 const performSearch = createServerFn({ method: "GET" })
   .inputValidator((input: { query: string }) => input)
@@ -25,13 +37,7 @@ const groupColors: Record<string, string> = {
   Payments: "bg-violet-500/10 text-violet-600",
 };
 
-export function GlobalSearchOverlay({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function GlobalSearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -161,8 +167,7 @@ export function GlobalSearchOverlay({
             className="border-none bg-transparent px-0 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
           />
           <kbd className="hidden shrink-0 items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground sm:inline-flex">
-            <Command className="h-3 w-3" />
-            K
+            <Command className="h-3 w-3" />K
           </kbd>
           <button
             onClick={onClose}
@@ -180,14 +185,11 @@ export function GlobalSearchOverlay({
             </div>
           )}
 
-          {error && (
-            <div className="py-8 text-center text-sm text-destructive">{error}</div>
-          )}
+          {error && <div className="py-8 text-center text-sm text-destructive">{error}</div>}
 
           {!loading && !error && query.trim() && !allItems.length && (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              No results found for{" "}
-              <span className="font-medium text-foreground">"{query}"</span>
+              No results found for <span className="font-medium text-foreground">"{query}"</span>
             </div>
           )}
 
@@ -295,7 +297,9 @@ export function GlobalSearchOverlay({
             </span>
             <div className="flex items-center gap-3">
               <span>
-                <kbd className="mr-1 rounded border border-border bg-muted/50 px-1.5 py-0.5">↑↓</kbd>
+                <kbd className="mr-1 rounded border border-border bg-muted/50 px-1.5 py-0.5">
+                  ↑↓
+                </kbd>
                 Navigate
               </span>
               <span>
@@ -303,7 +307,9 @@ export function GlobalSearchOverlay({
                 Open
               </span>
               <span>
-                <kbd className="mr-1 rounded border border-border bg-muted/50 px-1.5 py-0.5">Esc</kbd>
+                <kbd className="mr-1 rounded border border-border bg-muted/50 px-1.5 py-0.5">
+                  Esc
+                </kbd>
                 Close
               </span>
             </div>

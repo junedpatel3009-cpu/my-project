@@ -20,7 +20,9 @@ export const Route = createFileRoute("/privacy-policy")({
 });
 
 function PrivacyPolicy() {
-  const { cmsPage } = Route.useLoaderData() as { cmsPage: { title: string; content: string } | null };
+  const { cmsPage } = Route.useLoaderData() as {
+    cmsPage: { title: string; content: string } | null;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -41,12 +43,26 @@ function PrivacyPolicy() {
           />
         ) : (
           <div className="text-sm leading-7 text-muted-foreground">
-            <h2 className="font-display text-2xl font-semibold text-foreground">Information We Collect</h2>
-            <p className="mt-3">We collect account, contact, usage, and transaction information needed to operate Servio.</p>
-            <h2 className="font-display mt-8 text-2xl font-semibold text-foreground">How We Use It</h2>
-            <p className="mt-3">We use information to provide services, improve safety, process payments, and support users.</p>
-            <h2 className="font-display mt-8 text-2xl font-semibold text-foreground">Your Choices</h2>
-            <p className="mt-3">You can update your account information or contact support for privacy requests.</p>
+            <h2 className="font-display text-2xl font-semibold text-foreground">
+              Information We Collect
+            </h2>
+            <p className="mt-3">
+              We collect account, contact, usage, and transaction information needed to operate
+              Servio.
+            </p>
+            <h2 className="font-display mt-8 text-2xl font-semibold text-foreground">
+              How We Use It
+            </h2>
+            <p className="mt-3">
+              We use information to provide services, improve safety, process payments, and support
+              users.
+            </p>
+            <h2 className="font-display mt-8 text-2xl font-semibold text-foreground">
+              Your Choices
+            </h2>
+            <p className="mt-3">
+              You can update your account information or contact support for privacy requests.
+            </p>
           </div>
         )}
       </section>

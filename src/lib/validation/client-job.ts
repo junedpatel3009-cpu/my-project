@@ -53,7 +53,10 @@ export const clientJobSchema = z
       });
     }
 
-    if (data.workMode !== "REMOTE" && (!data.locationAddress?.trim() || data.locationLat == null || data.locationLng == null)) {
+    if (
+      data.workMode !== "REMOTE" &&
+      (!data.locationAddress?.trim() || data.locationLat == null || data.locationLng == null)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["locationAddress"],

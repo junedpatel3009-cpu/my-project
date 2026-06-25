@@ -37,7 +37,10 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Servio — Find Trusted Professionals Near You" },
-      { name: "description", content: "Post jobs, hire experts, track work, and manage projects in one platform." },
+      {
+        name: "description",
+        content: "Post jobs, hire experts, track work, and manage projects in one platform.",
+      },
     ],
   }),
   beforeLoad: async () => {

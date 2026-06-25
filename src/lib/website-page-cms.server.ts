@@ -1,5 +1,10 @@
-import path from "node:path";
+﻿import path from "node:path";
 import Database from "better-sqlite3";
+import { JSDOM } from "jsdom";
+import DOMPurify from "dompurify";
+
+const window = new JSDOM("").window;
+const purify = DOMPurify(window);
 
 export type WebsitePageStatus = "DRAFT" | "PUBLISHED";
 export type WebsitePageRecord = {
@@ -57,21 +62,27 @@ function ensureTable(db: InstanceType<typeof Database>) {
 }
 
 export function listWebsitePages(): WebsitePageRecord[] {
-  return getDatabase().prepare(
-    `SELECT pageKey, path, title, content, status, updatedAt FROM "WebsitePage" ORDER BY rowid`,
-  ).all() as WebsitePageRecord[];
+  return getDatabase()
+    .prepare(
+      `SELECT pageKey, path, title, content, status, updatedAt FROM "WebsitePage" ORDER BY rowid`,
+    )
+    .all() as WebsitePageRecord[];
 }
 
 export function listPublishedWebsitePages(): WebsitePageRecord[] {
-  return getDatabase().prepare(
-    `SELECT pageKey, path, title, content, status, updatedAt FROM "WebsitePage" WHERE status = 'PUBLISHED'`,
-  ).all() as WebsitePageRecord[];
+  return getDatabase()
+    .prepare(
+      `SELECT pageKey, path, title, content, status, updatedAt FROM "WebsitePage" WHERE status = 'PUBLISHED'`,
+    )
+    .all() as WebsitePageRecord[];
 }
 
 export function getPublishedWebsitePage(pageKey: string): WebsitePageRecord | undefined {
-  return getDatabase().prepare(
-    `SELECT pageKey, path, title, content, status, updatedAt FROM "WebsitePage" WHERE pageKey = ? AND status = 'PUBLISHED'`,
-  ).get(pageKey) as WebsitePageRecord | undefined;
+  return getDatabase()
+    .prepare(
+      `SELECT pageKey, path, title, content, status, updatedAt FROM "WebsitePage" WHERE pageKey = ? AND status = 'PUBLISHED'`,
+    )
+    .get(pageKey) as WebsitePageRecord | undefined;
 }
 
 export function saveWebsitePage(
@@ -82,15 +93,19 @@ export function saveWebsitePage(
     throw new Error("This page is not editable.");
   }
   const db = getDatabase();
-  db.prepare(`UPDATE "WebsitePage" SET content = ?, status = ?, updatedAt = ? WHERE pageKey = ?`)
-    .run(input.content, input.status, new Date().toISOString(), pageKey);
-  const saved = db.prepare(
-    `SELECT pageKey, path, title, content, status, updatedAt FROM "WebsitePage" WHERE pageKey = ?`,
-  ).get(pageKey) as WebsitePageRecord | undefined;
+  const sanitizedContent = purify.sanitize(input.content);
+  db.prepare(
+    `UPDATE "WebsitePage" SET content = ?, status = ?, updatedAt = ? WHERE pageKey = ?`,
+  ).run(sanitizedContent, input.status, new Date().toISOString(), pageKey);
+  const saved = db
+    .prepare(
+      `SELECT pageKey, path, title, content, status, updatedAt FROM "WebsitePage" WHERE pageKey = ?`,
+    )
+    .get(pageKey) as WebsitePageRecord | undefined;
   if (!saved) throw new Error("Unable to save website page.");
   return saved;
 }
 
 function createDefaultContent(title: string) {
-  return `<section class="cms-hero center"><div class="cms-wrap"><p class="cms-kicker">Servio</p><h1>${title}</h1><p>Edit this page visually or open Source Editing to paste HTML.</p></div></section><section class="cms-section"><div class="cms-wrap"><h2>Main section</h2><div class="cms-grid two"><div class="cms-card"><h3>Content card one</h3><p>Add your page content here.</p></div><div class="cms-card"><h3>Content card two</h3><p>Add supporting information here.</p></div></div><div class="cms-cta"><div><h2>Ready to get started?</h2><p>Join Servio today.</p></div><a class="cms-btn orange" href="/signup">Create account</a></div></div></section>`;
+  return `<section class="cms-hero center"><div class="cms-wrap"><p class="cms-kicker">Servio</p><h1>\${title}</h1><p>Edit this page visually or open Source Editing to paste HTML.</p></div></section><section class="cms-section"><div class="cms-wrap"><h2>Main section</h2><div class="cms-grid two"><div class="cms-card"><h3>Content card one</h3><p>Add your page content here.</p></div><div class="cms-card"><h3>Content card two</h3><p>Add supporting information here.</p></div></div><div class="cms-cta"><div><h2>Ready to get started?</h2><p>Join Servio today.</p></div><a class="cms-btn orange" href="/signup">Create account</a></div></div></section>`;
 }

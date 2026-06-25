@@ -11,12 +11,16 @@ Redux state management for the Profile Setup page replacing local React state wi
 ## 📋 Changes Made
 
 ### 1. Store Configuration
+
 **File:** `src/store/index.ts`
+
 - Added `profileReducer` from `profileSlice`
 - Store now manages both `auth` and `profile` state
 
 ### 2. Profile Slice Created
+
 **File:** `src/store/slices/profileSlice.ts`
+
 - Manages 6 state properties:
   - `profilePhotoPreview` - Image preview
   - `successMessage` - Success notifications
@@ -36,7 +40,9 @@ Redux state management for the Profile Setup page replacing local React state wi
   - `resetProfileState()`
 
 ### 3. Component Integration
+
 **File:** `src/client/profile-setup.tsx`
+
 - Removed: `useState()` hooks (7 state variables)
 - Added: `useAppDispatch()` and `useAppSelector()` hooks
 - All state updates now use Redux `dispatch()`
@@ -46,6 +52,7 @@ Redux state management for the Profile Setup page replacing local React state wi
 ## 🔄 State Management Comparison
 
 ### Before (React Hooks)
+
 ```typescript
 const [profilePhotoPreview, setProfilePhotoPreview] = useState("");
 const [successMessage, setSuccessMessage] = useState(null);
@@ -61,15 +68,16 @@ setSuccessMessage("Success!");
 ```
 
 ### After (Redux)
+
 ```typescript
 const dispatch = useAppDispatch();
-const { 
-  profilePhotoPreview, 
-  successMessage, 
-  submitError, 
-  newLocationLabel, 
-  newLocationAddress, 
-  isLoading 
+const {
+  profilePhotoPreview,
+  successMessage,
+  submitError,
+  newLocationLabel,
+  newLocationAddress,
+  isLoading,
 } = useAppSelector((state) => state.profile);
 
 // Usage:
@@ -81,15 +89,15 @@ dispatch(setSuccessMessage("Success!"));
 
 ## 🎯 Key Features
 
-| Feature | Details |
-|---------|---------|
-| **Centralized State** | All profile UI state in Redux store |
-| **Type Safety** | Full TypeScript support for state and actions |
-| **Async Handling** | `isLoading` state for loading indicators |
-| **Error Management** | Centralized error state with `submitError` |
-| **Photo Preview** | Base64 image preview state |
-| **Location Management** | Input states for adding saved locations |
-| **Success Messages** | Feedback state for user actions |
+| Feature                 | Details                                       |
+| ----------------------- | --------------------------------------------- |
+| **Centralized State**   | All profile UI state in Redux store           |
+| **Type Safety**         | Full TypeScript support for state and actions |
+| **Async Handling**      | `isLoading` state for loading indicators      |
+| **Error Management**    | Centralized error state with `submitError`    |
+| **Photo Preview**       | Base64 image preview state                    |
+| **Location Management** | Input states for adding saved locations       |
+| **Success Messages**    | Feedback state for user actions               |
 
 ---
 
@@ -113,6 +121,7 @@ dispatch(setSuccessMessage("Success!"));
 ## 💬 Usage Examples
 
 ### Example 1: Update Photo
+
 ```typescript
 const handlePhotoUpload = (file: File) => {
   const reader = new FileReader();
@@ -124,6 +133,7 @@ const handlePhotoUpload = (file: File) => {
 ```
 
 ### Example 2: Add Location
+
 ```typescript
 const addLocation = () => {
   dispatch(setSubmitError(null));
@@ -134,6 +144,7 @@ const addLocation = () => {
 ```
 
 ### Example 3: Handle Form Submission
+
 ```typescript
 const onSubmit = async (values) => {
   dispatch(setSubmitError(null));
@@ -142,7 +153,7 @@ const onSubmit = async (values) => {
 
   try {
     const result = await saveClientProfile({ data: values });
-    
+
     if (!result.ok) {
       dispatch(setSubmitError(result.formError));
     } else {
@@ -155,6 +166,7 @@ const onSubmit = async (values) => {
 ```
 
 ### Example 4: Conditional Rendering
+
 ```typescript
 // Loading state
 <Button disabled={isLoading}>
@@ -204,14 +216,14 @@ const onSubmit = async (values) => {
 
 ## 📊 Action Dispatch Map
 
-| User Action | Redux Action Dispatched | Result |
-|-------------|------------------------|--------|
-| Upload photo | `setProfilePhotoPreview(base64)` | Preview updates |
-| Click Save | `setIsLoading(true)` | Button disabled, "Saving..." text |
-| Save succeeds | `setSuccessMessage("...success")` | Green message shown |
-| Save fails | `setSubmitError("...error")` | Red error message shown |
-| Add location | `setNewLocationLabel("")` | Input fields cleared |
-| Clear messages | `clearMessages()` | Messages hidden |
+| User Action    | Redux Action Dispatched           | Result                            |
+| -------------- | --------------------------------- | --------------------------------- |
+| Upload photo   | `setProfilePhotoPreview(base64)`  | Preview updates                   |
+| Click Save     | `setIsLoading(true)`              | Button disabled, "Saving..." text |
+| Save succeeds  | `setSuccessMessage("...success")` | Green message shown               |
+| Save fails     | `setSubmitError("...error")`      | Red error message shown           |
+| Add location   | `setNewLocationLabel("")`         | Input fields cleared              |
+| Clear messages | `clearMessages()`                 | Messages hidden                   |
 
 ---
 
@@ -235,12 +247,12 @@ UI Updates (button disables, loading spinner shows, etc.)
 
 ## 📦 Files Modified/Created
 
-| File | Change | Purpose |
-|------|--------|---------|
-| `src/store/index.ts` | Added `profileReducer` | Register profile slice |
-| `src/store/slices/profileSlice.ts` | Created | Define profile state & actions |
-| `src/store/hooks.ts` | Unchanged | Type-safe Redux hooks |
-| `src/client/profile-setup.tsx` | Updated | Use Redux instead of useState |
+| File                               | Change                 | Purpose                        |
+| ---------------------------------- | ---------------------- | ------------------------------ |
+| `src/store/index.ts`               | Added `profileReducer` | Register profile slice         |
+| `src/store/slices/profileSlice.ts` | Created                | Define profile state & actions |
+| `src/store/hooks.ts`               | Unchanged              | Type-safe Redux hooks          |
+| `src/client/profile-setup.tsx`     | Updated                | Use Redux instead of useState  |
 
 ---
 

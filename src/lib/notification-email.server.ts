@@ -73,7 +73,9 @@ function getActionUrl(pathValue?: string) {
     return pathValue;
   }
 
-  return APP_ORIGIN ? `${APP_ORIGIN}${pathValue.startsWith("/") ? pathValue : `/${pathValue}`}` : pathValue;
+  return APP_ORIGIN
+    ? `${APP_ORIGIN}${pathValue.startsWith("/") ? pathValue : `/${pathValue}`}`
+    : pathValue;
 }
 
 function escapeHtml(value: string) {

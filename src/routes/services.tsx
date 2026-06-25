@@ -16,7 +16,8 @@ export const Route = createFileRoute("/services")({
       { title: "Services - Browse all categories | Servio" },
       {
         name: "description",
-        content: "From plumbing to web design, explore every category of service offered by vetted pros on Servio.",
+        content:
+          "From plumbing to web design, explore every category of service offered by vetted pros on Servio.",
       },
     ],
   }),

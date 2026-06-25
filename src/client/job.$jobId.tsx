@@ -158,11 +158,13 @@ function JobDetails() {
   const displayName = viewer ? `${viewer.firstName} ${viewer.lastName}`.trim() : "Guest";
   const skillTags = getSkillTags(job.category, job.title, job.description);
   const budgetLabel = formatBudget(job.budgetMin, job.budgetMax, job.timingType);
-  const budgetType = job.budgetMin || job.budgetMax ? formatTimingType(job.timingType) : "Budget not set";
+  const budgetType =
+    job.budgetMin || job.budgetMax ? formatTimingType(job.timingType) : "Budget not set";
   const clientLocation = formatJobLocation(job);
-  const jobMapQuery = job.locationLat != null && job.locationLng != null
-    ? `${job.locationLat},${job.locationLng}`
-    : job.locationAddress;
+  const jobMapQuery =
+    job.locationLat != null && job.locationLng != null
+      ? `${job.locationLat},${job.locationLng}`
+      : job.locationAddress;
   const [favorite, setFavorite] = useState(isFavorite);
   const [favoriteStatus, setFavoriteStatus] = useState<string | null>(null);
   const [isProposalOpen, setIsProposalOpen] = useState(false);
@@ -232,7 +234,11 @@ function JobDetails() {
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {[
                 { label: budgetType, value: budgetLabel, icon: Tag },
-                { label: "Experience level", value: getExperienceLevel(job.urgency), icon: Settings },
+                {
+                  label: "Experience level",
+                  value: getExperienceLevel(job.urgency),
+                  icon: Settings,
+                },
                 { label: "Deadline", value: formatDate(job.deadline), icon: CalendarDays },
               ].map((item) => (
                 <div key={item.label} className="rounded-lg border border-border p-4">
@@ -260,7 +266,10 @@ function JobDetails() {
               <p className="mt-3 text-sm font-medium">Mandatory skills</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {skillTags.map((skill) => (
-                  <span key={skill} className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium text-muted-foreground">
+                  <span
+                    key={skill}
+                    className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium text-muted-foreground"
+                  >
                     {skill}
                   </span>
                 ))}
@@ -272,10 +281,15 @@ function JobDetails() {
               {job.attachments.length ? (
                 <ul className="mt-3 space-y-2">
                   {job.attachments.map((attachment) => (
-                    <li key={attachment.id} className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm">
+                    <li
+                      key={attachment.id}
+                      className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm"
+                    >
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       <span className="min-w-0 flex-1 truncate">{attachment.fileName}</span>
-                      <span className="text-xs text-muted-foreground">{formatFileSize(attachment.fileSize)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatFileSize(attachment.fileSize)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -288,7 +302,8 @@ function JobDetails() {
               <div>
                 <h2 className="text-lg font-semibold">Preferred qualifications</h2>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  {getExperienceLevel(job.urgency)} professional with clear communication and examples of similar work.
+                  {getExperienceLevel(job.urgency)} professional with clear communication and
+                  examples of similar work.
                 </p>
               </div>
               <div>
@@ -304,7 +319,12 @@ function JobDetails() {
         <div className="space-y-6">
           <Dialog open={isProposalOpen} onOpenChange={setIsProposalOpen}>
             <div className="rounded-xl border border-border bg-card p-6 shadow-soft">
-              <a href={`/job/${job.id}`} target="_blank" rel="noreferrer" className="mb-5 flex items-center gap-2 text-sm font-semibold text-primary">
+              <a
+                href={`/job/${job.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mb-5 flex items-center gap-2 text-sm font-semibold text-primary"
+              >
                 <ExternalLink className="h-4 w-4" />
                 Open job in a new window
               </a>
@@ -312,7 +332,8 @@ function JobDetails() {
                 <div className="flex gap-3 text-sm">
                   <MessageSquare className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
                   <p>
-                    Send a message to the client to ask questions, confirm the work, and discuss next steps.
+                    Send a message to the client to ask questions, confirm the work, and discuss
+                    next steps.
                   </p>
                 </div>
               </div>
@@ -332,7 +353,9 @@ function JobDetails() {
                 <Heart className={`h-4 w-4 ${favorite ? "fill-current text-primary" : ""}`} />
                 {favorite ? "Saved job" : "Save job"}
               </Button>
-              {favoriteStatus ? <p className="mt-2 text-center text-xs text-muted-foreground">{favoriteStatus}</p> : null}
+              {favoriteStatus ? (
+                <p className="mt-2 text-center text-xs text-muted-foreground">{favoriteStatus}</p>
+              ) : null}
             </div>
             <ProposalDialog
               jobId={job.id}
@@ -562,7 +585,9 @@ function ProposalDialog({
         ) : null}
         <label className="block cursor-pointer rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground hover:bg-muted/40">
           <Paperclip className="mr-1 inline h-3 w-3" />
-          {attachments.length ? `${attachments.length} work sample${attachments.length === 1 ? "" : "s"} selected` : "Attach work samples (optional)"}
+          {attachments.length
+            ? `${attachments.length} work sample${attachments.length === 1 ? "" : "s"} selected`
+            : "Attach work samples (optional)"}
           <input
             type="file"
             multiple
@@ -645,7 +670,11 @@ function formatTimingType(timingType: string | null | undefined) {
   return "Fixed-price";
 }
 
-function formatJobLocation(job: { locationAddress?: string | null; locationLabel?: string | null; workMode?: string | null }) {
+function formatJobLocation(job: {
+  locationAddress?: string | null;
+  locationLabel?: string | null;
+  workMode?: string | null;
+}) {
   if (job.workMode === "REMOTE") {
     return "Remote";
   }

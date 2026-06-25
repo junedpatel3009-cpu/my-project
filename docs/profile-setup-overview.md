@@ -3,11 +3,13 @@
 A short, point-based summary of how client profile setup works in this app.
 
 ## What it does
+
 - Loads the current client profile for onboarding.
 - Lets clients enter company details, saved locations, and hiring needs.
 - Saves the finished profile back to the server.
 
 ## Key files
+
 - `src/client/profile-setup.tsx` – profile page and server functions.
 - `src/store/slices/profileSlice.ts` – Redux state for page UI.
 - `src/store/index.ts` – Redux store setup.
@@ -15,6 +17,7 @@ A short, point-based summary of how client profile setup works in this app.
 - `src/lib/user-db.server.ts` – database persistence.
 
 ## API flow
+
 - `getProfileSetupData` (GET)
   - checks auth
   - loads the saved client profile
@@ -26,6 +29,7 @@ A short, point-based summary of how client profile setup works in this app.
   - updates client profile in the database
 
 ## Redux state in the page
+
 - Stores temporary UI values, not form content:
   - `profilePhotoPreview`
   - `newLocationLabel`
@@ -38,16 +42,19 @@ A short, point-based summary of how client profile setup works in this app.
 - Uses `useAppDispatch()` to update state.
 
 ## Why Redux is used
+
 - Keeps UI state separate from form state.
 - Makes loading and error handling visible.
 - Supports predictable state changes.
 
 ## Database details
+
 - Uses SQLite-backed persistence.
 - `ClientProfile`, `ClientSavedLocation`, and `ClientHiringNeed` store saved data.
 - `user-db.server.ts` ensures required tables and columns exist.
 
 ## Important behavior
+
 - The UI and server share the same validation rules.
 - Errors are handled in Redux and shown on the page.
 - Successful saves update the profile and let the client continue.

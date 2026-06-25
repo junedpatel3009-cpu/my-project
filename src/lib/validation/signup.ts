@@ -2,11 +2,25 @@ import { z } from "zod";
 
 export const signupSchema = z.object({
   accountType: z.enum(["client", "professional"]),
-  firstName: z.string().trim().min(2, "First name must be at least 2 characters.").max(40, "First name is too long."),
-  lastName: z.string().trim().min(2, "Last name must be at least 2 characters.").max(40, "Last name is too long."),
+  firstName: z
+    .string()
+    .trim()
+    .min(2, "First name must be at least 2 characters.")
+    .max(40, "First name is too long."),
+  lastName: z
+    .string()
+    .trim()
+    .min(2, "Last name must be at least 2 characters.")
+    .max(40, "Last name is too long."),
   email: z.string().trim().email("Enter a valid email address."),
-  otp: z.string().trim().regex(/^\d{4,6}$/, "Enter the 4-6 digit OTP sent to your email."),
-  countryCode: z.string().trim().regex(/^\+\d{1,4}$/, "Select a valid country code."),
+  otp: z
+    .string()
+    .trim()
+    .regex(/^\d{4,6}$/, "Enter the 4-6 digit OTP sent to your email."),
+  countryCode: z
+    .string()
+    .trim()
+    .regex(/^\+\d{1,4}$/, "Select a valid country code."),
   phone: z
     .string()
     .trim()

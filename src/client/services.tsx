@@ -14,8 +14,18 @@ import {
 } from "@/components/ui/select";
 import { Search, MapPin, Filter, X } from "lucide-react";
 import {
-  Wrench, Code, Paintbrush, Camera, Megaphone, GraduationCap,
-  Hammer, Sparkles, Truck, Music, Briefcase, HeartPulse,
+  Wrench,
+  Code,
+  Paintbrush,
+  Camera,
+  Megaphone,
+  GraduationCap,
+  Hammer,
+  Sparkles,
+  Truck,
+  Music,
+  Briefcase,
+  HeartPulse,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
@@ -33,14 +43,23 @@ const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   HeartPulse,
 };
 
-export function buildDiscoverSearch(category?: string, extra?: Record<string, string>): Record<string, string> {
+export function buildDiscoverSearch(
+  category?: string,
+  extra?: Record<string, string>,
+): Record<string, string> {
   const params: Record<string, string> = {};
   if (category) params.category = category;
   if (extra) Object.assign(params, extra);
   return params;
 }
 
-export function ServicesPageContent({ categories, totalPros }: { categories: any[]; totalPros: number }) {
+export function ServicesPageContent({
+  categories,
+  totalPros,
+}: {
+  categories: any[];
+  totalPros: number;
+}) {
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,8 +70,13 @@ export function ServicesPageContent({ categories, totalPros }: { categories: any
   const [availabilityFilters, setAvailabilityFilters] = useState<string[]>([]);
   const [otherFilters, setOtherFilters] = useState<Set<string>>(new Set());
 
-  const hasActiveFilters = searchQuery || locationQuery || selectedCategory ||
-    ratingFilters.length || distanceFilters.length || availabilityFilters.length ||
+  const hasActiveFilters =
+    searchQuery ||
+    locationQuery ||
+    selectedCategory ||
+    ratingFilters.length ||
+    distanceFilters.length ||
+    availabilityFilters.length ||
     otherFilters.size > 0;
 
   const filteredCategories = useMemo(() => {
@@ -104,7 +128,8 @@ export function ServicesPageContent({ categories, totalPros }: { categories: any
     if (otherFilters.has("Verified only")) extra.verifiedOnly = "true";
     if (otherFilters.has("Remote")) extra.workMode = "REMOTE";
     if (otherFilters.has("On-site")) extra.workMode = "ON_SITE";
-    if (ratingFilters.length > 0) extra.rating = Math.min(...ratingFilters.map(parseRating)).toString();
+    if (ratingFilters.length > 0)
+      extra.rating = Math.min(...ratingFilters.map(parseRating)).toString();
 
     navigate({
       to: "/discover",
@@ -123,7 +148,9 @@ export function ServicesPageContent({ categories, totalPros }: { categories: any
       <SiteHeader />
       <section className="border-b border-border bg-surface">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Browse all services</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+            Browse all services
+          </h1>
           <p className="mt-2 text-muted-foreground">Find exactly the type of pro you need.</p>
           <div className="mt-6 grid gap-2 rounded-2xl border border-border bg-card p-2 shadow-soft sm:grid-cols-[1fr_1fr_auto_auto]">
             <div className="flex items-center gap-2 rounded-xl px-3">
@@ -208,20 +235,44 @@ export function ServicesPageContent({ categories, totalPros }: { categories: any
                 </button>
               </div>
             ) : null}
-            <FilterGroup title="Rating" options={["4.5 & up", "4.0 & up", "3.5 & up"]} selected={ratingFilters} onToggle={toggleRating} />
-            <FilterGroup title="Distance" options={["Within 2 km", "Within 5 km", "Within 10 km", "Any"]} selected={distanceFilters} onToggle={toggleDistance} />
-            <FilterGroup title="Availability" options={["Now", "This week", "Next week"]} selected={availabilityFilters} onToggle={toggleAvailability} />
-            <FilterGroup title="Other" options={["Verified only", "Remote", "On-site"]} selected={Array.from(otherFilters)} onToggle={(value) => toggleOther(value)} />
+            <FilterGroup
+              title="Rating"
+              options={["4.5 & up", "4.0 & up", "3.5 & up"]}
+              selected={ratingFilters}
+              onToggle={toggleRating}
+            />
+            <FilterGroup
+              title="Distance"
+              options={["Within 2 km", "Within 5 km", "Within 10 km", "Any"]}
+              selected={distanceFilters}
+              onToggle={toggleDistance}
+            />
+            <FilterGroup
+              title="Availability"
+              options={["Now", "This week", "Next week"]}
+              selected={availabilityFilters}
+              onToggle={toggleAvailability}
+            />
+            <FilterGroup
+              title="Other"
+              options={["Verified only", "Remote", "On-site"]}
+              selected={Array.from(otherFilters)}
+              onToggle={(value) => toggleOther(value)}
+            />
             <Button className="mt-4 w-full bg-primary" onClick={handleSearch}>
               <Search className="h-4 w-4" />
-              {appliedFilterCount > 0 ? `Apply ${appliedFilterCount} filter${appliedFilterCount > 1 ? "s" : ""}` : "Apply filters"}
+              {appliedFilterCount > 0
+                ? `Apply ${appliedFilterCount} filter${appliedFilterCount > 1 ? "s" : ""}`
+                : "Apply filters"}
             </Button>
           </div>
         </aside>
 
         <div>
           <p className="text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{filteredCategories.length} categor{filteredCategories.length === 1 ? "y" : "ies"}</span>
+            <span className="font-semibold text-foreground">
+              {filteredCategories.length} categor{filteredCategories.length === 1 ? "y" : "ies"}
+            </span>
             {totalPros > 0 ? <span> · {totalPros.toLocaleString()} pros</span> : null}
           </p>
           {filteredCategories.length ? (
@@ -248,7 +299,9 @@ export function ServicesPageContent({ categories, totalPros }: { categories: any
                           {c.jobCount} open job{c.jobCount === 1 ? "" : "s"}
                         </p>
                       ) : null}
-                      <p className="mt-2 text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100">Browse pros →</p>
+                      <p className="mt-2 text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                        Browse pros →
+                      </p>
                     </div>
                   </Link>
                 );
@@ -258,7 +311,9 @@ export function ServicesPageContent({ categories, totalPros }: { categories: any
             <div className="mt-10 text-center">
               <Search className="mx-auto h-8 w-8 text-muted-foreground" />
               <h3 className="mt-3 font-semibold">No categories match</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Try a different search term or clear your filters.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Try a different search term or clear your filters.
+              </p>
               <Button variant="outline" className="mt-4" onClick={clearAllFilters}>
                 <X className="h-4 w-4" />
                 Clear filters
@@ -292,7 +347,9 @@ function FilterGroup({
 }) {
   return (
     <div className="mt-5 border-t border-border pt-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
       <div className="mt-3 space-y-2">
         {options.map((o) => (
           <label key={o} className="flex cursor-pointer items-center gap-2 text-sm">

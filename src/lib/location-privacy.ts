@@ -21,10 +21,16 @@ export function formatApproximateLocation(
     return parts.join(", ");
   }
 
-  return rawLocation.replace(/^\s*(?:house|flat|apt|apartment|unit|door|plot|no\.?)?\s*#?\d+[A-Za-z/-]*\s+/i, "");
+  return rawLocation.replace(
+    /^\s*(?:house|flat|apt|apartment|unit|door|plot|no\.?)?\s*#?\d+[A-Za-z/-]*\s+/i,
+    "",
+  );
 }
 
-export function formatApproximateCoordinates(lat: number | null | undefined, lng: number | null | undefined) {
+export function formatApproximateCoordinates(
+  lat: number | null | undefined,
+  lng: number | null | undefined,
+) {
   if (lat == null || lng == null) {
     return "";
   }

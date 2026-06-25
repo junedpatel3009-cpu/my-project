@@ -24,7 +24,9 @@ function LegalPage() {
         <SiteHeader />
         <main className="mx-auto max-w-3xl px-4 py-32 text-center sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold">Page not found</h1>
-          <p className="mt-3 text-muted-foreground">This page is not published or does not exist.</p>
+          <p className="mt-3 text-muted-foreground">
+            This page is not published or does not exist.
+          </p>
         </main>
         <SiteFooter />
       </div>

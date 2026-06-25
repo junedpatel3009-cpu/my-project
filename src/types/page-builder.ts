@@ -370,12 +370,47 @@ export const SUPPORTED_PAGES: Array<{
   path: string;
   description: string;
 }> = [
-  { id: "client-home", label: "Home Page (Client)", path: "/", description: "Main client-facing landing page" },
-  { id: "professional-home", label: "Home Page (Professional)", path: "/for-professionals", description: "Professional landing page" },
-  { id: "for-clients", label: "For Clients Page", path: "/for-clients", description: "Client experience page" },
-  { id: "for-professionals", label: "For Professionals Page", path: "/for-professionals", description: "Professional experience page" },
-  { id: "how-it-works", label: "How It Works", path: "/how-it-works", description: "How the platform works" },
-  { id: "services", label: "Services / Categories", path: "/services", description: "Browse service categories" },
-  { id: "pricing", label: "Pricing / Fees / Commission", path: "/pricing", description: "Pricing plans and fees" },
+  {
+    id: "client-home",
+    label: "Home Page (Client)",
+    path: "/",
+    description: "Main client-facing landing page",
+  },
+  {
+    id: "professional-home",
+    label: "Home Page (Professional)",
+    path: "/for-professionals",
+    description: "Professional landing page",
+  },
+  {
+    id: "for-clients",
+    label: "For Clients Page",
+    path: "/for-clients",
+    description: "Client experience page",
+  },
+  {
+    id: "for-professionals",
+    label: "For Professionals Page",
+    path: "/for-professionals",
+    description: "Professional experience page",
+  },
+  {
+    id: "how-it-works",
+    label: "How It Works",
+    path: "/how-it-works",
+    description: "How the platform works",
+  },
+  {
+    id: "services",
+    label: "Services / Categories",
+    path: "/services",
+    description: "Browse service categories",
+  },
+  {
+    id: "pricing",
+    label: "Pricing / Fees / Commission",
+    path: "/pricing",
+    description: "Pricing plans and fees",
+  },
   { id: "about-us", label: "About Us", path: "/about-us", description: "About the company" },
 ];

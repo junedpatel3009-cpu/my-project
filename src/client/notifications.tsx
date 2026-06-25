@@ -112,7 +112,9 @@ function Notifications() {
   const router = useRouter();
   const [tab, setTab] = useState<(typeof tabs)[number]>("All");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [browserPermission, setBrowserPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [browserPermission, setBrowserPermission] = useState<
+    NotificationPermission | "unsupported"
+  >("unsupported");
   const notifications = data.notifications;
   const filtered = notifications.filter((notification) => matchesTab(notification.type, tab));
   const unreadCount = notifications.filter((notification) => !notification.readAt).length;
@@ -174,11 +176,7 @@ function Notifications() {
   };
 
   return (
-    <AppShell
-      userName={userName}
-      userRole={userRole}
-      userAvatarUrl={data.viewer.avatarUrl}
-    >
+    <AppShell userName={userName} userRole={userRole} userAvatarUrl={data.viewer.avatarUrl}>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-3">
@@ -214,7 +212,9 @@ function Notifications() {
             variant={browserAlertsOn ? "default" : "outline"}
             size="sm"
             className="gap-2"
-            disabled={isUpdating || browserPermission === "denied" || browserPermission === "unsupported"}
+            disabled={
+              isUpdating || browserPermission === "denied" || browserPermission === "unsupported"
+            }
             onClick={() => void toggleBrowserAlerts()}
           >
             <BellRing className="h-4 w-4" />
@@ -288,9 +288,7 @@ function Notifications() {
                       <p className="font-medium">{notification.title}</p>
                       {unread ? <span className="h-2 w-2 rounded-full bg-primary" /> : null}
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {notification.description}
-                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{notification.description}</p>
                     <p className="mt-2 text-xs text-muted-foreground">
                       {formatNotificationTime(notification.createdAt)}
                     </p>

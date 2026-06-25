@@ -1,7 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { Briefcase, CalendarDays, CheckCircle2, Clock, Handshake, MapPin, MessageSquare, Send, Star } from "lucide-react";
+import {
+  Briefcase,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  Handshake,
+  MapPin,
+  MessageSquare,
+  Send,
+  Star,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
@@ -64,7 +74,10 @@ const saveReviewResponse = createServerFn({ method: "POST" })
   });
 
 const sendNegotiationOffer = createServerFn({ method: "POST" })
-  .inputValidator((input: { requestId: number; bidAmount: number | null; duration: string; message: string }) => input)
+  .inputValidator(
+    (input: { requestId: number; bidAmount: number | null; duration: string; message: string }) =>
+      input,
+  )
   .handler(async ({ data }) => {
     const viewer = getCurrentUser();
 
@@ -87,9 +100,14 @@ function ProfessionalStatsDetail() {
   const projectNegotiations = (data.projectNegotiations ?? []) as ProjectNegotiationRecord[];
   const hireRequests = (data.hireRequests ?? []) as ProfessionalHireRequestRecord[];
   const trackedProjects = (data.trackedProjects ?? []) as ProfessionalTrackedProjectRecord[];
-  const visibleProjectRequests = projectRequests.filter((project) => isVisibleProjectRequest(project));
+  const visibleProjectRequests = projectRequests.filter((project) =>
+    isVisibleProjectRequest(project),
+  );
   const visibleHireRequests = hireRequests.filter(
-    (request) => request.status !== "started" && request.status !== "cancelled" && !isExpiredRejectedHireRequest(request),
+    (request) =>
+      request.status !== "started" &&
+      request.status !== "cancelled" &&
+      !isExpiredRejectedHireRequest(request),
   );
   const runningProjects = trackedProjects.filter((project) => project.status === "ACTIVE");
   const completedProjects = trackedProjects.filter((project) => project.status === "COMPLETED");
@@ -98,7 +116,11 @@ function ProfessionalStatsDetail() {
   const title = getSectionTitle(section);
 
   return (
-    <AppShell userName={displayName} userRole="Professional" userAvatarUrl={profile?.avatarUrl || viewer.avatarUrl}>
+    <AppShell
+      userName={displayName}
+      userRole="Professional"
+      userAvatarUrl={profile?.avatarUrl || viewer.avatarUrl}
+    >
       <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
@@ -109,16 +131,27 @@ function ProfessionalStatsDetail() {
         </Button>
       </div>
 
-      {section === "projects" ? <ProjectGrid projects={runningProjects} emptyTitle="No running projects" /> : null}
+      {section === "projects" ? (
+        <ProjectGrid projects={runningProjects} emptyTitle="No running projects" />
+      ) : null}
       {section === "project-requests" ? (
         <RequestGrid projects={visibleProjectRequests} negotiations={projectNegotiations} />
       ) : null}
       {section === "hire-requests" ? <HireGrid requests={visibleHireRequests} /> : null}
-      {section === "completed" ? <ProjectGrid projects={completedProjects} emptyTitle="No completed projects" /> : null}
-      {section === "ratings" ? <ProjectGrid projects={reviewedProjects} emptyTitle="No client reviews yet" showReviews /> : null}
+      {section === "completed" ? (
+        <ProjectGrid projects={completedProjects} emptyTitle="No completed projects" />
+      ) : null}
+      {section === "ratings" ? (
+        <ProjectGrid projects={reviewedProjects} emptyTitle="No client reviews yet" showReviews />
+      ) : null}
 
-      {!["projects", "project-requests", "hire-requests", "completed", "ratings"].includes(section) ? (
-        <EmptyState title="Stats section not found" description="Choose one of the stat cards from My stats." />
+      {!["projects", "project-requests", "hire-requests", "completed", "ratings"].includes(
+        section,
+      ) ? (
+        <EmptyState
+          title="Stats section not found"
+          description="Choose one of the stat cards from My stats."
+        />
       ) : null}
     </AppShell>
   );
@@ -134,7 +167,12 @@ function ProjectGrid({
   showReviews?: boolean;
 }) {
   if (!projects.length) {
-    return <EmptyState title={emptyTitle} description="New items will appear here when the project status changes." />;
+    return (
+      <EmptyState
+        title={emptyTitle}
+        description="New items will appear here when the project status changes."
+      />
+    );
   }
 
   return (
@@ -148,18 +186,31 @@ function ProjectGrid({
                 <Badge>{project.status === "COMPLETED" ? "Completed" : "Running"}</Badge>
               </div>
               <h2 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Client: {project.clientName || `Client ${project.clientId}`}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Client: {project.clientName || `Client ${project.clientId}`}
+              </p>
             </div>
             <img
-              src={project.clientAvatarUrl || `https://i.pravatar.cc/100?u=stat-detail-${project.clientId}`}
+              src={
+                project.clientAvatarUrl ||
+                `https://i.pravatar.cc/100?u=stat-detail-${project.clientId}`
+              }
               alt=""
               className="h-12 w-12 shrink-0 rounded-lg object-cover"
             />
           </div>
           <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
             <Info icon={Briefcase} label="Price" value={formatMoney(project.bidAmount ?? 0)} />
-            <Info icon={CalendarDays} label="Accepted" value={project.acceptedAt ? formatDate(project.acceptedAt) : "Not set"} />
-            <Info icon={MapPin} label="Deadline" value={project.deadline ? formatDate(project.deadline) : "Not set"} />
+            <Info
+              icon={CalendarDays}
+              label="Accepted"
+              value={project.acceptedAt ? formatDate(project.acceptedAt) : "Not set"}
+            />
+            <Info
+              icon={MapPin}
+              label="Deadline"
+              value={project.deadline ? formatDate(project.deadline) : "Not set"}
+            />
             <Info icon={CheckCircle2} label="Status" value={formatEnum(project.status)} />
           </div>
           {showReviews ? <ReviewSummary project={project} /> : null}
@@ -198,7 +249,12 @@ function RequestGrid({
   >({});
 
   if (!projects.length) {
-    return <EmptyState title="No project requests" description="Requests you send to clients will appear here." />;
+    return (
+      <EmptyState
+        title="No project requests"
+        description="Requests you send to clients will appear here."
+      />
+    );
   }
 
   async function handleSendNegotiation(project: ProfessionalProjectRequestRecord) {
@@ -236,7 +292,9 @@ function RequestGrid({
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {projects.map((project) => {
-        const negotiationHistory = negotiations.filter((negotiation) => negotiation.requestId === project.id);
+        const negotiationHistory = negotiations.filter(
+          (negotiation) => negotiation.requestId === project.id,
+        );
         const latestNegotiation = negotiationHistory.at(-1);
         const negotiationDraft = negotiationDrafts[project.id] ?? {
           bidAmount: project.bidAmount ? String(project.bidAmount) : "",
@@ -248,17 +306,35 @@ function RequestGrid({
           <div key={project.id} className="rounded-xl border border-border bg-card p-5 shadow-soft">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">{project.projectCategory}</Badge>
-              <Badge variant={project.status === "ACCEPTED" ? "default" : project.status === "DECLINED" ? "destructive" : "outline"}>
+              <Badge
+                variant={
+                  project.status === "ACCEPTED"
+                    ? "default"
+                    : project.status === "DECLINED"
+                      ? "destructive"
+                      : "outline"
+                }
+              >
                 {formatEnum(project.status)}
               </Badge>
-              {project.trackingStatus ? <Badge variant="outline">Tracking {formatEnum(project.trackingStatus)}</Badge> : null}
-              {negotiationHistory.length ? <Badge variant="outline">{negotiationHistory.length} offers</Badge> : null}
+              {project.trackingStatus ? (
+                <Badge variant="outline">Tracking {formatEnum(project.trackingStatus)}</Badge>
+              ) : null}
+              {negotiationHistory.length ? (
+                <Badge variant="outline">{negotiationHistory.length} offers</Badge>
+              ) : null}
             </div>
             <h2 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Client: {project.clientName || `Client ${project.clientId}`}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Client: {project.clientName || `Client ${project.clientId}`}
+            </p>
             <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
               <Info icon={Briefcase} label="Bid" value={formatMoney(project.bidAmount ?? 0)} />
-              <Info icon={CalendarDays} label="Deadline" value={project.deadline ? formatDate(project.deadline) : "Not set"} />
+              <Info
+                icon={CalendarDays}
+                label="Deadline"
+                value={project.deadline ? formatDate(project.deadline) : "Not set"}
+              />
             </div>
             <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{project.coverLetter}</p>
 
@@ -275,7 +351,9 @@ function RequestGrid({
                   <span>Bid: {formatMoney(latestNegotiation.bidAmount ?? 0)}</span>
                   <span>Duration: {latestNegotiation.duration || "Not set"}</span>
                 </div>
-                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{latestNegotiation.message}</p>
+                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                  {latestNegotiation.message}
+                </p>
               </div>
             ) : null}
 
@@ -304,7 +382,10 @@ function RequestGrid({
               ) : null}
               {project.trackingId ? (
                 <Button size="sm" variant="outline" asChild>
-                  <Link to="/project-track/$trackingId" params={{ trackingId: String(project.trackingId) }}>
+                  <Link
+                    to="/project-track/$trackingId"
+                    params={{ trackingId: String(project.trackingId) }}
+                  >
                     Track project
                   </Link>
                 </Button>
@@ -317,7 +398,10 @@ function RequestGrid({
               </Button>
             </div>
 
-            <Dialog open={openNegotiationId === project.id} onOpenChange={(open) => setOpenNegotiationId(open ? project.id : null)}>
+            <Dialog
+              open={openNegotiationId === project.id}
+              onOpenChange={(open) => setOpenNegotiationId(open ? project.id : null)}
+            >
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Negotiate project offer</DialogTitle>
@@ -384,7 +468,8 @@ function RequestGrid({
                           <div key={negotiation.id} className="rounded-md bg-muted/40 p-3 text-sm">
                             <div className="flex flex-wrap justify-between gap-2 font-medium">
                               <span>
-                                {formatMoney(negotiation.bidAmount ?? 0)} / {negotiation.duration || "Not set"}
+                                {formatMoney(negotiation.bidAmount ?? 0)} /{" "}
+                                {negotiation.duration || "Not set"}
                               </span>
                               <span className="text-xs font-normal text-muted-foreground">
                                 {formatDateTime(negotiation.createdAt)}
@@ -406,7 +491,10 @@ function RequestGrid({
                   <Button variant="outline" onClick={() => setOpenNegotiationId(null)}>
                     Cancel
                   </Button>
-                  <Button onClick={() => handleSendNegotiation(project)} disabled={pendingNegotiationId === project.id}>
+                  <Button
+                    onClick={() => handleSendNegotiation(project)}
+                    disabled={pendingNegotiationId === project.id}
+                  >
                     <Handshake className="h-4 w-4" />
                     {pendingNegotiationId === project.id ? "Sending" : "Send offer"}
                   </Button>
@@ -422,28 +510,62 @@ function RequestGrid({
 
 function HireGrid({ requests }: { requests: ProfessionalHireRequestRecord[] }) {
   if (!requests.length) {
-    return <EmptyState title="No hire requests" description="Direct client hire requests will appear here." />;
+    return (
+      <EmptyState
+        title="No hire requests"
+        description="Direct client hire requests will appear here."
+      />
+    );
   }
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {requests.map((request) => (
-        <div key={request.contractId} className="rounded-xl border border-border bg-card p-5 shadow-soft">
+        <div
+          key={request.contractId}
+          className="rounded-xl border border-border bg-card p-5 shadow-soft"
+        >
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary">Direct hire</Badge>
-            <Badge variant={request.status === "accepted" ? "default" : request.status === "rejected" ? "destructive" : "outline"}>
+            <Badge
+              variant={
+                request.status === "accepted"
+                  ? "default"
+                  : request.status === "rejected"
+                    ? "destructive"
+                    : "outline"
+              }
+            >
               {formatEnum(request.status)}
             </Badge>
           </div>
           <h2 className="mt-3 line-clamp-2 font-semibold">{request.title}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Client: {request.clientName || `Client ${request.clientId}`}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Client: {request.clientName || `Client ${request.clientId}`}
+          </p>
           <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
             <Info icon={Clock} label="Sent" value={formatDateTime(request.createdAt)} />
-            <Info icon={CalendarDays} label="Updated" value={request.updatedAt ? formatDateTime(request.updatedAt) : "Not set"} />
-            <Info icon={Briefcase} label="Budget" value={formatMoney(request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0)} />
-            <Info icon={MapPin} label="Deadline" value={request.deadline ? formatDate(request.deadline) : "Not set"} />
+            <Info
+              icon={CalendarDays}
+              label="Updated"
+              value={request.updatedAt ? formatDateTime(request.updatedAt) : "Not set"}
+            />
+            <Info
+              icon={Briefcase}
+              label="Budget"
+              value={formatMoney(
+                request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0,
+              )}
+            />
+            <Info
+              icon={MapPin}
+              label="Deadline"
+              value={request.deadline ? formatDate(request.deadline) : "Not set"}
+            />
           </div>
-          <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{request.description || "No work description added."}</p>
+          <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
+            {request.description || "No work description added."}
+          </p>
         </div>
       ))}
     </div>
@@ -495,7 +617,11 @@ function ReviewSummary({ project }: { project: ProfessionalTrackedProjectRecord 
       <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
         <Star className="h-4 w-4 fill-warning text-warning" />
         <span>{project.reviewRating}/5 client review</span>
-        {project.reviewCreatedAt ? <span className="text-xs text-muted-foreground">{formatDate(project.reviewCreatedAt)}</span> : null}
+        {project.reviewCreatedAt ? (
+          <span className="text-xs text-muted-foreground">
+            {formatDate(project.reviewCreatedAt)}
+          </span>
+        ) : null}
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
         {project.reviewComment || "Client left a rating without a written review."}
@@ -505,7 +631,11 @@ function ReviewSummary({ project }: { project: ProfessionalTrackedProjectRecord 
           <div className="flex flex-wrap items-center gap-2 font-medium">
             <MessageSquare className="h-4 w-4 text-primary" />
             <span>Your response</span>
-            {project.reviewResponseAt ? <span className="text-xs font-normal text-muted-foreground">{formatDate(project.reviewResponseAt)}</span> : null}
+            {project.reviewResponseAt ? (
+              <span className="text-xs font-normal text-muted-foreground">
+                {formatDate(project.reviewResponseAt)}
+              </span>
+            ) : null}
           </div>
           <p className="mt-2 text-muted-foreground">{project.reviewResponse}</p>
         </div>
@@ -646,7 +776,9 @@ function parseWeeks(value?: string | null) {
   if (weekMatch || !value.toLowerCase().includes("until")) {
     const numericValue = Number((weekMatch || anyNumberMatch)?.[1] ?? anyNumberMatch?.[0]);
 
-    return Number.isFinite(numericValue) && numericValue > 0 ? Math.max(1, Math.round(numericValue)) : null;
+    return Number.isFinite(numericValue) && numericValue > 0
+      ? Math.max(1, Math.round(numericValue))
+      : null;
   }
 
   const untilDate = new Date(value.replace(/^until\s+/i, ""));

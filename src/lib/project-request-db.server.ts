@@ -965,7 +965,12 @@ function withTrackingActivity(
   tracking:
     | Omit<
         ProjectTrackingDetailsRecord,
-        "workUploads" | "revisionRequests" | "milestones" | "completionRequests" | "transactions" | "disputes"
+        | "workUploads"
+        | "revisionRequests"
+        | "milestones"
+        | "completionRequests"
+        | "transactions"
+        | "disputes"
       >
     | undefined,
 ) {
@@ -1003,7 +1008,9 @@ export function submitProjectCompletion(
     .get(input.trackingId, professionalId) as ProjectTrackingRecord | undefined;
 
   if (!tracking) {
-    throw new Error("Only the assigned professional can submit completion for this active project.");
+    throw new Error(
+      "Only the assigned professional can submit completion for this active project.",
+    );
   }
 
   const milestoneSummary = db
@@ -1022,7 +1029,9 @@ export function submitProjectCompletion(
     Number(milestoneSummary.total || 0) < REQUIRED_PROJECT_MILESTONES ||
     Number(milestoneSummary.paid || 0) < REQUIRED_PROJECT_MILESTONES
   ) {
-    throw new Error(`Complete all ${REQUIRED_PROJECT_MILESTONES} milestones before final submission.`);
+    throw new Error(
+      `Complete all ${REQUIRED_PROJECT_MILESTONES} milestones before final submission.`,
+    );
   }
 
   const timestamp = new Date().toISOString();
@@ -1092,7 +1101,9 @@ export function updateProjectCompletionStatus(
       Number(milestoneSummary.total || 0) < REQUIRED_PROJECT_MILESTONES ||
       Number(milestoneSummary.paid || 0) < REQUIRED_PROJECT_MILESTONES
     ) {
-      throw new Error(`Complete all ${REQUIRED_PROJECT_MILESTONES} milestones before approving final submission.`);
+      throw new Error(
+        `Complete all ${REQUIRED_PROJECT_MILESTONES} milestones before approving final submission.`,
+      );
     }
   }
 
@@ -1145,11 +1156,24 @@ export function updateProjectCompletionStatus(
   return getProjectCompletionRequests(completion.trackingId);
 }
 
-export function createProjectDispute(reporterId: number, reporterRole: string, input: ProjectDisputeInput) {
+export function createProjectDispute(
+  reporterId: number,
+  reporterRole: string,
+  input: ProjectDisputeInput,
+) {
   const db = getDatabase();
   ensureProjectRequestTables(db);
 
-  if (!["PAYMENT", "WORK_QUALITY", "DEADLINE_DELAY", "COMMUNICATION", "FILE_PROBLEM", "OTHER"].includes(input.issueType)) {
+  if (
+    ![
+      "PAYMENT",
+      "WORK_QUALITY",
+      "DEADLINE_DELAY",
+      "COMMUNICATION",
+      "FILE_PROBLEM",
+      "OTHER",
+    ].includes(input.issueType)
+  ) {
     throw new Error("Choose a valid issue type.");
   }
 
@@ -1275,7 +1299,10 @@ export function createProjectMilestone(clientId: number, input: ProjectMilestone
     )
     .get(tracking.requestId) as { bidAmount: number | null } | undefined;
   const milestoneNumber = existingMilestoneCount + 1;
-  const requiredAmount = getRequiredMilestoneAmount(projectRequest?.bidAmount ?? 0, milestoneNumber);
+  const requiredAmount = getRequiredMilestoneAmount(
+    projectRequest?.bidAmount ?? 0,
+    milestoneNumber,
+  );
   const title = input.title.trim() || `Milestone ${milestoneNumber}/${REQUIRED_PROJECT_MILESTONES}`;
   const description = input.description?.trim() || null;
   const amount = requiredAmount > 0 ? requiredAmount : null;
@@ -1507,7 +1534,8 @@ export function createProjectWorkUpload(professionalId: number, input: ProjectWo
       fileSize: file.fileSize ?? null,
     }))
     .filter((file) => file.fileName);
-  const title = input.title?.trim() || files[0]?.fileName || input.fileName?.trim() || "Uploaded work";
+  const title =
+    input.title?.trim() || files[0]?.fileName || input.fileName?.trim() || "Uploaded work";
   const note = input.note?.trim() || "Work file uploaded.";
 
   if (!files.length && !input.fileName?.trim()) {
@@ -1747,8 +1775,9 @@ export function createProjectRequest(input: ProjectRequestInput) {
     return getProjectRequestById(existingPending.id);
   }
 
-  const result = db.prepare(
-    `
+  const result = db
+    .prepare(
+      `
       INSERT INTO "ProjectRequest" (
         jobId,
         clientId,
@@ -1763,17 +1792,18 @@ export function createProjectRequest(input: ProjectRequestInput) {
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, ?)
     `,
-  ).run(
-    input.jobId,
-    job.userId,
-    input.professionalId,
-    bidAmount,
-    duration,
-    coverLetter,
-    attachmentsJson,
-    timestamp,
-    timestamp,
-  );
+    )
+    .run(
+      input.jobId,
+      job.userId,
+      input.professionalId,
+      bidAmount,
+      duration,
+      coverLetter,
+      attachmentsJson,
+      timestamp,
+      timestamp,
+    );
 
   return getProjectRequestById(Number(result.lastInsertRowid));
 }
@@ -1844,7 +1874,10 @@ export function getClientProjectRequests(clientId: number) {
     .all(clientId) as ClientProjectRequestRecord[];
 }
 
-export function createProfessionalNegotiation(professionalId: number, input: ProjectNegotiationInput) {
+export function createProfessionalNegotiation(
+  professionalId: number,
+  input: ProjectNegotiationInput,
+) {
   const db = getDatabase();
   ensureProjectRequestTables(db);
 
@@ -2458,7 +2491,10 @@ export function getProfessionalWithdrawals(professionalId: number) {
 export function getProfessionalAvailableWithdrawalBalance(professionalId: number) {
   const transactions = getProfessionalTransactions(professionalId);
   const withdrawals = getProfessionalWithdrawals(professionalId);
-  const earned = transactions.reduce((total, transaction) => total + Math.round(transaction.amount * 0.9), 0);
+  const earned = transactions.reduce(
+    (total, transaction) => total + Math.round(transaction.amount * 0.9),
+    0,
+  );
   const alreadyRequested = withdrawals
     .filter((withdrawal) => withdrawal.status !== "REJECTED")
     .reduce((total, withdrawal) => total + withdrawal.amount, 0);
@@ -2513,7 +2549,15 @@ export function createProfessionalWithdrawalRequest(
         VALUES (?, ?, 'USD', ?, ?, 'PENDING', ?, ?, ?)
       `,
     )
-    .run(professionalId, amount, input.destinationType, destinationLabel, note, timestamp, timestamp);
+    .run(
+      professionalId,
+      amount,
+      input.destinationType,
+      destinationLabel,
+      note,
+      timestamp,
+      timestamp,
+    );
 
   return db
     .prepare(`SELECT * FROM "ProjectWithdrawal" WHERE id = ? LIMIT 1`)
@@ -2568,7 +2612,10 @@ export function getProfessionalProjectRequests(professionalId: number) {
     .all(professionalId) as ProfessionalProjectRequestRecord[];
 }
 
-export function getProjectTrackingDetails(userId: number, trackingId: number): ProjectTrackingDetailsRecord | undefined {
+export function getProjectTrackingDetails(
+  userId: number,
+  trackingId: number,
+): ProjectTrackingDetailsRecord | undefined {
   const db = getDatabase();
   ensureProjectRequestTables(db);
 
@@ -2625,14 +2672,22 @@ export function getProjectTrackingDetails(userId: number, trackingId: number): P
     .get(trackingId, userId, userId) as
     | Omit<
         ProjectTrackingDetailsRecord,
-        "workUploads" | "revisionRequests" | "milestones" | "completionRequests" | "transactions" | "disputes"
+        | "workUploads"
+        | "revisionRequests"
+        | "milestones"
+        | "completionRequests"
+        | "transactions"
+        | "disputes"
       >
     | undefined;
 
   return withTrackingActivity(tracking);
 }
 
-export function getOrCreateProjectTrackingDetails(userId: number, trackingKey: number): ProjectTrackingDetailsRecord | null {
+export function getOrCreateProjectTrackingDetails(
+  userId: number,
+  trackingKey: number,
+): ProjectTrackingDetailsRecord | null {
   const existing =
     getProjectTrackingDetails(userId, trackingKey) ??
     getProjectTrackingDetailsByJob(userId, trackingKey);
@@ -2693,7 +2748,11 @@ export function getOrCreateProjectTrackingDetails(userId: number, trackingKey: n
     timestamp,
   );
 
-  return getProjectTrackingDetailsByJob(userId, request.jobId) ?? getProjectTrackingDetails(userId, trackingKey) ?? null;
+  return (
+    getProjectTrackingDetailsByJob(userId, request.jobId) ??
+    getProjectTrackingDetails(userId, trackingKey) ??
+    null
+  );
 }
 
 function getProjectSchedule(db: BetterSqlite3Database, jobId: number) {
@@ -2729,7 +2788,9 @@ function normalizeScheduleDate(value?: string | null) {
       return null;
     }
 
-    return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate())).toISOString();
+    return new Date(
+      Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate()),
+    ).toISOString();
   }
 
   return new Date(`${dateOnly}T00:00:00.000Z`).toISOString();
@@ -2739,7 +2800,10 @@ function compareScheduleDates(a: string, b: string) {
   return new Date(a).getTime() - new Date(b).getTime();
 }
 
-export function getProjectTrackingDetailsByJob(userId: number, jobId: number): ProjectTrackingDetailsRecord | undefined {
+export function getProjectTrackingDetailsByJob(
+  userId: number,
+  jobId: number,
+): ProjectTrackingDetailsRecord | undefined {
   const db = getDatabase();
   ensureProjectRequestTables(db);
 
@@ -2797,7 +2861,12 @@ export function getProjectTrackingDetailsByJob(userId: number, jobId: number): P
     .get(jobId, userId, userId) as
     | Omit<
         ProjectTrackingDetailsRecord,
-        "workUploads" | "revisionRequests" | "milestones" | "completionRequests" | "transactions" | "disputes"
+        | "workUploads"
+        | "revisionRequests"
+        | "milestones"
+        | "completionRequests"
+        | "transactions"
+        | "disputes"
       >
     | undefined;
 

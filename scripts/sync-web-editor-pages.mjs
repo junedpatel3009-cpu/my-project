@@ -2,13 +2,11 @@ import Database from "better-sqlite3";
 
 const origin = process.env.SERVIO_ORIGIN || "http://localhost:8080";
 const database = new Database("prisma/app.db");
-const pages = database.prepare(
-  `SELECT pageKey, path, status FROM "WebsitePage" WHERE pageKey <> 'home' ORDER BY rowid`,
-).all();
+const pages = database
+  .prepare(`SELECT pageKey, path, status FROM "WebsitePage" WHERE pageKey <> 'home' ORDER BY rowid`)
+  .all();
 
-const setStatus = database.prepare(
-  `UPDATE "WebsitePage" SET status = ? WHERE pageKey = ?`,
-);
+const setStatus = database.prepare(`UPDATE "WebsitePage" SET status = ? WHERE pageKey = ?`);
 const saveSnapshot = database.prepare(
   `UPDATE "WebsitePage" SET content = ?, status = ?, updatedAt = ? WHERE pageKey = ?`,
 );

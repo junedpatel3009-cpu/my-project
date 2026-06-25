@@ -93,13 +93,7 @@ function shouldUseSecureCookie() {
 }
 
 function serializeCookie(name: string, value: string, maxAge: number) {
-  const parts = [
-    `${name}=${value}`,
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Lax",
-    `Max-Age=${maxAge}`,
-  ];
+  const parts = [`${name}=${value}`, "Path=/", "HttpOnly", "SameSite=Lax", `Max-Age=${maxAge}`];
 
   if (shouldUseSecureCookie()) {
     parts.push("Secure");
@@ -116,11 +110,7 @@ export function createSessionCookie(user: PublicUser) {
     exp: Date.now() + THIRTY_DAYS_IN_SECONDS * 1000,
   };
 
-  return serializeCookie(
-    SESSION_COOKIE_NAME,
-    encodeSignedPayload(payload),
-    THIRTY_DAYS_IN_SECONDS,
-  );
+  return serializeCookie(SESSION_COOKIE_NAME, encodeSignedPayload(payload), THIRTY_DAYS_IN_SECONDS);
 }
 
 export function clearSessionCookie() {
@@ -134,11 +124,7 @@ export function createGoogleStateCookie(state: string, returnTo: string) {
     exp: Date.now() + 10 * 60 * 1000,
   };
 
-  return serializeCookie(
-    GOOGLE_STATE_COOKIE_NAME,
-    encodeSignedPayload(payload),
-    10 * 60,
-  );
+  return serializeCookie(GOOGLE_STATE_COOKIE_NAME, encodeSignedPayload(payload), 10 * 60);
 }
 
 export function clearGoogleStateCookie() {

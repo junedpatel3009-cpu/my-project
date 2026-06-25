@@ -6,7 +6,14 @@ import { useForm } from "react-hook-form";
 import { CheckCircle2, LoaderCircle, MailCheck, ShieldCheck, TriangleAlert } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { hashPassword, verifyPassword } from "@/lib/password.server";
 import {
@@ -76,7 +83,8 @@ const resetPassword = createServerFn({ method: "POST" })
       }
 
       if ((await verifyPassword(data.password, user.passwordHash)).valid) {
-        fieldErrors.password = "This password is the same as your old password. Please write another password.";
+        fieldErrors.password =
+          "This password is the same as your old password. Please write another password.";
         return {
           ok: false as const,
           fieldErrors,
@@ -194,7 +202,10 @@ function Forgot() {
     const email = requestForm.getValues("email").trim();
 
     if (!email) {
-      requestForm.setError("email", { type: "manual", message: "Enter your email to resend the code." });
+      requestForm.setError("email", {
+        type: "manual",
+        message: "Enter your email to resend the code.",
+      });
       return;
     }
 
@@ -232,13 +243,20 @@ function Forgot() {
       }
       footer={
         <>
-          Remembered it? <Link to="/login" className="text-primary hover:underline">Back to log in</Link>
+          Remembered it?{" "}
+          <Link to="/login" className="text-primary hover:underline">
+            Back to log in
+          </Link>
         </>
       }
     >
       {otpSent ? (
         <Form {...resetForm}>
-          <form onSubmit={resetForm.handleSubmit(handleResetPassword)} className="space-y-4" noValidate>
+          <form
+            onSubmit={resetForm.handleSubmit(handleResetPassword)}
+            className="space-y-4"
+            noValidate
+          >
             <div className="rounded-xl border border-success/20 bg-success/5 px-4 py-4 text-success shadow-soft">
               <div className="flex items-start gap-3">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-success/10">
@@ -261,7 +279,13 @@ function Forgot() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input {...field} type="email" placeholder="you@example.com" autoComplete="email" disabled />
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      disabled
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -289,7 +313,12 @@ function Forgot() {
                 <FormItem>
                   <FormLabel>New password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" placeholder="••••••••" autoComplete="new-password" />
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -303,7 +332,12 @@ function Forgot() {
                 <FormItem>
                   <FormLabel>Confirm password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" placeholder="Confirm password" autoComplete="new-password" />
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="Confirm password"
+                      autoComplete="new-password"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -314,7 +348,12 @@ function Forgot() {
             {statusMessage ? <OtpNotice message={statusMessage} tone="success" /> : null}
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button type="button" variant="outline" disabled={isSendingOtp} onClick={handleResendOtp}>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSendingOtp}
+                onClick={handleResendOtp}
+              >
                 {isSendingOtp ? "Resending code..." : "Resend code"}
               </Button>
               <Button type="submit" className="w-full sm:w-auto" disabled={isResetting}>
@@ -333,7 +372,12 @@ function Forgot() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input {...field} type="email" placeholder="you@example.com" autoComplete="email" />
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -355,13 +399,7 @@ function Forgot() {
   );
 }
 
-function OtpNotice({
-  message,
-  tone,
-}: {
-  message: string;
-  tone: "sending" | "success" | "error";
-}) {
+function OtpNotice({ message, tone }: { message: string; tone: "sending" | "success" | "error" }) {
   const Icon = tone === "sending" ? LoaderCircle : tone === "error" ? TriangleAlert : MailCheck;
 
   return (

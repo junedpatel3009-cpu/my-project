@@ -131,7 +131,8 @@ function Messages() {
       return;
     }
 
-    const urlConversation = peekPendingConversation() || getConversationFromSearch(getSearchFromHref(location.href));
+    const urlConversation =
+      peekPendingConversation() || getConversationFromSearch(getSearchFromHref(location.href));
 
     if (!urlConversation) {
       return;
@@ -163,7 +164,8 @@ function Messages() {
       storageKey(viewer.id, "messages"),
       {},
     );
-    const urlConversation = peekPendingConversation() || getConversationFromSearch(window.location.search);
+    const urlConversation =
+      peekPendingConversation() || getConversationFromSearch(window.location.search);
     const pendingIncomingCall = readPendingIncomingCall(viewer.id);
     const pendingCallConversation = pendingIncomingCall
       ? buildConversationFromCall(pendingIncomingCall)
@@ -172,7 +174,7 @@ function Messages() {
       ? upsertConversationList(storedConversations, urlConversation)
       : pendingCallConversation
         ? upsertConversationList(storedConversations, pendingCallConversation)
-      : storedConversations;
+        : storedConversations;
 
     setConversations(nextConversations);
     setMessagesByConversation(storedMessages);
@@ -1531,7 +1533,11 @@ function readPendingConversation(): Conversation | null {
       return null;
     }
 
-    const parsed = JSON.parse(raw) as { createdAt?: number; conversation?: Conversation; firstMessage?: string };
+    const parsed = JSON.parse(raw) as {
+      createdAt?: number;
+      conversation?: Conversation;
+      firstMessage?: string;
+    };
 
     if (!parsed.conversation?.id || !parsed.conversation.otherUserId) {
       return null;
@@ -1784,7 +1790,9 @@ function isVideoSourceError(error: unknown) {
 
   const message = error.message.toLowerCase();
   return (
-    ["NotReadableError", "AbortError", "NotFoundError", "OverconstrainedError"].includes(error.name) ||
+    ["NotReadableError", "AbortError", "NotFoundError", "OverconstrainedError"].includes(
+      error.name,
+    ) ||
     message.includes("video source") ||
     message.includes("camera")
   );

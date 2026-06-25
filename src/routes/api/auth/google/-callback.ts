@@ -5,10 +5,7 @@ import {
   createSessionCookie,
   readGoogleStateFromCookieHeader,
 } from "@/lib/auth-session.server";
-import {
-  deriveNamesFromGoogleProfile,
-  exchangeCodeForGoogleUser,
-} from "@/lib/google-oauth.server";
+import { deriveNamesFromGoogleProfile, exchangeCodeForGoogleUser } from "@/lib/google-oauth.server";
 import { findUserByEmail, recordUserLogin, upsertGoogleUser } from "@/lib/user-db.server";
 
 function redirectTo(path: string, cookie: string) {

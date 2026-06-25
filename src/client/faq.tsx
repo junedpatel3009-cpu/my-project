@@ -2,14 +2,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 
 const faqItems = [
   {
     id: 1,
     question: "How do I hire a professional?",
-    answer: "Post a job, compare proposals, review profiles, and choose the pro that fits your needs.",
+    answer:
+      "Post a job, compare proposals, review profiles, and choose the pro that fits your needs.",
   },
   {
     id: 2,
@@ -19,7 +25,8 @@ const faqItems = [
   {
     id: 3,
     question: "How are professionals verified?",
-    answer: "Profiles are reviewed for completeness and can include verification badges and platform checks.",
+    answer:
+      "Profiles are reviewed for completeness and can include verification badges and platform checks.",
   },
   {
     id: 4,
@@ -38,14 +45,20 @@ export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
       { title: "FAQ — Common questions answered | Servio" },
-      { name: "description", content: "Answers to common questions about hiring, pricing, payments, verification, and more." },
+      {
+        name: "description",
+        content:
+          "Answers to common questions about hiring, pricing, payments, verification, and more.",
+      },
     ],
   }),
   component: FAQ,
 });
 
 function FAQ() {
-  const { cmsPage } = Route.useLoaderData() as { cmsPage: { title: string; content: string } | null };
+  const { cmsPage } = Route.useLoaderData() as {
+    cmsPage: { title: string; content: string } | null;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,7 +69,9 @@ function FAQ() {
           <h1 className="font-display mt-3 text-4xl font-bold tracking-tight md:text-5xl">
             {cmsPage?.title || "Frequently asked questions"}
           </h1>
-          <p className="mt-4 text-muted-foreground">Can't find what you're looking for? Our team is one click away.</p>
+          <p className="mt-4 text-muted-foreground">
+            Can't find what you're looking for? Our team is one click away.
+          </p>
         </div>
       </section>
       <section className="mx-auto max-w-3xl px-4 pb-20 sm:px-6 lg:px-8">
@@ -66,17 +81,25 @@ function FAQ() {
             dangerouslySetInnerHTML={{ __html: cmsPage.content }}
           />
         ) : null}
-        <Accordion type="single" collapsible className="rounded-2xl border border-border bg-card shadow-soft">
+        <Accordion
+          type="single"
+          collapsible
+          className="rounded-2xl border border-border bg-card shadow-soft"
+        >
           {faqItems.map((faq) => (
             <AccordionItem key={faq.id} value={`faq-${faq.id}`} className="px-5">
               <AccordionTrigger className="text-left font-medium">{faq.question}</AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground">{faq.answer}</AccordionContent>
+              <AccordionContent className="text-sm text-muted-foreground">
+                {faq.answer}
+              </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
         <div className="mt-12 rounded-2xl border border-border bg-card p-8 text-center shadow-soft">
           <h3 className="font-display text-2xl font-semibold">Still have questions?</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Our support team replies in under an hour.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Our support team replies in under an hour.
+          </p>
           <Button asChild size="lg" className="mt-5 bg-cta text-cta-foreground hover:bg-cta/90">
             <Link to="/">Contact support</Link>
           </Button>

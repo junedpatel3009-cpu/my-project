@@ -2,7 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link, redirect, useLoaderData, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { getClientJobsByUserId, getOpenClientJobs, updateClientJobStatus, type JobStatus } from "@/lib/job-db.server";
+import {
+  getClientJobsByUserId,
+  getOpenClientJobs,
+  updateClientJobStatus,
+  type JobStatus,
+} from "@/lib/job-db.server";
 import { formatApproximateLocation } from "@/lib/location-privacy";
 import { getClientProfileByUserId } from "@/lib/user-db.server";
 import { getCurrentUser } from "@/lib/current-user.server";
@@ -131,19 +136,44 @@ function Dashboard() {
   }
 
   if (viewer.role === "PROFESSIONAL") {
-    return <ProfessionalDashboard displayName={displayName} viewer={viewer} openJobs={access.openJobs} />;
+    return (
+      <ProfessionalDashboard displayName={displayName} viewer={viewer} openJobs={access.openJobs} />
+    );
   }
 
   const openJobs = clientJobs.filter((job) => job.status === "OPEN").length;
   const draftJobs = clientJobs.filter((job) => job.status === "DRAFT").length;
   const closedJobs = clientJobs.filter((job) => job.status === "CLOSED").length;
   const upcomingJobs = clientJobs.filter((job) => new Date(job.deadline) >= new Date()).length;
-  const totalBudget = clientJobs.reduce((sum, job) => sum + (job.budgetMax ?? job.budgetMin ?? 0), 0);
+  const totalBudget = clientJobs.reduce(
+    (sum, job) => sum + (job.budgetMax ?? job.budgetMin ?? 0),
+    0,
+  );
   const stats = [
-    { label: "Total jobs", value: String(clientJobs.length), icon: Briefcase, tint: "text-primary bg-primary/10" },
-    { label: "Active jobs", value: String(openJobs), icon: ClipboardList, tint: "text-accent bg-accent/15" },
-    { label: "Upcoming deadlines", value: String(upcomingJobs), icon: CalendarClock, tint: "text-warning bg-warning/15" },
-    { label: "Planned budget", value: totalBudget ? `$${totalBudget.toLocaleString()}` : "$0", icon: DollarSign, tint: "text-success bg-success/15" },
+    {
+      label: "Total jobs",
+      value: String(clientJobs.length),
+      icon: Briefcase,
+      tint: "text-primary bg-primary/10",
+    },
+    {
+      label: "Active jobs",
+      value: String(openJobs),
+      icon: ClipboardList,
+      tint: "text-accent bg-accent/15",
+    },
+    {
+      label: "Upcoming deadlines",
+      value: String(upcomingJobs),
+      icon: CalendarClock,
+      tint: "text-warning bg-warning/15",
+    },
+    {
+      label: "Planned budget",
+      value: totalBudget ? `$${totalBudget.toLocaleString()}` : "$0",
+      icon: DollarSign,
+      tint: "text-success bg-success/15",
+    },
   ];
 
   const changeJobStatus = async (jobId: number, status: JobStatus) => {
@@ -199,7 +229,11 @@ function Dashboard() {
         <div className="rounded-xl border border-border bg-card p-6 shadow-soft">
           <div className="flex items-start gap-4">
             <img
-              src={clientProfile?.avatarUrl || viewer.avatarUrl || "https://i.pravatar.cc/120?u=client-dashboard"}
+              src={
+                clientProfile?.avatarUrl ||
+                viewer.avatarUrl ||
+                "https://i.pravatar.cc/120?u=client-dashboard"
+              }
               alt={displayName}
               className="h-16 w-16 rounded-xl object-cover"
             />
@@ -228,8 +262,17 @@ function Dashboard() {
           <div className="mt-4 space-y-3">
             {(clientProfile?.savedLocations?.length
               ? clientProfile.savedLocations
-              : [{ label: "No saved locations yet", address: "Add your first location from profile setup." }]).map((location, index) => (
-              <div key={`${location.label}-${index}`} className="rounded-lg border border-border bg-muted/30 p-4">
+              : [
+                  {
+                    label: "No saved locations yet",
+                    address: "Add your first location from profile setup.",
+                  },
+                ]
+            ).map((location, index) => (
+              <div
+                key={`${location.label}-${index}`}
+                className="rounded-lg border border-border bg-muted/30 p-4"
+              >
                 <p className="font-medium">{location.label}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{location.address}</p>
               </div>
@@ -242,10 +285,12 @@ function Dashboard() {
         {stats.map((s) => (
           <div key={s.label} className="rounded-xl border border-border bg-card p-5 shadow-soft">
             <div className="flex items-start justify-between">
-            <div className={`grid h-10 w-10 place-items-center rounded-xl ${s.tint}`}>
+              <div className={`grid h-10 w-10 place-items-center rounded-xl ${s.tint}`}>
                 <s.icon className="h-5 w-5" />
               </div>
-              {draftJobs ? <span className="text-xs font-medium text-muted-foreground">{draftJobs} draft</span> : null}
+              {draftJobs ? (
+                <span className="text-xs font-medium text-muted-foreground">{draftJobs} draft</span>
+              ) : null}
             </div>
             <p className="mt-4 text-2xl font-semibold">{s.value}</p>
             <p className="text-sm text-muted-foreground">{s.label}</p>
@@ -309,13 +354,23 @@ function Dashboard() {
                       </Link>
                       <p className="text-xs text-muted-foreground">{job.category}</p>
                     </TableCell>
-                    <TableCell>{formatBudget(job.budgetMin, job.budgetMax, job.timingType)}</TableCell>
+                    <TableCell>
+                      {formatBudget(job.budgetMin, job.budgetMax, job.timingType)}
+                    </TableCell>
                     <TableCell>{formatEnum(job.urgency)}</TableCell>
                     <TableCell>{formatWorkMode(job.workMode)}</TableCell>
                     <TableCell>{formatDate(job.deadline)}</TableCell>
                     <TableCell>{job.attachments.length}</TableCell>
                     <TableCell>
-                      <Badge variant={job.status === "OPEN" ? "default" : job.status === "DRAFT" ? "secondary" : "outline"}>
+                      <Badge
+                        variant={
+                          job.status === "OPEN"
+                            ? "default"
+                            : job.status === "DRAFT"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
                         {formatJobStatus(job.status)}
                       </Badge>
                     </TableCell>
@@ -388,13 +443,35 @@ function ProfessionalDashboard({
   openJobs: Awaited<ReturnType<typeof getOpenClientJobs>>;
 }) {
   const highUrgencyJobs = openJobs.filter((job) => job.urgency === "HIGH").length;
-  const remoteJobs = openJobs.filter((job) => job.workMode === "REMOTE" || job.workMode === "BOTH").length;
+  const remoteJobs = openJobs.filter(
+    (job) => job.workMode === "REMOTE" || job.workMode === "BOTH",
+  ).length;
   const withAttachments = openJobs.filter((job) => job.attachments.length > 0).length;
   const stats = [
-    { label: "Open jobs", value: String(openJobs.length), icon: Briefcase, tint: "text-primary bg-primary/10" },
-    { label: "Remote friendly", value: String(remoteJobs), icon: Search, tint: "text-accent bg-accent/15" },
-    { label: "High urgency", value: String(highUrgencyJobs), icon: CalendarClock, tint: "text-warning bg-warning/15" },
-    { label: "With files", value: String(withAttachments), icon: Paperclip, tint: "text-success bg-success/15" },
+    {
+      label: "Open jobs",
+      value: String(openJobs.length),
+      icon: Briefcase,
+      tint: "text-primary bg-primary/10",
+    },
+    {
+      label: "Remote friendly",
+      value: String(remoteJobs),
+      icon: Search,
+      tint: "text-accent bg-accent/15",
+    },
+    {
+      label: "High urgency",
+      value: String(highUrgencyJobs),
+      icon: CalendarClock,
+      tint: "text-warning bg-warning/15",
+    },
+    {
+      label: "With files",
+      value: String(withAttachments),
+      icon: Paperclip,
+      tint: "text-success bg-success/15",
+    },
   ];
 
   return (
@@ -448,7 +525,9 @@ function ProfessionalDashboard({
                       </Badge>
                     </div>
                     <h3 className="mt-3 line-clamp-2 text-lg font-semibold">{job.title}</h3>
-                    <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{job.description}</p>
+                    <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+                      {job.description}
+                    </p>
                   </div>
                   <img
                     src={job.clientAvatarUrl || "https://i.pravatar.cc/100?u=client-job"}
@@ -466,7 +545,12 @@ function ProfessionalDashboard({
 
                 <div className="mt-4 flex items-center gap-2 border-t border-border pt-4 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4" />
-                  <span className="truncate">{formatApproximateLocation(job.locationAddress || job.locationLabel, "Remote job")}</span>
+                  <span className="truncate">
+                    {formatApproximateLocation(
+                      job.locationAddress || job.locationLabel,
+                      "Remote job",
+                    )}
+                  </span>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
                   Posted by {job.clientCompanyName || job.clientName}

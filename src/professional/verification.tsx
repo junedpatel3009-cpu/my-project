@@ -27,7 +27,10 @@ export const Route = createFileRoute("/verification")({
   head: () => ({
     meta: [
       { title: "Verification - Servio" },
-      { name: "description", content: "Upload your documents to get verified and earn the trust badge." },
+      {
+        name: "description",
+        content: "Upload your documents to get verified and earn the trust badge.",
+      },
     ],
   }),
   beforeLoad: async ({ location }) => {
@@ -52,7 +55,12 @@ export const Route = createFileRoute("/verification")({
   component: Verification,
 });
 
-type VerificationDocumentKey = "governmentIdUrl" | "licenseUrl" | "certifications" | "insuranceUrl" | "selfieUrl";
+type VerificationDocumentKey =
+  | "governmentIdUrl"
+  | "licenseUrl"
+  | "certifications"
+  | "insuranceUrl"
+  | "selfieUrl";
 
 const documentOptions: Array<{
   key: VerificationDocumentKey;
@@ -207,7 +215,9 @@ function Verification() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="font-display text-xl font-bold">{percent}% verified</h2>
-              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${status.color}`}>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${status.color}`}
+              >
                 <status.icon className="h-3.5 w-3.5" />
                 {status.label}
               </span>
@@ -216,7 +226,10 @@ function Verification() {
               {completedCount} of {documentOptions.length} verification items saved in the database.
             </p>
             <div className="mt-3 h-2 w-full max-w-md overflow-hidden rounded-full bg-muted">
-              <div className="h-full rounded-full bg-success transition-all" style={{ width: `${percent}%` }} />
+              <div
+                className="h-full rounded-full bg-success transition-all"
+                style={{ width: `${percent}%` }}
+              />
             </div>
           </div>
         </div>
@@ -230,7 +243,10 @@ function Verification() {
           const isSaving = savingKey === document.key;
 
           return (
-            <div key={document.key} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+            <div
+              key={document.key}
+              className="rounded-2xl border border-border bg-card p-5 shadow-soft"
+            >
               <div className="flex items-start gap-4">
                 <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
@@ -318,13 +334,20 @@ function getStatusMeta(status: ProfessionalVerificationInfo["status"]) {
   }
 
   if (status === "rejected") {
-    return { label: "Needs changes", color: "bg-destructive/10 text-destructive", icon: AlertCircle };
+    return {
+      label: "Needs changes",
+      color: "bg-destructive/10 text-destructive",
+      icon: AlertCircle,
+    };
   }
 
   return { label: "Not started", color: "bg-warning/15 text-warning-foreground", icon: Upload };
 }
 
-function getDocumentValue(verification: ProfessionalVerificationInfo, key: VerificationDocumentKey) {
+function getDocumentValue(
+  verification: ProfessionalVerificationInfo,
+  key: VerificationDocumentKey,
+) {
   if (key === "certifications") {
     return verification.certifications[0] || "";
   }
@@ -333,7 +356,8 @@ function getDocumentValue(verification: ProfessionalVerificationInfo, key: Verif
 }
 
 function getCompletedCount(verification: ProfessionalVerificationInfo) {
-  return documentOptions.filter((document) => Boolean(getDocumentValue(verification, document.key))).length;
+  return documentOptions.filter((document) => Boolean(getDocumentValue(verification, document.key)))
+    .length;
 }
 
 function readFileAsDataUrl(file: File) {

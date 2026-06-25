@@ -419,7 +419,10 @@ export function getUserNotifications(userId: number, role: "CLIENT" | "PROFESSIO
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function markUserNotificationsRead(userId: number, role: "CLIENT" | "PROFESSIONAL" | "ADMIN") {
+export function markUserNotificationsRead(
+  userId: number,
+  role: "CLIENT" | "PROFESSIONAL" | "ADMIN",
+) {
   const db = getDatabase();
   const now = new Date().toISOString();
   const notifications = getUserNotifications(userId, role);
@@ -435,11 +438,13 @@ export function markUserNotificationsRead(userId: number, role: "CLIENT" | "PROF
       markDerived.run(userId, notification.key, now);
     }
 
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE "UserNotification"
       SET readAt = ?
       WHERE userId = ? AND clearedAt IS NULL
-    `).run(now, userId);
+    `,
+    ).run(now, userId);
   });
 
   transaction();
@@ -463,35 +468,54 @@ export function clearUserNotifications(userId: number, role: "CLIENT" | "PROFESS
       clearDerived.run(userId, notification.key, notification.readAt ?? now, now);
     }
 
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE "UserNotification"
       SET clearedAt = ?, readAt = COALESCE(readAt, ?)
       WHERE userId = ? AND clearedAt IS NULL
-    `).run(now, now, userId);
+    `,
+    ).run(now, now, userId);
   });
 
   transaction();
 }
 
 function getAdminActivityNotifications(db: BetterSqlite3Database): UserNotification[] {
-  const users = db.prepare(`
+  const users = db
+    .prepare(
+      `
     SELECT id, firstName, lastName, email, role, createdAt
     FROM "User"
     WHERE role != 'ADMIN'
     ORDER BY datetime(createdAt) DESC
     LIMIT 30
-  `).all() as Array<{ id: number; firstName: string; lastName: string; email: string; role: string; createdAt: string }>;
+  `,
+    )
+    .all() as Array<{
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+    createdAt: string;
+  }>;
 
-  const jobs = db.prepare(`
+  const jobs = db
+    .prepare(
+      `
     SELECT ClientJob.id, ClientJob.title, ClientJob.createdAt,
       TRIM(User.firstName || ' ' || User.lastName) AS clientName
     FROM "ClientJob"
     LEFT JOIN "User" ON User.id = ClientJob.userId
     ORDER BY datetime(ClientJob.createdAt) DESC
     LIMIT 30
-  `).all() as Array<{ id: number; title: string; createdAt: string; clientName: string | null }>;
+  `,
+    )
+    .all() as Array<{ id: number; title: string; createdAt: string; clientName: string | null }>;
 
-  const disputes = db.prepare(`
+  const disputes = db
+    .prepare(
+      `
     SELECT ProjectDispute.id, ProjectDispute.status, ProjectDispute.priority,
       ProjectDispute.createdAt, COALESCE(ClientJob.title, 'Project') AS jobTitle
     FROM "ProjectDispute"
@@ -499,9 +523,19 @@ function getAdminActivityNotifications(db: BetterSqlite3Database): UserNotificat
     LEFT JOIN "ClientJob" ON ClientJob.id = ProjectTracking.jobId
     ORDER BY datetime(ProjectDispute.createdAt) DESC
     LIMIT 30
-  `).all() as Array<{ id: number; status: string; priority: string; createdAt: string; jobTitle: string }>;
+  `,
+    )
+    .all() as Array<{
+    id: number;
+    status: string;
+    priority: string;
+    createdAt: string;
+    jobTitle: string;
+  }>;
 
-  const payments = db.prepare(`
+  const payments = db
+    .prepare(
+      `
     SELECT ProjectTransaction.id, ProjectTransaction.amount, ProjectTransaction.currency,
       ProjectTransaction.createdAt, COALESCE(ClientJob.title, ProjectTransaction.description, 'Project') AS jobTitle
     FROM "ProjectTransaction"
@@ -510,7 +544,15 @@ function getAdminActivityNotifications(db: BetterSqlite3Database): UserNotificat
     WHERE ProjectTransaction.status = 'COMPLETED'
     ORDER BY datetime(ProjectTransaction.createdAt) DESC
     LIMIT 30
-  `).all() as Array<{ id: number; amount: number; currency: string; createdAt: string; jobTitle: string }>;
+  `,
+    )
+    .all() as Array<{
+    id: number;
+    amount: number;
+    currency: string;
+    createdAt: string;
+    jobTitle: string;
+  }>;
 
   return [
     ...users.map((user) => ({
@@ -757,18 +799,28 @@ function getHireContractNotifications(
         return {
           key: `hire-contract:${contract.contractId}:${contract.status}`,
           type: "project",
-          title: contract.status === "pending" ? "New direct hire request" : `Hire request ${contract.status}`,
+          title:
+            contract.status === "pending"
+              ? "New direct hire request"
+              : `Hire request ${contract.status}`,
           description:
             contract.status === "pending"
               ? `${clientName} sent you a hire request for ${title}.`
               : `${title} is now ${contract.status}.`,
           href: "/professional-stats",
-          createdAt: contract.status === "pending" ? contract.createdAt : contract.updatedAt || contract.createdAt,
+          createdAt:
+            contract.status === "pending"
+              ? contract.createdAt
+              : contract.updatedAt || contract.createdAt,
           readAt: null,
         } satisfies UserNotification;
       }
 
-      if (role === "CLIENT" && Number(contract.clientId) === userId && contract.status !== "pending") {
+      if (
+        role === "CLIENT" &&
+        Number(contract.clientId) === userId &&
+        contract.status !== "pending"
+      ) {
         const proName = formatName(
           contract.professionalFirstName,
           contract.professionalLastName,
@@ -922,10 +974,7 @@ function getRevisionNotifications(
         return {
           key: `revision:${revision.id}`,
           type: "work",
-          title:
-            revision.status === "ADDRESSED"
-              ? "Revision addressed"
-              : "Revision request saved",
+          title: revision.status === "ADDRESSED" ? "Revision addressed" : "Revision request saved",
           description: `${projectTitle}: ${revision.note}`,
           href: `/project-track/${revision.trackingId}`,
           createdAt: revision.status === "ADDRESSED" ? revision.updatedAt : revision.createdAt,
@@ -988,7 +1037,9 @@ function getMilestoneNotifications(
         return {
           key: `milestone:${milestone.id}:${milestone.status}`,
           type: milestone.status === "PAID" ? "payment" : "project",
-          title: isNew ? "New milestone added" : `Milestone ${formatMilestoneStatus(milestone.status)}`,
+          title: isNew
+            ? "New milestone added"
+            : `Milestone ${formatMilestoneStatus(milestone.status)}`,
           description: `${clientName} ${isNew ? "added" : "updated"} ${milestone.title}${amountLabel} for ${projectTitle}.`,
           href: `/project-track/${milestone.trackingId}`,
           createdAt: isNew ? milestone.createdAt : milestone.updatedAt,
@@ -1073,7 +1124,8 @@ function getCompletionNotifications(
               : `Final work ${completion.status.toLowerCase().replace(/_/g, " ")}`,
           description: `${proName} submitted final work for ${projectTitle}.`,
           href: `/project-track/${completion.trackingId}`,
-          createdAt: completion.status === "SUBMITTED" ? completion.submittedAt : completion.updatedAt,
+          createdAt:
+            completion.status === "SUBMITTED" ? completion.submittedAt : completion.updatedAt,
           readAt: null,
         } satisfies UserNotification;
       }
@@ -1096,7 +1148,8 @@ function getCompletionNotifications(
                 : "Final work submitted",
           description: `${clientName} updated final work review for ${projectTitle}.`,
           href: `/project-track/${completion.trackingId}`,
-          createdAt: completion.status === "SUBMITTED" ? completion.submittedAt : completion.updatedAt,
+          createdAt:
+            completion.status === "SUBMITTED" ? completion.submittedAt : completion.updatedAt,
           readAt: null,
         } satisfies UserNotification;
       }

@@ -1619,7 +1619,9 @@ function isVideoSourceError(error: unknown) {
 
   const message = error.message.toLowerCase();
   return (
-    ["NotReadableError", "AbortError", "NotFoundError", "OverconstrainedError"].includes(error.name) ||
+    ["NotReadableError", "AbortError", "NotFoundError", "OverconstrainedError"].includes(
+      error.name,
+    ) ||
     message.includes("video source") ||
     message.includes("camera")
   );

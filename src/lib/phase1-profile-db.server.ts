@@ -141,7 +141,15 @@ export function upsertPhase1ProfessionalProfile(input: Phase1ProfessionalProfile
           phone = excluded.phone,
           updated_at = excluded.updated_at
       `,
-    ).run(userId, input.role.toLowerCase(), input.email, input.phone || null, "active", timestamp, timestamp);
+    ).run(
+      userId,
+      input.role.toLowerCase(),
+      input.email,
+      input.phone || null,
+      "active",
+      timestamp,
+      timestamp,
+    );
 
     db.prepare(
       `

@@ -6,7 +6,14 @@ import { Chrome } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { createSessionCookie } from "@/lib/auth-session.server";
 import { hashPassword, verifyPassword } from "@/lib/password.server";
@@ -20,7 +27,12 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Log in — Servio" }, { name: "description", content: "Log in to your Servio account." }] }),
+  head: () => ({
+    meta: [
+      { title: "Log in — Servio" },
+      { name: "description", content: "Log in to your Servio account." },
+    ],
+  }),
   component: Login,
 });
 
@@ -82,16 +94,19 @@ const submitLogin = createServerFn({ method: "POST" })
       }
 
       recordUserLogin(user.id);
-      setResponseHeader("Set-Cookie", createSessionCookie({
-        id: user.id,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        avatarUrl: user.avatarUrl,
-        authProvider: user.authProvider,
-      }));
+      setResponseHeader(
+        "Set-Cookie",
+        createSessionCookie({
+          id: user.id,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone,
+          avatarUrl: user.avatarUrl,
+          authProvider: user.authProvider,
+        }),
+      );
 
       return {
         ok: true as const,
@@ -160,7 +175,11 @@ function Login() {
       await navigate({ to: nextRoute });
     } catch (error) {
       console.error("Login failed:", error);
-      dispatch(setLoginSubmitError(error instanceof Error ? error.message : "Login failed. Please try again."));
+      dispatch(
+        setLoginSubmitError(
+          error instanceof Error ? error.message : "Login failed. Please try again.",
+        ),
+      );
     } finally {
       dispatch(setLoginSubmitting(false));
     }
@@ -170,7 +189,14 @@ function Login() {
     <AuthLayout
       title="Welcome back"
       subtitle="Log in to continue to your dashboard."
-      footer={<>Don't have an account? <Link to="/signup" className="text-primary hover:underline">Sign up</Link></>}
+      footer={
+        <>
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-primary hover:underline">
+            Sign up
+          </Link>
+        </>
+      }
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -181,7 +207,9 @@ function Login() {
                 Continue with Google
               </a>
             </Button>
-            <Button type="button" variant="outline">Continue with Apple</Button>
+            <Button type="button" variant="outline">
+              Continue with Apple
+            </Button>
           </div>
 
           <div className="relative py-2 text-center text-xs text-muted-foreground">
@@ -196,7 +224,12 @@ function Login() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="you@example.com" autoComplete="email" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -210,10 +243,17 @@ function Login() {
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel>Password</FormLabel>
-                  <Link to="/forgot-password" className="text-xs text-primary hover:underline">Forgot?</Link>
+                  <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                    Forgot?
+                  </Link>
                 </div>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" autoComplete="current-password" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

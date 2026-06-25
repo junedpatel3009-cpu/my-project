@@ -287,11 +287,19 @@ export function getAdminDashboardSnapshot(): AdminDashboardSnapshot {
       openJobs: jobs.filter((job) => job.status === "OPEN").length,
       draftJobs: jobs.filter((job) => job.status === "DRAFT").length,
       closedJobs: jobs.filter((job) => job.status === "CLOSED").length,
-      todayJobs: jobs.filter((job) => new Date(job.createdAt).getTime() >= new Date(todayStart).getTime()).length,
+      todayJobs: jobs.filter(
+        (job) => new Date(job.createdAt).getTime() >= new Date(todayStart).getTime(),
+      ).length,
       pendingRequests: count(db, `"ProjectRequest"`, `status = 'PENDING'`),
       activeProjects: count(db, `"ProjectTracking"`, `status = 'ACTIVE'`),
       completedTransactions: count(db, `"ProjectTransaction"`, `status = 'COMPLETED'`),
-      todayTransactions: countSince(db, `"ProjectTransaction"`, "createdAt", todayStart, `status = 'COMPLETED'`),
+      todayTransactions: countSince(
+        db,
+        `"ProjectTransaction"`,
+        "createdAt",
+        todayStart,
+        `status = 'COMPLETED'`,
+      ),
       totalRevenue: sumAmount(db, null),
       todayRevenue: sumAmount(db, todayStart),
       openDisputes: count(db, `"ProjectDispute"`, `status IN ('OPEN', 'UNDER_REVIEW')`),
@@ -320,16 +328,24 @@ export function getAdminManagedUserDetails(
     users.map((user) => {
       const projects = getManagedUserProjects(db, user.id, user.role);
       const transactions = getManagedUserTransactions(db, user.id, user.role);
-      const completedTransactions = transactions.filter((transaction) => transaction.status === "COMPLETED");
+      const completedTransactions = transactions.filter(
+        (transaction) => transaction.status === "COMPLETED",
+      );
 
       return [
         user.id,
         {
           userId: user.id,
           projectCount: projects.length,
-          activeProjectCount: projects.filter((project) => project.trackingStatus === "ACTIVE").length,
-          completedProjectCount: projects.filter((project) => project.trackingStatus === "COMPLETED").length,
-          totalMoney: completedTransactions.reduce((total, transaction) => total + transaction.amount, 0),
+          activeProjectCount: projects.filter((project) => project.trackingStatus === "ACTIVE")
+            .length,
+          completedProjectCount: projects.filter(
+            (project) => project.trackingStatus === "COMPLETED",
+          ).length,
+          totalMoney: completedTransactions.reduce(
+            (total, transaction) => total + transaction.amount,
+            0,
+          ),
           projects,
           transactions,
         } satisfies AdminManagedUserDetail,
@@ -372,18 +388,23 @@ function getModernManagedUserProjects(
         ORDER BY datetime(latest.updatedAt) DESC, latest.id DESC LIMIT 1
       )`
     : "";
-  const userJoin = hasTracking ? `LEFT JOIN "User" AS Counterpart ON Counterpart.id = ${role === "CLIENT" ? "ProjectTracking.professionalId" : "ProjectTracking.clientId"}` : "";
-  const requestJoin = hasTracking && hasRequests
-    ? `LEFT JOIN "ProjectRequest" ON ProjectRequest.id = ProjectTracking.requestId`
+  const userJoin = hasTracking
+    ? `LEFT JOIN "User" AS Counterpart ON Counterpart.id = ${role === "CLIENT" ? "ProjectTracking.professionalId" : "ProjectTracking.clientId"}`
     : "";
-  const where = role === "CLIENT"
-    ? "ClientJob.userId = ?"
-    : hasTracking
-      ? "ProjectTracking.professionalId = ?"
-      : "1 = 0";
+  const requestJoin =
+    hasTracking && hasRequests
+      ? `LEFT JOIN "ProjectRequest" ON ProjectRequest.id = ProjectTracking.requestId`
+      : "";
+  const where =
+    role === "CLIENT"
+      ? "ClientJob.userId = ?"
+      : hasTracking
+        ? "ProjectTracking.professionalId = ?"
+        : "1 = 0";
 
-  return db.prepare(
-    `
+  return db
+    .prepare(
+      `
       SELECT
         ClientJob.id,
         ClientJob.title,
@@ -403,7 +424,8 @@ function getModernManagedUserProjects(
         CASE ${hasTracking ? "ProjectTracking.status" : "NULL"} WHEN 'ACTIVE' THEN 0 WHEN 'COMPLETED' THEN 1 ELSE 2 END,
         datetime(ClientJob.createdAt) DESC
     `,
-  ).all(userId) as AdminManagedUserProject[];
+    )
+    .all(userId) as AdminManagedUserProject[];
 }
 
 function getLegacyManagedUserProjects(
@@ -482,9 +504,7 @@ function getLegacyManagedUserProjects(
               : "COALESCE(LegacyJob.budget_max, LegacyJob.budget_min)"
           } AS agreedAmount,
           ${
-            counterpartJoin
-              ? "TRIM(Counterpart.firstName || ' ' || Counterpart.lastName)"
-              : "NULL"
+            counterpartJoin ? "TRIM(Counterpart.firstName || ' ' || Counterpart.lastName)" : "NULL"
           } AS counterpartName,
           ${counterpartJoin ? "Counterpart.email" : "NULL"} AS counterpartEmail,
           LegacyJob.created_at AS createdAt
@@ -497,19 +517,19 @@ function getLegacyManagedUserProjects(
       `,
     )
     .all(...parameters) as Array<{
-      legacyId: string;
-      title: string;
-      category: string;
-      jobStatus: string;
-      contractStatus: string | null;
-      linkedJobId: number | null;
-      contractAmount: number | null;
-      trackingStatus: string | null;
-      agreedAmount: number | null;
-      counterpartName: string | null;
-      counterpartEmail: string | null;
-      createdAt: string;
-    }>;
+    legacyId: string;
+    title: string;
+    category: string;
+    jobStatus: string;
+    contractStatus: string | null;
+    linkedJobId: number | null;
+    contractAmount: number | null;
+    trackingStatus: string | null;
+    agreedAmount: number | null;
+    counterpartName: string | null;
+    counterpartEmail: string | null;
+    createdAt: string;
+  }>;
 
   const contractProjects = rows
     .filter((project) => !project.linkedJobId || !modernJobIds.has(project.linkedJobId))
@@ -573,14 +593,14 @@ function getLegacyManagedUserProjects(
       `,
     )
     .all(userId) as Array<{
-      id: number;
-      jobId: number;
-      trackingStatus: string;
-      createdAt: string;
-      agreedAmount: number | null;
-      counterpartName: string | null;
-      counterpartEmail: string | null;
-    }>;
+    id: number;
+    jobId: number;
+    trackingStatus: string;
+    createdAt: string;
+    agreedAmount: number | null;
+    counterpartName: string | null;
+    counterpartEmail: string | null;
+  }>;
 
   return [
     ...contractProjects,
@@ -631,11 +651,14 @@ function getManagedUserTransactions(
 
   const hasTracking = tableExists(db, `"ProjectTracking"`);
   const hasJobs = tableExists(db, `"ClientJob"`);
-  const counterpartColumn = role === "CLIENT" ? "ProjectTransaction.professionalId" : "ProjectTransaction.clientId";
-  const userColumn = role === "CLIENT" ? "ProjectTransaction.clientId" : "ProjectTransaction.professionalId";
+  const counterpartColumn =
+    role === "CLIENT" ? "ProjectTransaction.professionalId" : "ProjectTransaction.clientId";
+  const userColumn =
+    role === "CLIENT" ? "ProjectTransaction.clientId" : "ProjectTransaction.professionalId";
 
-  return db.prepare(
-    `
+  return db
+    .prepare(
+      `
       SELECT
         ProjectTransaction.id,
         ${hasTracking && hasJobs ? "COALESCE(ClientJob.title, ProjectTransaction.description)" : "ProjectTransaction.description"} AS projectTitle,
@@ -652,7 +675,8 @@ function getManagedUserTransactions(
       WHERE ${userColumn} = ?
       ORDER BY datetime(ProjectTransaction.createdAt) DESC, ProjectTransaction.id DESC
     `,
-  ).all(userId) as AdminManagedUserTransaction[];
+    )
+    .all(userId) as AdminManagedUserTransaction[];
 }
 
 function tableExists(db: BetterSqlite3Database, tableName: string) {
@@ -687,7 +711,9 @@ function countSince(
     return 0;
   }
 
-  const where = [`datetime(${columnName}) >= datetime(?)`, extraWhere].filter(Boolean).join(" AND ");
+  const where = [`datetime(${columnName}) >= datetime(?)`, extraWhere]
+    .filter(Boolean)
+    .join(" AND ");
   const row = db
     .prepare(`SELECT COUNT(*) AS value FROM ${tableName} WHERE ${where}`)
     .get(since) as { value: number };
@@ -858,9 +884,9 @@ export function getAdminJobRecords() {
       : "";
 
   const rows = hasClientJobs
-    ? db
-      .prepare(
-      `
+    ? (db
+        .prepare(
+          `
         SELECT
           ClientJob.id,
           ClientJob.title,
@@ -908,8 +934,8 @@ export function getAdminJobRecords() {
         ${completionJoin}
         ORDER BY datetime(ClientJob.createdAt) DESC, ClientJob.id DESC
       `,
-    )
-      .all() as AdminJobRecord[]
+        )
+        .all() as AdminJobRecord[])
     : [];
   const attachments = getAdminJobAttachments(db);
   const requests = getAdminJobRequests(db);
@@ -930,9 +956,7 @@ export function getAdminJobRecords() {
     })),
     ...legacyRows,
   ].sort(
-    (a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
-      b.id - a.id,
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() || b.id - a.id,
   );
 }
 
@@ -1050,14 +1074,14 @@ function getLegacyAdminJobRecords(
       `,
     )
     .all() as Array<
-      Omit<AdminJobRecord, "id" | "status" | "attachments" | "requests" | "workUploads"> & {
-        legacyId: string;
-        legacyStatus: string;
-        linkedJobId: number | null;
-        contractStatus: string | null;
-        contractAmount: number | null;
-      }
-    >;
+    Omit<AdminJobRecord, "id" | "status" | "attachments" | "requests" | "workUploads"> & {
+      legacyId: string;
+      legacyStatus: string;
+      linkedJobId: number | null;
+      contractStatus: string | null;
+      contractAmount: number | null;
+    }
+  >;
 
   return rows
     .filter((row) => !row.linkedJobId || !modernJobIds.has(row.linkedJobId))
@@ -1116,7 +1140,10 @@ function normalizeLegacyJobStatus(
     return "CLOSED";
   }
 
-  if (trackingStatus === "CANCELLED" || ["cancelled", "rejected"].includes(contractStatus?.toLowerCase() || "")) {
+  if (
+    trackingStatus === "CANCELLED" ||
+    ["cancelled", "rejected"].includes(contractStatus?.toLowerCase() || "")
+  ) {
     return "CANCELLED";
   }
 
@@ -1290,7 +1317,10 @@ export function getAdminDisputeRecords() {
   }));
 }
 
-export function updateAdminDisputeStatus(disputeId: number, status: "OPEN" | "UNDER_REVIEW" | "RESOLVED") {
+export function updateAdminDisputeStatus(
+  disputeId: number,
+  status: "OPEN" | "UNDER_REVIEW" | "RESOLVED",
+) {
   const db = getDatabase();
 
   if (!tableExists(db, `"ProjectDispute"`)) {
@@ -1306,9 +1336,9 @@ export function updateAdminDisputeStatus(disputeId: number, status: "OPEN" | "UN
     `,
   ).run(status, timestamp, disputeId);
 
-  const row = db
-    .prepare(`SELECT id FROM "ProjectDispute" WHERE id = ? LIMIT 1`)
-    .get(disputeId) as { id: number } | undefined;
+  const row = db.prepare(`SELECT id FROM "ProjectDispute" WHERE id = ? LIMIT 1`).get(disputeId) as
+    | { id: number }
+    | undefined;
 
   if (!row) {
     throw new Error("Dispute not found.");
@@ -1333,13 +1363,18 @@ export function getAdminEarningsReport(): AdminEarningsReport {
       processingPayouts:
         summary.processingPayouts +
         payouts
-          .filter((payout) => payout.professionalId === professional.professionalId && payout.status === "PROCESSING")
+          .filter(
+            (payout) =>
+              payout.professionalId === professional.professionalId &&
+              payout.status === "PROCESSING",
+          )
           .reduce((total, payout) => total + payout.amount, 0),
       rejectedPayouts: summary.rejectedPayouts + professional.rejectedPayouts,
       availableBalance: summary.availableBalance + professional.availableBalance,
       transactionCount: summary.transactionCount + professional.transactionCount,
       payoutCount: summary.payoutCount + professional.payoutCount,
-      professionalsWithEarnings: summary.professionalsWithEarnings + (professional.transactionCount > 0 ? 1 : 0),
+      professionalsWithEarnings:
+        summary.professionalsWithEarnings + (professional.transactionCount > 0 ? 1 : 0),
     }),
     {
       grossEarnings: 0,
@@ -1456,7 +1491,8 @@ function getAdminEarningsTransactions(db: BetterSqlite3Database) {
 
   return rows.map((transaction) => {
     const commissionAmount = getCommissionAmount(transaction.amount, transaction.status);
-    const netPayoutAmount = transaction.status === "COMPLETED" ? Math.max(0, transaction.amount - commissionAmount) : 0;
+    const netPayoutAmount =
+      transaction.status === "COMPLETED" ? Math.max(0, transaction.amount - commissionAmount) : 0;
 
     return {
       ...transaction,
@@ -1537,14 +1573,26 @@ function getProfessionalEarningsSummaries(
   return Array.from(professionalIds)
     .map((professionalId) => {
       const professionalTransactions = transactions.filter(
-        (transaction) => transaction.professionalId === professionalId && transaction.status === "COMPLETED",
+        (transaction) =>
+          transaction.professionalId === professionalId && transaction.status === "COMPLETED",
       );
-      const professionalPayouts = payouts.filter((payout) => payout.professionalId === professionalId);
+      const professionalPayouts = payouts.filter(
+        (payout) => payout.professionalId === professionalId,
+      );
       const firstTransaction = professionalTransactions[0];
       const firstPayout = professionalPayouts[0];
-      const grossEarnings = professionalTransactions.reduce((total, transaction) => total + transaction.grossAmount, 0);
-      const commissionAmount = professionalTransactions.reduce((total, transaction) => total + transaction.commissionAmount, 0);
-      const netEarnings = professionalTransactions.reduce((total, transaction) => total + transaction.netPayoutAmount, 0);
+      const grossEarnings = professionalTransactions.reduce(
+        (total, transaction) => total + transaction.grossAmount,
+        0,
+      );
+      const commissionAmount = professionalTransactions.reduce(
+        (total, transaction) => total + transaction.commissionAmount,
+        0,
+      );
+      const netEarnings = professionalTransactions.reduce(
+        (total, transaction) => total + transaction.netPayoutAmount,
+        0,
+      );
       const requestedPayouts = professionalPayouts
         .filter((payout) => payout.status !== "REJECTED")
         .reduce((total, payout) => total + payout.amount, 0);
@@ -1560,8 +1608,12 @@ function getProfessionalEarningsSummaries(
 
       return {
         professionalId,
-        professionalName: firstTransaction?.professionalName || firstPayout?.professionalName || "Unknown professional",
-        professionalEmail: firstTransaction?.professionalEmail || firstPayout?.professionalEmail || "Unknown email",
+        professionalName:
+          firstTransaction?.professionalName ||
+          firstPayout?.professionalName ||
+          "Unknown professional",
+        professionalEmail:
+          firstTransaction?.professionalEmail || firstPayout?.professionalEmail || "Unknown email",
         grossEarnings,
         commissionAmount,
         netEarnings,

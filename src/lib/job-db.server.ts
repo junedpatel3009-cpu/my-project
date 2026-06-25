@@ -129,8 +129,18 @@ function ensureClientJobTables(db: BetterSqlite3Database) {
     CREATE INDEX IF NOT EXISTS "ProjectTracking_jobId_idx" ON "ProjectTracking"("jobId");
   `);
 
-  ensureColumn(db, "ClientJob", "timingType", `ALTER TABLE "ClientJob" ADD COLUMN "timingType" TEXT NOT NULL DEFAULT 'FIXED'`);
-  ensureColumn(db, "ClientJob", "hourlyRate", `ALTER TABLE "ClientJob" ADD COLUMN "hourlyRate" INTEGER`);
+  ensureColumn(
+    db,
+    "ClientJob",
+    "timingType",
+    `ALTER TABLE "ClientJob" ADD COLUMN "timingType" TEXT NOT NULL DEFAULT 'FIXED'`,
+  );
+  ensureColumn(
+    db,
+    "ClientJob",
+    "hourlyRate",
+    `ALTER TABLE "ClientJob" ADD COLUMN "hourlyRate" INTEGER`,
+  );
 }
 
 function ensureFavoriteJobTable(db: BetterSqlite3Database) {
@@ -158,7 +168,10 @@ function normalizeDateValue(value?: string | null) {
   return new Date(`${trimmed}T00:00:00.000Z`).toISOString();
 }
 
-function mapJob(row: Omit<ClientJobRecord, "attachments">, attachments: ClientJobAttachmentRecord[]) {
+function mapJob(
+  row: Omit<ClientJobRecord, "attachments">,
+  attachments: ClientJobAttachmentRecord[],
+) {
   return {
     ...row,
     timingType: row.timingType ?? (row.hourlyRate ? "HOURLY" : "FIXED"),
@@ -175,7 +188,12 @@ function tableExists(db: BetterSqlite3Database, tableName: string) {
   return Boolean(result);
 }
 
-function ensureColumn(db: BetterSqlite3Database, tableName: string, columnName: string, alterSql: string) {
+function ensureColumn(
+  db: BetterSqlite3Database,
+  tableName: string,
+  columnName: string,
+  alterSql: string,
+) {
   const columns = db.prepare(`PRAGMA table_info("${tableName}")`).all() as Array<{ name: string }>;
 
   if (!columns.some((column) => column.name === columnName)) {
@@ -720,17 +738,25 @@ export function deleteClientJob(userId: number, jobId: number) {
 
       for (const table of trackingTables) {
         if (tableExists(db, table)) {
-          db.prepare(`DELETE FROM "${table}" WHERE trackingId IN (${placeholders})`).run(...trackingIdValues);
+          db.prepare(`DELETE FROM "${table}" WHERE trackingId IN (${placeholders})`).run(
+            ...trackingIdValues,
+          );
         }
       }
     }
 
     if (tableExists(db, "ProjectTracking")) {
-      db.prepare(`DELETE FROM "ProjectTracking" WHERE jobId = ? AND clientId = ?`).run(jobId, userId);
+      db.prepare(`DELETE FROM "ProjectTracking" WHERE jobId = ? AND clientId = ?`).run(
+        jobId,
+        userId,
+      );
     }
 
     if (tableExists(db, "ProjectRequest")) {
-      db.prepare(`DELETE FROM "ProjectRequest" WHERE jobId = ? AND clientId = ?`).run(jobId, userId);
+      db.prepare(`DELETE FROM "ProjectRequest" WHERE jobId = ? AND clientId = ?`).run(
+        jobId,
+        userId,
+      );
     }
 
     db.prepare(`DELETE FROM "FavoriteJob" WHERE jobId = ?`).run(jobId);

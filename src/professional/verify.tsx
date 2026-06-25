@@ -23,13 +23,19 @@ function Verify() {
     <AuthLayout
       title="Verify your email"
       subtitle="We sent a 6-digit code to jane@company.com. Enter it below to continue."
-      footer={<>Didn't get it? <button className="text-primary hover:underline">Resend code</button></>}
+      footer={
+        <>
+          Didn't get it? <button className="text-primary hover:underline">Resend code</button>
+        </>
+      }
     >
       <div className="flex justify-between gap-2">
         {code.map((c, i) => (
           <input
             key={i}
-            ref={(el) => { refs.current[i] = el; }}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
             value={c}
             onChange={(e) => set(i, e.target.value)}
             className="h-14 w-12 rounded-xl border border-input bg-card text-center text-xl font-semibold outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"

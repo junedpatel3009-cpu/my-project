@@ -1,7 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(timeout 2 npm run *)"
-    ]
+    "allow": ["Bash(timeout 2 npm run *)"]
   }
 }

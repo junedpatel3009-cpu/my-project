@@ -11,7 +11,8 @@ export const Route = createFileRoute("/for-clients")({
       { title: "For Clients - Hire vetted professionals | Servio" },
       {
         name: "description",
-        content: "Post a job, compare proposals, and pay safely via escrow. Servio is built to help clients hire with confidence.",
+        content:
+          "Post a job, compare proposals, and pay safely via escrow. Servio is built to help clients hire with confidence.",
       },
     ],
   }),
@@ -19,9 +20,21 @@ export const Route = createFileRoute("/for-clients")({
 });
 
 const benefits = [
-  { icon: ShieldCheck, title: "Vetted professionals", desc: "Every pro is ID-verified. Background checks for in-home services." },
-  { icon: Wallet, title: "Escrow payments", desc: "Your money is safe. Released only when you approve a milestone." },
-  { icon: Clock, title: "Fast matches", desc: "Get your first proposal in under 2 hours, on average." },
+  {
+    icon: ShieldCheck,
+    title: "Vetted professionals",
+    desc: "Every pro is ID-verified. Background checks for in-home services.",
+  },
+  {
+    icon: Wallet,
+    title: "Escrow payments",
+    desc: "Your money is safe. Released only when you approve a milestone.",
+  },
+  {
+    icon: Clock,
+    title: "Fast matches",
+    desc: "Get your first proposal in under 2 hours, on average.",
+  },
   { icon: Users, title: "World-class support", desc: "Real humans, 24/7 - never a bot." },
 ];
 
@@ -32,12 +45,15 @@ function ForClients() {
       <section className="gradient-hero">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">For clients</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+              For clients
+            </p>
             <h1 className="font-display mt-3 text-4xl font-bold tracking-tight md:text-5xl">
               Hire trusted pros - without the back-and-forth
             </h1>
             <p className="mt-4 max-w-lg text-muted-foreground">
-              Post once. Get qualified, vetted proposals fast. Pay only when work is done. It&apos;s the modern way to get things done.
+              Post once. Get qualified, vetted proposals fast. Pay only when work is done. It&apos;s
+              the modern way to get things done.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild size="lg" className="bg-cta text-cta-foreground hover:bg-cta/90">
@@ -54,7 +70,9 @@ function ForClients() {
             </div>
           </div>
           <div className="rounded-3xl border border-border bg-card p-6 shadow-elevated">
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Sample timeline</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+              Sample timeline
+            </p>
             <ol className="mt-4 space-y-4">
               {[
                 { t: "0 min", e: "You post a kitchen plumbing job" },
@@ -79,10 +97,15 @@ function ForClients() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <h2 className="font-display text-3xl font-bold tracking-tight">Why clients choose Servio</h2>
+        <h2 className="font-display text-3xl font-bold tracking-tight">
+          Why clients choose Servio
+        </h2>
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {benefits.map((benefit) => (
-            <div key={benefit.title} className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+            <div
+              key={benefit.title}
+              className="rounded-2xl border border-border bg-card p-6 shadow-soft"
+            >
               <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
                 <benefit.icon className="h-5 w-5" />
               </div>

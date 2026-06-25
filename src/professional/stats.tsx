@@ -2,7 +2,20 @@ import { createServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link, redirect, useLoaderData, useRouter } from "@tanstack/react-router";
 import type { ComponentType } from "react";
 import { useEffect, useState } from "react";
-import { Briefcase, CalendarDays, CheckCircle2, Clock, Handshake, Heart, MapPin, MessageSquare, Send, Star, Wallet, XCircle } from "lucide-react";
+import {
+  Briefcase,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  Handshake,
+  Heart,
+  MapPin,
+  MessageSquare,
+  Send,
+  Star,
+  Wallet,
+  XCircle,
+} from "lucide-react";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
 
@@ -47,7 +60,13 @@ import {
 import { formatApproximateLocation } from "@/lib/location-privacy";
 import { getProfessionalProfileByUserId } from "@/lib/user-db.server";
 
-type ProfessionalStatsFilter = "running" | "completed" | "project-requests" | "hire-requests" | "ratings" | "earnings";
+type ProfessionalStatsFilter =
+  | "running"
+  | "completed"
+  | "project-requests"
+  | "hire-requests"
+  | "ratings"
+  | "earnings";
 
 export const getProfessionalStatsData = createServerFn({ method: "GET" }).handler(async () => {
   const viewer = getCurrentUser();
@@ -84,7 +103,10 @@ export const getProfessionalStatsData = createServerFn({ method: "GET" }).handle
 });
 
 const sendNegotiationOffer = createServerFn({ method: "POST" })
-  .inputValidator((input: { requestId: number; bidAmount: number | null; duration: string; message: string }) => input)
+  .inputValidator(
+    (input: { requestId: number; bidAmount: number | null; duration: string; message: string }) =>
+      input,
+  )
   .handler(async ({ data }) => {
     const viewer = getCurrentUser();
 
@@ -108,7 +130,10 @@ const updateHireRequestStatus = createServerFn({ method: "POST" })
   });
 
 const sendHireNegotiationOffer = createServerFn({ method: "POST" })
-  .inputValidator((input: { contractId: string; bidAmount: number | null; duration: string; message: string }) => input)
+  .inputValidator(
+    (input: { contractId: string; bidAmount: number | null; duration: string; message: string }) =>
+      input,
+  )
   .handler(async ({ data }) => {
     const viewer = getCurrentUser();
 
@@ -149,7 +174,9 @@ const deleteProfessionalRejectedDirectHire = createServerFn({ method: "POST" })
     const viewer = getCurrentUser();
 
     if (!viewer || viewer.role !== "PROFESSIONAL") {
-      throw new Error("Only professionals can delete rejected direct hire requests from this page.");
+      throw new Error(
+        "Only professionals can delete rejected direct hire requests from this page.",
+      );
     }
 
     return deleteRejectedHireRequest(viewer.id, data.contractId);
@@ -241,23 +268,40 @@ function ProfessionalStats() {
   const hireRequests = (data.hireRequests ?? []) as ProfessionalHireRequestRecord[];
   const trackedProjects = (data.trackedProjects ?? []) as ProfessionalTrackedProjectRecord[];
   const transactions = data.transactions ?? [];
-  const visibleProjectRequests = projectRequests.filter((project) => isVisibleProjectRequest(project));
+  const visibleProjectRequests = projectRequests.filter((project) =>
+    isVisibleProjectRequest(project),
+  );
   const visibleHireRequests = hireRequests.filter(
-    (request) => request.status !== "started" && request.status !== "cancelled" && !isExpiredRejectedHireRequest(request, now),
+    (request) =>
+      request.status !== "started" &&
+      request.status !== "cancelled" &&
+      !isExpiredRejectedHireRequest(request, now),
   );
   const runningTrackedProjects = trackedProjects.filter((project) => project.status === "ACTIVE");
-  const completedTrackedProjects = trackedProjects.filter((project) => project.status === "COMPLETED");
-  const startedDirectHires = hireRequests.filter((request) => request.status === "started" && !request.trackingId);
+  const completedTrackedProjects = trackedProjects.filter(
+    (project) => project.status === "COMPLETED",
+  );
+  const startedDirectHires = hireRequests.filter(
+    (request) => request.status === "started" && !request.trackingId,
+  );
   const completedEarnings = transactions
-    .filter((transaction) => transaction.status === "COMPLETED" && transaction.professionalId === viewer.id)
+    .filter(
+      (transaction) =>
+        transaction.status === "COMPLETED" && transaction.professionalId === viewer.id,
+    )
     .reduce((total, transaction) => total + transaction.amount, 0);
   const displayName = profile?.fullName || `${viewer.firstName} ${viewer.lastName}`.trim();
-  const reviewedCompletedProjects = completedTrackedProjects.filter((project) => project.reviewRating);
+  const reviewedCompletedProjects = completedTrackedProjects.filter(
+    (project) => project.reviewRating,
+  );
   const averageRating =
     profile?.reviewCount && profile.reviewCount > 0
       ? Number(profile.averageRating || 0)
       : reviewedCompletedProjects.length
-        ? reviewedCompletedProjects.reduce((total, review) => total + Number(review.reviewRating || 0), 0) / reviewedCompletedProjects.length
+        ? reviewedCompletedProjects.reduce(
+            (total, review) => total + Number(review.reviewRating || 0),
+            0,
+          ) / reviewedCompletedProjects.length
         : 0;
   const ratingLabel = reviewedCompletedProjects.length ? averageRating.toFixed(1) : "No reviews";
   const statCounts = {
@@ -269,7 +313,9 @@ function ProfessionalStats() {
     earnings: Math.round(completedEarnings),
   };
   const showAllStatsSections = activeStatsFilter === null;
-  const activeStatsFilterLabel = activeStatsFilter ? getProfessionalStatsFilterLabel(activeStatsFilter) : null;
+  const activeStatsFilterLabel = activeStatsFilter
+    ? getProfessionalStatsFilterLabel(activeStatsFilter)
+    : null;
 
   function toggleStatsFilter(filter: ProfessionalStatsFilter) {
     setActiveStatsFilter((current) => (current === filter ? null : filter));
@@ -328,7 +374,9 @@ function ProfessionalStats() {
       setOpenNegotiationId(null);
       await router.invalidate();
     } catch (error) {
-      setNegotiationError(error instanceof Error ? error.message : "Could not send negotiation offer.");
+      setNegotiationError(
+        error instanceof Error ? error.message : "Could not send negotiation offer.",
+      );
     } finally {
       setPendingNegotiationId(null);
     }
@@ -353,7 +401,10 @@ function ProfessionalStats() {
 
   async function handleSendHireNegotiation(request: ProfessionalHireRequestRecord) {
     const draft = hireNegotiationDrafts[request.contractId] ?? {
-      bidAmount: request.totalAmount || request.budgetMax || request.budgetMin ? String(request.totalAmount ?? request.budgetMax ?? request.budgetMin) : "",
+      bidAmount:
+        request.totalAmount || request.budgetMax || request.budgetMin
+          ? String(request.totalAmount ?? request.budgetMax ?? request.budgetMin)
+          : "",
       duration: getDurationWeeksValue(null, request.deadline),
       message: request.description || "",
     };
@@ -383,7 +434,8 @@ function ProfessionalStats() {
       setOpenHireNegotiationId(null);
       await router.invalidate();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not send direct hire negotiation offer.";
+      const message =
+        error instanceof Error ? error.message : "Could not send direct hire negotiation offer.";
       setHireActionError(message);
       toast.error(message);
     } finally {
@@ -415,7 +467,9 @@ function ProfessionalStats() {
       await cancelProfessionalDirectHireProject({ data: { contractId } });
       await router.invalidate();
     } catch (error) {
-      setHireActionError(error instanceof Error ? error.message : "Could not cancel direct hire project.");
+      setHireActionError(
+        error instanceof Error ? error.message : "Could not cancel direct hire project.",
+      );
     } finally {
       setPendingCancelActionId(null);
     }
@@ -430,7 +484,9 @@ function ProfessionalStats() {
       await deleteProfessionalRejectedDirectHire({ data: { contractId } });
       await router.invalidate();
     } catch (error) {
-      setHireActionError(error instanceof Error ? error.message : "Could not delete rejected direct hire request.");
+      setHireActionError(
+        error instanceof Error ? error.message : "Could not delete rejected direct hire request.",
+      );
     } finally {
       setPendingCancelActionId(null);
     }
@@ -483,7 +539,10 @@ function ProfessionalStats() {
         <Textarea
           value={draft}
           onChange={(event) => {
-            setReviewResponseDrafts((current) => ({ ...current, [project.id]: event.target.value }));
+            setReviewResponseDrafts((current) => ({
+              ...current,
+              [project.id]: event.target.value,
+            }));
             setReviewResponseErrorId(null);
             setReviewResponseError(null);
           }}
@@ -514,7 +573,11 @@ function ProfessionalStats() {
   }
 
   return (
-    <AppShell userName={displayName} userRole="Professional" userAvatarUrl={profile?.avatarUrl || viewer.avatarUrl}>
+    <AppShell
+      userName={displayName}
+      userRole="Professional"
+      userAvatarUrl={profile?.avatarUrl || viewer.avatarUrl}
+    >
       <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">My stats</h1>
@@ -592,917 +655,1084 @@ function ProfessionalStats() {
 
       {activeStatsFilterLabel ? (
         <div className="mt-6 flex flex-col justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 sm:flex-row sm:items-center">
-          <p className="text-sm font-medium">Showing only {activeStatsFilterLabel.toLowerCase()}.</p>
-          <Button type="button" size="sm" variant="outline" onClick={() => setActiveStatsFilter(null)}>
+          <p className="text-sm font-medium">
+            Showing only {activeStatsFilterLabel.toLowerCase()}.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setActiveStatsFilter(null)}
+          >
             Show all projects
           </Button>
         </div>
       ) : null}
 
       {showAllStatsSections || activeStatsFilter === "completed" ? (
-      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-lg font-semibold">Completed projects</h2>
-            <p className="text-sm text-muted-foreground">
-              Finished projects and project details.
-            </p>
+        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">Completed projects</h2>
+              <p className="text-sm text-muted-foreground">
+                Finished projects and project details.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">{completedTrackedProjects.length} completed</Badge>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">{completedTrackedProjects.length} completed</Badge>
-          </div>
-        </div>
 
-        {completedTrackedProjects.length ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {completedTrackedProjects.map((project) => (
-              <div key={`completed-${project.id}`} className="rounded-lg border border-border p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{project.projectCategory}</Badge>
-                      <Badge>Completed</Badge>
-                      {project.reviewRating ? (
-                        <Badge variant="outline">{project.reviewRating}/5 review</Badge>
-                      ) : project.reviewRequestedAt ? (
-                        <Badge variant="outline">Review requested</Badge>
-                      ) : (
-                        <Badge variant="outline">No review yet</Badge>
-                      )}
+          {completedTrackedProjects.length ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {completedTrackedProjects.map((project) => (
+                <div
+                  key={`completed-${project.id}`}
+                  className="rounded-lg border border-border p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary">{project.projectCategory}</Badge>
+                        <Badge>Completed</Badge>
+                        {project.reviewRating ? (
+                          <Badge variant="outline">{project.reviewRating}/5 review</Badge>
+                        ) : project.reviewRequestedAt ? (
+                          <Badge variant="outline">Review requested</Badge>
+                        ) : (
+                          <Badge variant="outline">No review yet</Badge>
+                        )}
+                      </div>
+                      <h3 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Client: {project.clientName || `Client ${project.clientId}`}
+                      </p>
                     </div>
-                    <h3 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Client: {project.clientName || `Client ${project.clientId}`}
-                    </p>
+                    <img
+                      src={
+                        project.clientAvatarUrl ||
+                        `https://i.pravatar.cc/100?u=completed-client-${project.clientId}`
+                      }
+                      alt=""
+                      className="h-12 w-12 shrink-0 rounded-lg object-cover"
+                    />
                   </div>
-                  <img
-                    src={project.clientAvatarUrl || `https://i.pravatar.cc/100?u=completed-client-${project.clientId}`}
-                    alt=""
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                  />
-                </div>
-                <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                  <span>Price: {formatMoney(project.bidAmount ?? 0)}</span>
-                  <span>Duration: {project.duration || "Not set"}</span>
-                  <span>Accepted {project.acceptedAt ? formatDate(project.acceptedAt) : "Not set"}</span>
-                  <span>{project.deadline ? `Deadline ${formatDate(project.deadline)}` : "Deadline not set"}</span>
-                </div>
+                  <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                    <span>Price: {formatMoney(project.bidAmount ?? 0)}</span>
+                    <span>Duration: {project.duration || "Not set"}</span>
+                    <span>
+                      Accepted {project.acceptedAt ? formatDate(project.acceptedAt) : "Not set"}
+                    </span>
+                    <span>
+                      {project.deadline
+                        ? `Deadline ${formatDate(project.deadline)}`
+                        : "Deadline not set"}
+                    </span>
+                  </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/project-track/$trackingId" params={{ trackingId: String(project.id) }}>
-                      View project
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/professional-messages">
-                      <MessageSquare className="h-4 w-4" />
-                      Message client
-                    </Link>
-                  </Button>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link
+                        to="/project-track/$trackingId"
+                        params={{ trackingId: String(project.id) }}
+                      >
+                        View project
+                      </Link>
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to="/professional-messages">
+                        <MessageSquare className="h-4 w-4" />
+                        Message client
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
-            <CheckCircle2 className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h3 className="mt-3 font-semibold">No completed projects yet</h3>
-            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Completed tracked projects will appear here with review status.
-            </p>
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+              <CheckCircle2 className="mx-auto h-8 w-8 text-muted-foreground" />
+              <h3 className="mt-3 font-semibold">No completed projects yet</h3>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                Completed tracked projects will appear here with review status.
+              </p>
+            </div>
+          )}
+        </div>
       ) : null}
 
       {activeStatsFilter === "ratings" ? (
-      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-lg font-semibold">Ratings & Client Reviews</h2>
-            <p className="text-sm text-muted-foreground">
-              Completed projects where clients left a review.
-            </p>
+        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">Ratings & Client Reviews</h2>
+              <p className="text-sm text-muted-foreground">
+                Completed projects where clients left a review.
+              </p>
+            </div>
+            <Badge variant="secondary">
+              {reviewedCompletedProjects.length} client review
+              {reviewedCompletedProjects.length === 1 ? "" : "s"}
+            </Badge>
           </div>
-          <Badge variant="secondary">
-            {reviewedCompletedProjects.length} client review{reviewedCompletedProjects.length === 1 ? "" : "s"}
-          </Badge>
-        </div>
 
-        {reviewedCompletedProjects.length ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {reviewedCompletedProjects.map((project) => (
-              <div key={`rating-${project.id}`} className="rounded-lg border border-border p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="secondary">{project.projectCategory}</Badge>
-                      <RatingStars rating={Number(project.reviewRating || 0)} />
-                      <Badge variant="outline">{project.reviewRating}/5</Badge>
+          {reviewedCompletedProjects.length ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {reviewedCompletedProjects.map((project) => (
+                <div key={`rating-${project.id}`} className="rounded-lg border border-border p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="secondary">{project.projectCategory}</Badge>
+                        <RatingStars rating={Number(project.reviewRating || 0)} />
+                        <Badge variant="outline">{project.reviewRating}/5</Badge>
+                      </div>
+                      <h3 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Client: {project.clientName || `Client ${project.clientId}`}
+                      </p>
                     </div>
-                    <h3 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Client: {project.clientName || `Client ${project.clientId}`}
-                    </p>
+                    <img
+                      src={
+                        project.clientAvatarUrl ||
+                        `https://i.pravatar.cc/100?u=rating-client-${project.clientId}`
+                      }
+                      alt=""
+                      className="h-12 w-12 shrink-0 rounded-lg object-cover"
+                    />
                   </div>
-                  <img
-                    src={project.clientAvatarUrl || `https://i.pravatar.cc/100?u=rating-client-${project.clientId}`}
-                    alt=""
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                  />
+                  <p className="mt-4 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+                    {project.reviewComment || "Client left a rating without a written review."}
+                  </p>
+                  {renderReviewResponseEditor(project)}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link
+                        to="/project-track/$trackingId"
+                        params={{ trackingId: String(project.id) }}
+                      >
+                        View project
+                      </Link>
+                    </Button>
+                    {project.reviewCreatedAt ? (
+                      <Badge variant="outline">Rated {formatDate(project.reviewCreatedAt)}</Badge>
+                    ) : null}
+                  </div>
                 </div>
-                <p className="mt-4 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
-                  {project.reviewComment || "Client left a rating without a written review."}
-                </p>
-                {renderReviewResponseEditor(project)}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/project-track/$trackingId" params={{ trackingId: String(project.id) }}>
-                      View project
-                    </Link>
-                  </Button>
-                  {project.reviewCreatedAt ? (
-                    <Badge variant="outline">Rated {formatDate(project.reviewCreatedAt)}</Badge>
-                  ) : null}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
-            <Star className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h3 className="mt-3 font-semibold">No ratings yet</h3>
-            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Client reviews for completed projects will appear here.
-            </p>
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+              <Star className="mx-auto h-8 w-8 text-muted-foreground" />
+              <h3 className="mt-3 font-semibold">No ratings yet</h3>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                Client reviews for completed projects will appear here.
+              </p>
+            </div>
+          )}
+        </div>
       ) : null}
 
       {activeStatsFilter === "earnings" ? (
-      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-lg font-semibold">Earnings</h2>
-            <p className="text-sm text-muted-foreground">
-              Completed project payments from milestones and final approvals.
-            </p>
+        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">Earnings</h2>
+              <p className="text-sm text-muted-foreground">
+                Completed project payments from milestones and final approvals.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge>{formatMoney(completedEarnings)} earned</Badge>
+              <Button size="sm" variant="outline" asChild>
+                <Link to="/earnings">Open earnings dashboard</Link>
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge>{formatMoney(completedEarnings)} earned</Badge>
-            <Button size="sm" variant="outline" asChild>
-              <Link to="/earnings">Open earnings dashboard</Link>
-            </Button>
-          </div>
-        </div>
 
-        {transactions.length ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {transactions.map((transaction) => (
-              <div key={`earning-${transaction.id}`} className="rounded-lg border border-border p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{transaction.projectCategory || "Project"}</Badge>
-                      <Badge variant="outline">{formatEnum(transaction.type)}</Badge>
+          {transactions.length ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {transactions.map((transaction) => (
+                <div
+                  key={`earning-${transaction.id}`}
+                  className="rounded-lg border border-border p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary">
+                          {transaction.projectCategory || "Project"}
+                        </Badge>
+                        <Badge variant="outline">{formatEnum(transaction.type)}</Badge>
+                      </div>
+                      <h3 className="mt-3 line-clamp-2 font-semibold">
+                        {transaction.projectTitle ||
+                          transaction.description ||
+                          `Project #${transaction.trackingId}`}
+                      </h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {transaction.description}
+                      </p>
                     </div>
-                    <h3 className="mt-3 line-clamp-2 font-semibold">
-                      {transaction.projectTitle || transaction.description || `Project #${transaction.trackingId}`}
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {transaction.description}
+                    <p className="shrink-0 text-lg font-semibold">
+                      {formatMoney(transaction.amount)}
                     </p>
                   </div>
-                  <p className="shrink-0 text-lg font-semibold">{formatMoney(transaction.amount)}</p>
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+                    <span>{formatDate(transaction.createdAt)}</span>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link
+                        to="/project-track/$trackingId"
+                        params={{ trackingId: String(transaction.trackingId) }}
+                      >
+                        View project
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-                  <span>{formatDate(transaction.createdAt)}</span>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/project-track/$trackingId" params={{ trackingId: String(transaction.trackingId) }}>
-                      View project
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
-            <Wallet className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h3 className="mt-3 font-semibold">No earnings yet</h3>
-            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Completed milestone and final payments will appear here.
-            </p>
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+              <Wallet className="mx-auto h-8 w-8 text-muted-foreground" />
+              <h3 className="mt-3 font-semibold">No earnings yet</h3>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                Completed milestone and final payments will appear here.
+              </p>
+            </div>
+          )}
+        </div>
       ) : null}
 
       {showAllStatsSections || activeStatsFilter === "running" ? (
-      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-lg font-semibold">Running projects</h2>
-            <p className="text-sm text-muted-foreground">
-              Active tracked jobs and accepted direct hires.
-            </p>
+        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">Running projects</h2>
+              <p className="text-sm text-muted-foreground">
+                Active tracked jobs and accepted direct hires.
+              </p>
+            </div>
+            <Badge>{runningTrackedProjects.length + startedDirectHires.length} running</Badge>
           </div>
-          <Badge>{runningTrackedProjects.length + startedDirectHires.length} running</Badge>
+
+          {runningTrackedProjects.length || startedDirectHires.length ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {runningTrackedProjects.map((project) => (
+                <div key={`tracked-${project.id}`} className="rounded-lg border border-border p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary">{project.projectCategory}</Badge>
+                        <Badge>Running</Badge>
+                      </div>
+                      <h3 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Client: {project.clientName || `Client ${project.clientId}`}
+                      </p>
+                    </div>
+                    <img
+                      src={
+                        project.clientAvatarUrl ||
+                        `https://i.pravatar.cc/100?u=running-client-${project.clientId}`
+                      }
+                      alt=""
+                      className="h-12 w-12 shrink-0 rounded-lg object-cover"
+                    />
+                  </div>
+                  <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                    <span>Price: {formatMoney(project.bidAmount ?? 0)}</span>
+                    <span>Duration: {project.duration || "Not set"}</span>
+                    <span>
+                      Accepted {project.acceptedAt ? formatDate(project.acceptedAt) : "Not set"}
+                    </span>
+                    <span>Tracking {formatEnum(project.status || "ACTIVE")}</span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button size="sm" asChild>
+                      <Link
+                        to="/project-track/$trackingId"
+                        params={{ trackingId: String(project.id) }}
+                      >
+                        Track project
+                      </Link>
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to="/professional-messages">
+                        <MessageSquare className="h-4 w-4" />
+                        Message
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleCancelTrackedProject(project.id)}
+                      disabled={pendingCancelActionId === `tracked-${project.id}`}
+                    >
+                      <XCircle className="h-4 w-4" />
+                      {pendingCancelActionId === `tracked-${project.id}` ? "Cancelling" : "Cancel"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+
+              {startedDirectHires.map((request) => (
+                <div
+                  key={`hire-${request.contractId}`}
+                  className="rounded-lg border border-border p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary">Direct hire</Badge>
+                        <Badge>Running</Badge>
+                      </div>
+                      <h3 className="mt-3 line-clamp-2 font-semibold">{request.title}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Client: {request.clientName || `Client ${request.clientId}`}
+                      </p>
+                    </div>
+                    <img
+                      src={
+                        request.clientAvatarUrl ||
+                        `https://i.pravatar.cc/100?u=running-hire-client-${request.clientId}`
+                      }
+                      alt=""
+                      className="h-12 w-12 shrink-0 rounded-lg object-cover"
+                    />
+                  </div>
+                  <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                    <span>
+                      Price:{" "}
+                      {formatMoney(
+                        request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0,
+                      )}
+                    </span>
+                    <span>Work mode: {formatEnum(request.workMode || "both")}</span>
+                    <span>
+                      Accepted {request.updatedAt ? formatDate(request.updatedAt) : "Not set"}
+                    </span>
+                    <span>
+                      {request.deadline
+                        ? `Deadline ${formatDate(request.deadline)}`
+                        : "Deadline not set"}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to="/professional-messages">
+                        <MessageSquare className="h-4 w-4" />
+                        Message client
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleCancelDirectHire(request.contractId)}
+                      disabled={pendingCancelActionId === `hire-${request.contractId}`}
+                    >
+                      <XCircle className="h-4 w-4" />
+                      {pendingCancelActionId === `hire-${request.contractId}`
+                        ? "Cancelling"
+                        : "Cancel"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+              <Clock className="mx-auto h-8 w-8 text-muted-foreground" />
+              <h3 className="mt-3 font-semibold">No running projects yet</h3>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                Accepted tracked jobs and accepted direct hires will appear here.
+              </p>
+            </div>
+          )}
         </div>
-
-        {runningTrackedProjects.length || startedDirectHires.length ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {runningTrackedProjects.map((project) => (
-              <div key={`tracked-${project.id}`} className="rounded-lg border border-border p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{project.projectCategory}</Badge>
-                      <Badge>Running</Badge>
-                    </div>
-                    <h3 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Client: {project.clientName || `Client ${project.clientId}`}
-                    </p>
-                  </div>
-                  <img
-                    src={project.clientAvatarUrl || `https://i.pravatar.cc/100?u=running-client-${project.clientId}`}
-                    alt=""
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                  />
-                </div>
-                <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                  <span>Price: {formatMoney(project.bidAmount ?? 0)}</span>
-                  <span>Duration: {project.duration || "Not set"}</span>
-                  <span>Accepted {project.acceptedAt ? formatDate(project.acceptedAt) : "Not set"}</span>
-                  <span>Tracking {formatEnum(project.status || "ACTIVE")}</span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button size="sm" asChild>
-                    <Link to="/project-track/$trackingId" params={{ trackingId: String(project.id) }}>
-                      Track project
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/professional-messages">
-                      <MessageSquare className="h-4 w-4" />
-                      Message
-                    </Link>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleCancelTrackedProject(project.id)}
-                    disabled={pendingCancelActionId === `tracked-${project.id}`}
-                  >
-                    <XCircle className="h-4 w-4" />
-                    {pendingCancelActionId === `tracked-${project.id}` ? "Cancelling" : "Cancel"}
-                  </Button>
-                </div>
-              </div>
-            ))}
-
-            {startedDirectHires.map((request) => (
-              <div key={`hire-${request.contractId}`} className="rounded-lg border border-border p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">Direct hire</Badge>
-                      <Badge>Running</Badge>
-                    </div>
-                    <h3 className="mt-3 line-clamp-2 font-semibold">{request.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Client: {request.clientName || `Client ${request.clientId}`}
-                    </p>
-                  </div>
-                  <img
-                    src={request.clientAvatarUrl || `https://i.pravatar.cc/100?u=running-hire-client-${request.clientId}`}
-                    alt=""
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                  />
-                </div>
-                <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                  <span>Price: {formatMoney(request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0)}</span>
-                  <span>Work mode: {formatEnum(request.workMode || "both")}</span>
-                  <span>Accepted {request.updatedAt ? formatDate(request.updatedAt) : "Not set"}</span>
-                  <span>{request.deadline ? `Deadline ${formatDate(request.deadline)}` : "Deadline not set"}</span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/professional-messages">
-                      <MessageSquare className="h-4 w-4" />
-                      Message client
-                    </Link>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleCancelDirectHire(request.contractId)}
-                    disabled={pendingCancelActionId === `hire-${request.contractId}`}
-                  >
-                    <XCircle className="h-4 w-4" />
-                    {pendingCancelActionId === `hire-${request.contractId}` ? "Cancelling" : "Cancel"}
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
-            <Clock className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h3 className="mt-3 font-semibold">No running projects yet</h3>
-            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Accepted tracked jobs and accepted direct hires will appear here.
-            </p>
-          </div>
-        )}
-      </div>
       ) : null}
 
       {showAllStatsSections || activeStatsFilter === "hire-requests" ? (
-      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-lg font-semibold">Direct hire requests</h2>
-            <p className="text-sm text-muted-foreground">
-              Client hire requests sent from your professional profile.
-            </p>
+        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">Direct hire requests</h2>
+              <p className="text-sm text-muted-foreground">
+                Client hire requests sent from your professional profile.
+              </p>
+            </div>
+            <Badge variant="secondary">{visibleHireRequests.length} requests</Badge>
           </div>
-          <Badge variant="secondary">{visibleHireRequests.length} requests</Badge>
-        </div>
 
-        {hireActionMessage ? (
-          <p className="mt-4 rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">
-            {hireActionMessage}
-          </p>
-        ) : null}
+          {hireActionMessage ? (
+            <p className="mt-4 rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">
+              {hireActionMessage}
+            </p>
+          ) : null}
 
-        {hireActionError ? (
-          <p className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-            {hireActionError}
-          </p>
-        ) : null}
+          {hireActionError ? (
+            <p className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              {hireActionError}
+            </p>
+          ) : null}
 
-        {visibleHireRequests.length ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {visibleHireRequests.map((request) => {
-              const negotiationHistory = hireNegotiations.filter(
-                (negotiation) => negotiation.contractId === request.contractId,
-              );
-              const latestNegotiation = negotiationHistory.at(-1);
-              const hireNegotiationDraft = hireNegotiationDrafts[request.contractId] ?? {
-                bidAmount: request.totalAmount || request.budgetMax || request.budgetMin
-                  ? String(request.totalAmount ?? request.budgetMax ?? request.budgetMin)
-                  : "",
-                duration: getDurationWeeksValue(null, request.deadline),
-                message: request.description || "",
-              };
+          {visibleHireRequests.length ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {visibleHireRequests.map((request) => {
+                const negotiationHistory = hireNegotiations.filter(
+                  (negotiation) => negotiation.contractId === request.contractId,
+                );
+                const latestNegotiation = negotiationHistory.at(-1);
+                const hireNegotiationDraft = hireNegotiationDrafts[request.contractId] ?? {
+                  bidAmount:
+                    request.totalAmount || request.budgetMax || request.budgetMin
+                      ? String(request.totalAmount ?? request.budgetMax ?? request.budgetMin)
+                      : "",
+                  duration: getDurationWeeksValue(null, request.deadline),
+                  message: request.description || "",
+                };
 
-              return (
-              <div
-                key={request.contractId}
-                className={`rounded-lg border p-4 transition ${
-                  request.status === "pending" ? "border-primary/30 bg-primary/5 shadow-soft" : "border-border"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">Direct hire</Badge>
-                      <Badge variant={request.status === "accepted" ? "default" : request.status === "rejected" ? "destructive" : "outline"}>
-                        {formatEnum(request.status)}
-                      </Badge>
-                      {negotiationHistory.length ? <Badge variant="outline">{negotiationHistory.length} offers</Badge> : null}
+                return (
+                  <div
+                    key={request.contractId}
+                    className={`rounded-lg border p-4 transition ${
+                      request.status === "pending"
+                        ? "border-primary/30 bg-primary/5 shadow-soft"
+                        : "border-border"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="secondary">Direct hire</Badge>
+                          <Badge
+                            variant={
+                              request.status === "accepted"
+                                ? "default"
+                                : request.status === "rejected"
+                                  ? "destructive"
+                                  : "outline"
+                            }
+                          >
+                            {formatEnum(request.status)}
+                          </Badge>
+                          {negotiationHistory.length ? (
+                            <Badge variant="outline">{negotiationHistory.length} offers</Badge>
+                          ) : null}
+                        </div>
+                        <h3 className="mt-3 line-clamp-2 font-semibold">{request.title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Client: {request.clientName || `Client ${request.clientId}`}
+                        </p>
+                      </div>
+                      <img
+                        src={
+                          request.clientAvatarUrl ||
+                          `https://i.pravatar.cc/100?u=hire-client-${request.clientId}`
+                        }
+                        alt=""
+                        className="h-11 w-11 rounded-lg object-cover"
+                      />
                     </div>
-                    <h3 className="mt-3 line-clamp-2 font-semibold">{request.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Client: {request.clientName || `Client ${request.clientId}`}
-                    </p>
-                  </div>
-                  <img
-                    src={request.clientAvatarUrl || `https://i.pravatar.cc/100?u=hire-client-${request.clientId}`}
-                    alt=""
-                    className="h-11 w-11 rounded-lg object-cover"
-                  />
-                </div>
-                <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                  <span>Budget: {formatMoney(request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0)}</span>
-                  <span>Work mode: {formatEnum(request.workMode || "both")}</span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4" />
-                    Sent {formatDateTime(request.createdAt)}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <CalendarDays className="h-4 w-4" />
-                    Updated {request.updatedAt ? formatDateTime(request.updatedAt) : "Not set"}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <CalendarDays className="h-4 w-4" />
-                    Deadline {request.deadline ? formatDate(request.deadline) : "Not set"}
-                  </span>
-                  <span className="flex min-w-0 items-center gap-1.5">
-                    <MapPin className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{request.location || "Location not set"}</span>
-                  </span>
-                </div>
-                <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
-                  {request.description || "No work description added."}
-                </p>
-                {latestNegotiation ? (
-                  <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
-                    <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                      <Handshake className="h-4 w-4 text-primary" />
-                      <span>Latest negotiation offer</span>
-                      <span className="text-xs font-normal text-muted-foreground">
-                        {formatDateTime(latestNegotiation.createdAt)}
+                    <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                      <span>
+                        Budget:{" "}
+                        {formatMoney(
+                          request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0,
+                        )}
+                      </span>
+                      <span>Work mode: {formatEnum(request.workMode || "both")}</span>
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="h-4 w-4" />
+                        Sent {formatDateTime(request.createdAt)}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <CalendarDays className="h-4 w-4" />
+                        Updated {request.updatedAt ? formatDateTime(request.updatedAt) : "Not set"}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <CalendarDays className="h-4 w-4" />
+                        Deadline {request.deadline ? formatDate(request.deadline) : "Not set"}
+                      </span>
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <MapPin className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{request.location || "Location not set"}</span>
                       </span>
                     </div>
-                    <div className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                      <span>Bid: {formatMoney(latestNegotiation.bidAmount ?? 0)}</span>
-                      <span>Duration: {latestNegotiation.duration || "Not set"}</span>
-                    </div>
-                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{latestNegotiation.message}</p>
-                  </div>
-                ) : null}
-                {request.status === "rejected" ? (
-                  <p className="mt-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                    Direct hire rejected. It will be removed after 1 minute.
-                  </p>
-                ) : null}
-                {request.status === "pending" ? (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleHireStatus(request.contractId, "accepted")}
-                      disabled={pendingHireActionId === request.contractId}
-                    >
-                      {pendingHireActionId === request.contractId ? "Updating" : "Accept"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleHireStatus(request.contractId, "rejected")}
-                      disabled={pendingHireActionId === request.contractId}
-                    >
-                      Reject
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setHireActionError(null);
-                        setHireNegotiationDrafts((drafts) => ({
-                          ...drafts,
-                          [request.contractId]: hireNegotiationDraft,
-                        }));
-                        setOpenHireNegotiationId(request.contractId);
-                      }}
-                    >
-                      <Handshake className="h-4 w-4" />
-                      Negotiate
-                    </Button>
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to="/professional-messages">Message</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to="/professional-messages">Message client</Link>
-                    </Button>
-                    {request.status === "rejected" ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDeleteRejectedDirectHire(request.contractId)}
-                        disabled={pendingCancelActionId === `delete-hire-${request.contractId}`}
-                      >
-                        <XCircle className="h-4 w-4" />
-                        {pendingCancelActionId === `delete-hire-${request.contractId}` ? "Deleting" : "Delete immediately"}
-                      </Button>
-                    ) : null}
-                  </div>
-                )}
-                <Dialog
-                  open={openHireNegotiationId === request.contractId}
-                  onOpenChange={(open) => setOpenHireNegotiationId(open ? request.contractId : null)}
-                >
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Negotiate direct hire request</DialogTitle>
-                      <DialogDescription>
-                        Send the client a revised amount, duration, and message for {request.title}.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4">
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor={`hire-bid-${request.contractId}`}>Bid amount</Label>
-                          <Input
-                            id={`hire-bid-${request.contractId}`}
-                            type="number"
-                            min="0"
-                            value={hireNegotiationDraft.bidAmount}
-                            onChange={(event) =>
-                              setHireNegotiationDrafts((drafts) => ({
-                                ...drafts,
-                                [request.contractId]: { ...hireNegotiationDraft, bidAmount: event.target.value },
-                              }))
-                            }
-                            placeholder="Direct hire amount"
-                          />
+                    <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
+                      {request.description || "No work description added."}
+                    </p>
+                    {latestNegotiation ? (
+                      <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+                        <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                          <Handshake className="h-4 w-4 text-primary" />
+                          <span>Latest negotiation offer</span>
+                          <span className="text-xs font-normal text-muted-foreground">
+                            {formatDateTime(latestNegotiation.createdAt)}
+                          </span>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor={`hire-duration-${request.contractId}`}>Duration (weeks)</Label>
-                          <Input
-                            id={`hire-duration-${request.contractId}`}
-                            type="number"
-                            min="1"
-                            step="1"
-                            value={hireNegotiationDraft.duration}
-                            onChange={(event) =>
-                              setHireNegotiationDrafts((drafts) => ({
-                                ...drafts,
-                                [request.contractId]: { ...hireNegotiationDraft, duration: event.target.value },
-                              }))
-                            }
-                            placeholder="Weeks"
-                          />
+                        <div className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                          <span>Bid: {formatMoney(latestNegotiation.bidAmount ?? 0)}</span>
+                          <span>Duration: {latestNegotiation.duration || "Not set"}</span>
                         </div>
+                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                          {latestNegotiation.message}
+                        </p>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`hire-message-${request.contractId}`}>Message</Label>
-                        <Textarea
-                          id={`hire-message-${request.contractId}`}
-                          value={hireNegotiationDraft.message}
-                          onChange={(event) =>
+                    ) : null}
+                    {request.status === "rejected" ? (
+                      <p className="mt-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                        Direct hire rejected. It will be removed after 1 minute.
+                      </p>
+                    ) : null}
+                    {request.status === "pending" ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleHireStatus(request.contractId, "accepted")}
+                          disabled={pendingHireActionId === request.contractId}
+                        >
+                          {pendingHireActionId === request.contractId ? "Updating" : "Accept"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleHireStatus(request.contractId, "rejected")}
+                          disabled={pendingHireActionId === request.contractId}
+                        >
+                          Reject
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setHireActionError(null);
                             setHireNegotiationDrafts((drafts) => ({
                               ...drafts,
-                              [request.contractId]: { ...hireNegotiationDraft, message: event.target.value },
-                            }))
-                          }
-                          className="min-h-28"
-                          placeholder="Explain your revised direct hire offer"
-                        />
+                              [request.contractId]: hireNegotiationDraft,
+                            }));
+                            setOpenHireNegotiationId(request.contractId);
+                          }}
+                        >
+                          <Handshake className="h-4 w-4" />
+                          Negotiate
+                        </Button>
+                        <Button size="sm" variant="outline" asChild>
+                          <Link to="/professional-messages">Message</Link>
+                        </Button>
                       </div>
-                      {negotiationHistory.length ? (
-                        <div className="max-h-40 overflow-y-auto rounded-lg border border-border p-3">
-                          <h4 className="text-sm font-medium">Offer history</h4>
-                          <div className="mt-3 space-y-3">
-                            {negotiationHistory.map((negotiation) => (
-                              <div key={negotiation.id} className="rounded-md bg-muted/40 p-3 text-sm">
-                                <div className="flex flex-wrap justify-between gap-2 font-medium">
-                                  <span>
-                                    {formatMoney(negotiation.bidAmount ?? 0)} / {negotiation.duration || "Not set"}
-                                  </span>
-                                  <span className="text-xs font-normal text-muted-foreground">
-                                    {formatDateTime(negotiation.createdAt)}
-                                  </span>
-                                </div>
-                                <p className="mt-1 text-muted-foreground">{negotiation.message}</p>
-                              </div>
-                            ))}
+                    ) : (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button size="sm" variant="outline" asChild>
+                          <Link to="/professional-messages">Message client</Link>
+                        </Button>
+                        {request.status === "rejected" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteRejectedDirectHire(request.contractId)}
+                            disabled={pendingCancelActionId === `delete-hire-${request.contractId}`}
+                          >
+                            <XCircle className="h-4 w-4" />
+                            {pendingCancelActionId === `delete-hire-${request.contractId}`
+                              ? "Deleting"
+                              : "Delete immediately"}
+                          </Button>
+                        ) : null}
+                      </div>
+                    )}
+                    <Dialog
+                      open={openHireNegotiationId === request.contractId}
+                      onOpenChange={(open) =>
+                        setOpenHireNegotiationId(open ? request.contractId : null)
+                      }
+                    >
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Negotiate direct hire request</DialogTitle>
+                          <DialogDescription>
+                            Send the client a revised amount, duration, and message for{" "}
+                            {request.title}.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4">
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <div className="space-y-2">
+                              <Label htmlFor={`hire-bid-${request.contractId}`}>Bid amount</Label>
+                              <Input
+                                id={`hire-bid-${request.contractId}`}
+                                type="number"
+                                min="0"
+                                value={hireNegotiationDraft.bidAmount}
+                                onChange={(event) =>
+                                  setHireNegotiationDrafts((drafts) => ({
+                                    ...drafts,
+                                    [request.contractId]: {
+                                      ...hireNegotiationDraft,
+                                      bidAmount: event.target.value,
+                                    },
+                                  }))
+                                }
+                                placeholder="Direct hire amount"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`hire-duration-${request.contractId}`}>
+                                Duration (weeks)
+                              </Label>
+                              <Input
+                                id={`hire-duration-${request.contractId}`}
+                                type="number"
+                                min="1"
+                                step="1"
+                                value={hireNegotiationDraft.duration}
+                                onChange={(event) =>
+                                  setHireNegotiationDrafts((drafts) => ({
+                                    ...drafts,
+                                    [request.contractId]: {
+                                      ...hireNegotiationDraft,
+                                      duration: event.target.value,
+                                    },
+                                  }))
+                                }
+                                placeholder="Weeks"
+                              />
+                            </div>
                           </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`hire-message-${request.contractId}`}>Message</Label>
+                            <Textarea
+                              id={`hire-message-${request.contractId}`}
+                              value={hireNegotiationDraft.message}
+                              onChange={(event) =>
+                                setHireNegotiationDrafts((drafts) => ({
+                                  ...drafts,
+                                  [request.contractId]: {
+                                    ...hireNegotiationDraft,
+                                    message: event.target.value,
+                                  },
+                                }))
+                              }
+                              className="min-h-28"
+                              placeholder="Explain your revised direct hire offer"
+                            />
+                          </div>
+                          {negotiationHistory.length ? (
+                            <div className="max-h-40 overflow-y-auto rounded-lg border border-border p-3">
+                              <h4 className="text-sm font-medium">Offer history</h4>
+                              <div className="mt-3 space-y-3">
+                                {negotiationHistory.map((negotiation) => (
+                                  <div
+                                    key={negotiation.id}
+                                    className="rounded-md bg-muted/40 p-3 text-sm"
+                                  >
+                                    <div className="flex flex-wrap justify-between gap-2 font-medium">
+                                      <span>
+                                        {formatMoney(negotiation.bidAmount ?? 0)} /{" "}
+                                        {negotiation.duration || "Not set"}
+                                      </span>
+                                      <span className="text-xs font-normal text-muted-foreground">
+                                        {formatDateTime(negotiation.createdAt)}
+                                      </span>
+                                    </div>
+                                    <p className="mt-1 text-muted-foreground">
+                                      {negotiation.message}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
-                      ) : null}
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setOpenHireNegotiationId(null)}>
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={() => handleSendHireNegotiation(request)}
-                        disabled={pendingHireNegotiationId === request.contractId}
-                      >
-                        <Handshake className="h-4 w-4" />
-                        {pendingHireNegotiationId === request.contractId ? "Sending" : "Send offer"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
-            <Handshake className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h3 className="mt-3 font-semibold">No direct hire requests yet</h3>
-            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              When a client sends a hire request from your profile, it will appear here.
-            </p>
-          </div>
-        )}
-      </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setOpenHireNegotiationId(null)}>
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={() => handleSendHireNegotiation(request)}
+                            disabled={pendingHireNegotiationId === request.contractId}
+                          >
+                            <Handshake className="h-4 w-4" />
+                            {pendingHireNegotiationId === request.contractId
+                              ? "Sending"
+                              : "Send offer"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+              <Handshake className="mx-auto h-8 w-8 text-muted-foreground" />
+              <h3 className="mt-3 font-semibold">No direct hire requests yet</h3>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                When a client sends a hire request from your profile, it will appear here.
+              </p>
+            </div>
+          )}
+        </div>
       ) : null}
 
       {showAllStatsSections ? (
-      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-lg font-semibold">Saved jobs</h2>
-            <p className="text-sm text-muted-foreground">
-              Favorite client jobs you saved while browsing.
-            </p>
+        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">Saved jobs</h2>
+              <p className="text-sm text-muted-foreground">
+                Favorite client jobs you saved while browsing.
+              </p>
+            </div>
+            <Badge variant="secondary">{favoriteJobs.length} saved</Badge>
           </div>
-          <Badge variant="secondary">{favoriteJobs.length} saved</Badge>
-        </div>
 
-        {favoriteJobs.length ? (
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {favoriteJobs.map((job) => (
-              <Link
-                key={job.id}
-                to="/job/$jobId"
-                params={{ jobId: String(job.id) }}
-                className="block rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{job.category}</Badge>
-                      <Badge variant={job.urgency === "HIGH" ? "destructive" : "outline"}>
-                        {formatEnum(job.urgency)}
-                      </Badge>
+          {favoriteJobs.length ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {favoriteJobs.map((job) => (
+                <Link
+                  key={job.id}
+                  to="/job/$jobId"
+                  params={{ jobId: String(job.id) }}
+                  className="block rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary">{job.category}</Badge>
+                        <Badge variant={job.urgency === "HIGH" ? "destructive" : "outline"}>
+                          {formatEnum(job.urgency)}
+                        </Badge>
+                      </div>
+                      <h3 className="mt-3 line-clamp-2 font-semibold">{job.title}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Posted by {job.clientCompanyName || job.clientName}
+                      </p>
                     </div>
-                    <h3 className="mt-3 line-clamp-2 font-semibold">{job.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Posted by {job.clientCompanyName || job.clientName}
-                    </p>
+                    <Heart className="h-4 w-4 shrink-0 fill-primary text-primary" />
                   </div>
-                  <Heart className="h-4 w-4 shrink-0 fill-primary text-primary" />
-                </div>
-                <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                  <span>{formatBudget(job.budgetMin, job.budgetMax, job.timingType)}</span>
-                  <span className="flex items-center gap-1.5">
-                    <CalendarDays className="h-4 w-4" />
-                    Deadline {formatDate(job.deadline)}
-                  </span>
-                  <span className="flex min-w-0 items-center gap-1.5 sm:col-span-2">
-                    <MapPin className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{formatFavoriteJobLocation(job)}</span>
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
-            <Heart className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h3 className="mt-3 font-semibold">No saved jobs yet</h3>
-            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Save jobs from the home page or job detail page. They will appear here.
-            </p>
-          </div>
-        )}
-      </div>
+                  <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                    <span>{formatBudget(job.budgetMin, job.budgetMax, job.timingType)}</span>
+                    <span className="flex items-center gap-1.5">
+                      <CalendarDays className="h-4 w-4" />
+                      Deadline {formatDate(job.deadline)}
+                    </span>
+                    <span className="flex min-w-0 items-center gap-1.5 sm:col-span-2">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{formatFavoriteJobLocation(job)}</span>
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+              <Heart className="mx-auto h-8 w-8 text-muted-foreground" />
+              <h3 className="mt-3 font-semibold">No saved jobs yet</h3>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                Save jobs from the home page or job detail page. They will appear here.
+              </p>
+            </div>
+          )}
+        </div>
       ) : null}
 
       {showAllStatsSections || activeStatsFilter === "project-requests" ? (
         <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-lg font-semibold">Project requests you sent</h2>
-            <p className="text-sm text-muted-foreground">
-              Only your submitted project requests appear here with pending, accepted, or rejected status.
-            </p>
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">Project requests you sent</h2>
+              <p className="text-sm text-muted-foreground">
+                Only your submitted project requests appear here with pending, accepted, or rejected
+                status.
+              </p>
+            </div>
+            <Badge variant="secondary">{visibleProjectRequests.length} projects</Badge>
           </div>
-          <Badge variant="secondary">{visibleProjectRequests.length} projects</Badge>
-        </div>
 
-        {visibleProjectRequests.length ? (
-        <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {visibleProjectRequests.map((project) => {
-              const negotiationHistory = projectNegotiations.filter(
-                (negotiation) => negotiation.requestId === project.id,
-              );
-              const latestNegotiation = negotiationHistory.at(-1);
-              const negotiationDraft = negotiationDrafts[project.id] ?? {
-                bidAmount: project.bidAmount ? String(project.bidAmount) : "",
-                duration: getDurationWeeksValue(project.duration, project.deadline),
-                message: project.coverLetter || "",
-              };
+          {visibleProjectRequests.length ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {visibleProjectRequests.map((project) => {
+                const negotiationHistory = projectNegotiations.filter(
+                  (negotiation) => negotiation.requestId === project.id,
+                );
+                const latestNegotiation = negotiationHistory.at(-1);
+                const negotiationDraft = negotiationDrafts[project.id] ?? {
+                  bidAmount: project.bidAmount ? String(project.bidAmount) : "",
+                  duration: getDurationWeeksValue(project.duration, project.deadline),
+                  message: project.coverLetter || "",
+                };
 
-              return (
-              <div key={project.id} className="rounded-lg border border-border p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{project.projectCategory}</Badge>
-                      <Badge variant={project.status === "ACCEPTED" ? "default" : project.status === "DECLINED" ? "destructive" : "outline"}>
-                        {formatEnum(project.status)}
-                      </Badge>
-                      {project.trackingStatus ? <Badge variant="outline">Tracking {formatEnum(project.trackingStatus)}</Badge> : null}
-                      {negotiationHistory.length ? <Badge variant="outline">{negotiationHistory.length} offers</Badge> : null}
+                return (
+                  <div key={project.id} className="rounded-lg border border-border p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="secondary">{project.projectCategory}</Badge>
+                          <Badge
+                            variant={
+                              project.status === "ACCEPTED"
+                                ? "default"
+                                : project.status === "DECLINED"
+                                  ? "destructive"
+                                  : "outline"
+                            }
+                          >
+                            {formatEnum(project.status)}
+                          </Badge>
+                          {project.trackingStatus ? (
+                            <Badge variant="outline">
+                              Tracking {formatEnum(project.trackingStatus)}
+                            </Badge>
+                          ) : null}
+                          {negotiationHistory.length ? (
+                            <Badge variant="outline">{negotiationHistory.length} offers</Badge>
+                          ) : null}
+                        </div>
+                        <h3 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Client: {project.clientName || `Client ${project.clientId}`}
+                        </p>
+                      </div>
+                      <img
+                        src={
+                          project.clientAvatarUrl ||
+                          `https://i.pravatar.cc/100?u=tracked-client-${project.clientId}`
+                        }
+                        alt=""
+                        className="h-11 w-11 rounded-lg object-cover"
+                      />
                     </div>
-                    <h3 className="mt-3 line-clamp-2 font-semibold">{project.projectTitle}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Client: {project.clientName || `Client ${project.clientId}`}
-                    </p>
-                  </div>
-                  <img
-                    src={project.clientAvatarUrl || `https://i.pravatar.cc/100?u=tracked-client-${project.clientId}`}
-                    alt=""
-                    className="h-11 w-11 rounded-lg object-cover"
-                  />
-                </div>
-                <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                  <span>Bid: {formatMoney(project.bidAmount ?? 0)}</span>
-                  <span>Duration: {project.duration || "Not set"}</span>
-                  <span className="flex items-center gap-1.5">
-                    <CalendarDays className="h-4 w-4" />
-                    Deadline {formatDate(project.deadline)}
-                  </span>
-                  <span>{project.acceptedAt ? `Accepted ${formatDate(project.acceptedAt)}` : `Sent ${formatDate(project.createdAt)}`}</span>
-                </div>
-                <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{project.coverLetter}</p>
-                {project.status === "DECLINED" ? (
-                  <p className="mt-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                    Project request rejected. It will be removed after 24 hours.
-                  </p>
-                ) : null}
-                {latestNegotiation ? (
-                  <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
-                    <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                      <Handshake className="h-4 w-4 text-primary" />
-                      <span>Latest negotiation offer</span>
-                      <span className="text-xs font-normal text-muted-foreground">
-                        {formatDateTime(latestNegotiation.createdAt)}
+                    <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                      <span>Bid: {formatMoney(project.bidAmount ?? 0)}</span>
+                      <span>Duration: {project.duration || "Not set"}</span>
+                      <span className="flex items-center gap-1.5">
+                        <CalendarDays className="h-4 w-4" />
+                        Deadline {formatDate(project.deadline)}
+                      </span>
+                      <span>
+                        {project.acceptedAt
+                          ? `Accepted ${formatDate(project.acceptedAt)}`
+                          : `Sent ${formatDate(project.createdAt)}`}
                       </span>
                     </div>
-                    <div className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                      <span>Bid: {formatMoney(latestNegotiation.bidAmount ?? 0)}</span>
-                      <span>Duration: {latestNegotiation.duration || "Not set"}</span>
-                    </div>
-                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{latestNegotiation.message}</p>
-                  </div>
-                ) : null}
-                {project.reviewRating ? (
-                  <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
-                    <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                      <Star className="h-4 w-4 fill-primary text-primary" />
-                      <span>Client rating: {project.reviewRating}/5</span>
-                      {project.reviewCreatedAt ? (
-                        <span className="text-xs font-normal text-muted-foreground">
-                          {formatDate(project.reviewCreatedAt)}
-                        </span>
-                      ) : null}
-                    </div>
-                    {project.reviewComment ? (
-                      <p className="mt-2 text-sm text-muted-foreground">{project.reviewComment}</p>
+                    <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
+                      {project.coverLetter}
+                    </p>
+                    {project.status === "DECLINED" ? (
+                      <p className="mt-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                        Project request rejected. It will be removed after 24 hours.
+                      </p>
                     ) : null}
-                  </div>
-                ) : project.trackingStatus === "COMPLETED" ? (
-                  <div className="mt-3 rounded-lg border border-dashed border-border bg-muted/20 p-3 text-sm text-muted-foreground">
-                    No client rating yet.
-                  </div>
-                ) : null}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button size="sm" asChild>
-                    <Link to="/job/$jobId" params={{ jobId: String(project.jobId) }}>
-                      View job
-                    </Link>
-                  </Button>
-                  {project.status === "PENDING" ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setNegotiationError(null);
-                        setNegotiationDrafts((drafts) => ({
-                          ...drafts,
-                          [project.id]: negotiationDraft,
-                        }));
-                        setOpenNegotiationId(project.id);
-                      }}
-                    >
-                      <Handshake className="h-4 w-4" />
-                      Negotiate
-                    </Button>
-                  ) : null}
-                  {project.trackingId ? (
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to="/project-track/$trackingId" params={{ trackingId: String(project.trackingId) }}>
-                        Track project
-                      </Link>
-                    </Button>
-                  ) : null}
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/professional-messages">Message</Link>
-                  </Button>
-                </div>
-                <Dialog open={openNegotiationId === project.id} onOpenChange={(open) => setOpenNegotiationId(open ? project.id : null)}>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Negotiate project offer</DialogTitle>
-                      <DialogDescription>
-                        Send the client a revised bid, duration, and message for {project.projectTitle}.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4">
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor={`bid-${project.id}`}>Bid amount</Label>
-                          <Input
-                            id={`bid-${project.id}`}
-                            type="number"
-                            min="0"
-                            value={negotiationDraft.bidAmount}
-                            onChange={(event) =>
-                              setNegotiationDrafts((drafts) => ({
-                                ...drafts,
-                                [project.id]: { ...negotiationDraft, bidAmount: event.target.value },
-                              }))
-                            }
-                            placeholder="Project bid"
-                          />
+                    {latestNegotiation ? (
+                      <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+                        <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                          <Handshake className="h-4 w-4 text-primary" />
+                          <span>Latest negotiation offer</span>
+                          <span className="text-xs font-normal text-muted-foreground">
+                            {formatDateTime(latestNegotiation.createdAt)}
+                          </span>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor={`duration-${project.id}`}>Duration (weeks)</Label>
-                          <Input
-                            id={`duration-${project.id}`}
-                            type="number"
-                            min="1"
-                            step="1"
-                            value={negotiationDraft.duration}
-                            onChange={(event) =>
-                              setNegotiationDrafts((drafts) => ({
-                                ...drafts,
-                                [project.id]: { ...negotiationDraft, duration: event.target.value },
-                              }))
-                            }
-                            placeholder="Weeks"
-                          />
+                        <div className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                          <span>Bid: {formatMoney(latestNegotiation.bidAmount ?? 0)}</span>
+                          <span>Duration: {latestNegotiation.duration || "Not set"}</span>
                         </div>
+                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                          {latestNegotiation.message}
+                        </p>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`message-${project.id}`}>Message</Label>
-                        <Textarea
-                          id={`message-${project.id}`}
-                          value={negotiationDraft.message}
-                          onChange={(event) =>
+                    ) : null}
+                    {project.reviewRating ? (
+                      <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+                        <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                          <Star className="h-4 w-4 fill-primary text-primary" />
+                          <span>Client rating: {project.reviewRating}/5</span>
+                          {project.reviewCreatedAt ? (
+                            <span className="text-xs font-normal text-muted-foreground">
+                              {formatDate(project.reviewCreatedAt)}
+                            </span>
+                          ) : null}
+                        </div>
+                        {project.reviewComment ? (
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {project.reviewComment}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : project.trackingStatus === "COMPLETED" ? (
+                      <div className="mt-3 rounded-lg border border-dashed border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+                        No client rating yet.
+                      </div>
+                    ) : null}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <Button size="sm" asChild>
+                        <Link to="/job/$jobId" params={{ jobId: String(project.jobId) }}>
+                          View job
+                        </Link>
+                      </Button>
+                      {project.status === "PENDING" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setNegotiationError(null);
                             setNegotiationDrafts((drafts) => ({
                               ...drafts,
-                              [project.id]: { ...negotiationDraft, message: event.target.value },
-                            }))
-                          }
-                          className="min-h-28"
-                          placeholder="Explain your revised offer"
-                        />
-                      </div>
-                      {negotiationHistory.length ? (
-                        <div className="max-h-40 overflow-y-auto rounded-lg border border-border p-3">
-                          <h4 className="text-sm font-medium">Offer history</h4>
-                          <div className="mt-3 space-y-3">
-                            {negotiationHistory.map((negotiation) => (
-                              <div key={negotiation.id} className="rounded-md bg-muted/40 p-3 text-sm">
-                                <div className="flex flex-wrap justify-between gap-2 font-medium">
-                                  <span>{formatMoney(negotiation.bidAmount ?? 0)} / {negotiation.duration || "Not set"}</span>
-                                  <span className="text-xs font-normal text-muted-foreground">
-                                    {formatDateTime(negotiation.createdAt)}
-                                  </span>
-                                </div>
-                                <p className="mt-1 text-muted-foreground">{negotiation.message}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                              [project.id]: negotiationDraft,
+                            }));
+                            setOpenNegotiationId(project.id);
+                          }}
+                        >
+                          <Handshake className="h-4 w-4" />
+                          Negotiate
+                        </Button>
                       ) : null}
-                      {negotiationError ? (
-                        <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                          {negotiationError}
-                        </p>
+                      {project.trackingId ? (
+                        <Button size="sm" variant="outline" asChild>
+                          <Link
+                            to="/project-track/$trackingId"
+                            params={{ trackingId: String(project.trackingId) }}
+                          >
+                            Track project
+                          </Link>
+                        </Button>
                       ) : null}
+                      <Button size="sm" variant="outline" asChild>
+                        <Link to="/professional-messages">Message</Link>
+                      </Button>
                     </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setOpenNegotiationId(null)}>
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={() => handleSendNegotiation(project)}
-                        disabled={pendingNegotiationId === project.id}
-                      >
-                        <Handshake className="h-4 w-4" />
-                        {pendingNegotiationId === project.id ? "Sending" : "Send offer"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              );
-            })}
-        </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
-            <Send className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h3 className="mt-3 font-semibold">No project requests yet</h3>
-            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Project requests you send to clients will appear here.
-            </p>
-          </div>
-        )}
+                    <Dialog
+                      open={openNegotiationId === project.id}
+                      onOpenChange={(open) => setOpenNegotiationId(open ? project.id : null)}
+                    >
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Negotiate project offer</DialogTitle>
+                          <DialogDescription>
+                            Send the client a revised bid, duration, and message for{" "}
+                            {project.projectTitle}.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4">
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <div className="space-y-2">
+                              <Label htmlFor={`bid-${project.id}`}>Bid amount</Label>
+                              <Input
+                                id={`bid-${project.id}`}
+                                type="number"
+                                min="0"
+                                value={negotiationDraft.bidAmount}
+                                onChange={(event) =>
+                                  setNegotiationDrafts((drafts) => ({
+                                    ...drafts,
+                                    [project.id]: {
+                                      ...negotiationDraft,
+                                      bidAmount: event.target.value,
+                                    },
+                                  }))
+                                }
+                                placeholder="Project bid"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`duration-${project.id}`}>Duration (weeks)</Label>
+                              <Input
+                                id={`duration-${project.id}`}
+                                type="number"
+                                min="1"
+                                step="1"
+                                value={negotiationDraft.duration}
+                                onChange={(event) =>
+                                  setNegotiationDrafts((drafts) => ({
+                                    ...drafts,
+                                    [project.id]: {
+                                      ...negotiationDraft,
+                                      duration: event.target.value,
+                                    },
+                                  }))
+                                }
+                                placeholder="Weeks"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`message-${project.id}`}>Message</Label>
+                            <Textarea
+                              id={`message-${project.id}`}
+                              value={negotiationDraft.message}
+                              onChange={(event) =>
+                                setNegotiationDrafts((drafts) => ({
+                                  ...drafts,
+                                  [project.id]: {
+                                    ...negotiationDraft,
+                                    message: event.target.value,
+                                  },
+                                }))
+                              }
+                              className="min-h-28"
+                              placeholder="Explain your revised offer"
+                            />
+                          </div>
+                          {negotiationHistory.length ? (
+                            <div className="max-h-40 overflow-y-auto rounded-lg border border-border p-3">
+                              <h4 className="text-sm font-medium">Offer history</h4>
+                              <div className="mt-3 space-y-3">
+                                {negotiationHistory.map((negotiation) => (
+                                  <div
+                                    key={negotiation.id}
+                                    className="rounded-md bg-muted/40 p-3 text-sm"
+                                  >
+                                    <div className="flex flex-wrap justify-between gap-2 font-medium">
+                                      <span>
+                                        {formatMoney(negotiation.bidAmount ?? 0)} /{" "}
+                                        {negotiation.duration || "Not set"}
+                                      </span>
+                                      <span className="text-xs font-normal text-muted-foreground">
+                                        {formatDateTime(negotiation.createdAt)}
+                                      </span>
+                                    </div>
+                                    <p className="mt-1 text-muted-foreground">
+                                      {negotiation.message}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+                          {negotiationError ? (
+                            <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                              {negotiationError}
+                            </p>
+                          ) : null}
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setOpenNegotiationId(null)}>
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={() => handleSendNegotiation(project)}
+                            disabled={pendingNegotiationId === project.id}
+                          >
+                            <Handshake className="h-4 w-4" />
+                            {pendingNegotiationId === project.id ? "Sending" : "Send offer"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+              <Send className="mx-auto h-8 w-8 text-muted-foreground" />
+              <h3 className="mt-3 font-semibold">No project requests yet</h3>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                Project requests you send to clients will appear here.
+              </p>
+            </div>
+          )}
         </div>
       ) : null}
     </AppShell>
@@ -1525,7 +1755,13 @@ function StatBox({
   value: string;
   sub: string;
   tint: string;
-  to?: "/earnings" | "/professional-stats/projects" | "/professional-stats/project-requests" | "/professional-stats/hire-requests" | "/professional-stats/completed" | "/professional-stats/ratings";
+  to?:
+    | "/earnings"
+    | "/professional-stats/projects"
+    | "/professional-stats/project-requests"
+    | "/professional-stats/hire-requests"
+    | "/professional-stats/completed"
+    | "/professional-stats/ratings";
   delta?: number;
   isActive?: boolean;
   onClick?: () => void;
@@ -1574,11 +1810,7 @@ function StatBox({
     );
   }
 
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-soft">
-      {content}
-    </div>
-  );
+  return <div className="rounded-xl border border-border bg-card p-5 shadow-soft">{content}</div>;
 }
 
 function getProfessionalStatsFilterLabel(filter: ProfessionalStatsFilter) {
@@ -1676,7 +1908,9 @@ function parseWeeks(value?: string | null) {
   if (weekMatch || !value.toLowerCase().includes("until")) {
     const numericValue = Number((weekMatch || anyNumberMatch)?.[1] ?? anyNumberMatch?.[0]);
 
-    return Number.isFinite(numericValue) && numericValue > 0 ? Math.max(1, Math.round(numericValue)) : null;
+    return Number.isFinite(numericValue) && numericValue > 0
+      ? Math.max(1, Math.round(numericValue))
+      : null;
   }
 
   const untilDate = new Date(value.replace(/^until\s+/i, ""));
@@ -1720,7 +1954,11 @@ function formatBudget(min: number | null, max: number | null, timingType = "FIXE
   return "Not set";
 }
 
-function formatFavoriteJobLocation(job: { locationAddress?: string | null; locationLabel?: string | null; workMode?: string | null }) {
+function formatFavoriteJobLocation(job: {
+  locationAddress?: string | null;
+  locationLabel?: string | null;
+  workMode?: string | null;
+}) {
   if (job.workMode === "REMOTE") {
     return "Remote job";
   }

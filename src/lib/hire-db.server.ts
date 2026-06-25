@@ -858,21 +858,24 @@ export function startClientHireProject(clientId: number, contractId: string) {
   const userAIsClient = userAId === clientId;
 
   const startProject = db.transaction(() => {
-    const project = db.prepare(
-      `
+    const project = db
+      .prepare(
+        `
         SELECT id
         FROM "ClientJob"
         WHERE id = ? AND userId = ?
         LIMIT 1
       `,
-    ).get(clientProjectId, clientId) as { id: number } | undefined;
+      )
+      .get(clientProjectId, clientId) as { id: number } | undefined;
 
     if (!project) {
       throw new Error("Selected project was not found.");
     }
 
-    const projectRequest = db.prepare(
-      `
+    const projectRequest = db
+      .prepare(
+        `
         INSERT INTO "ProjectRequest" (
           jobId,
           clientId,
@@ -887,22 +890,24 @@ export function startClientHireProject(clientId: number, contractId: string) {
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
-    ).run(
-      clientProjectId,
-      clientId,
-      professionalId,
-      Math.round(contract.budgetMax ?? contract.budgetMin ?? 0),
-      "",
-      "Direct hire project started by the client.",
-      null,
-      "ACCEPTED",
-      timestamp,
-      timestamp,
-    );
+      )
+      .run(
+        clientProjectId,
+        clientId,
+        professionalId,
+        Math.round(contract.budgetMax ?? contract.budgetMin ?? 0),
+        "",
+        "Direct hire project started by the client.",
+        null,
+        "ACCEPTED",
+        timestamp,
+        timestamp,
+      );
     const projectRequestId = Number(projectRequest.lastInsertRowid);
 
-    const tracking = db.prepare(
-      `
+    const tracking = db
+      .prepare(
+        `
         INSERT INTO "ProjectTracking" (
           requestId,
           jobId,
@@ -915,16 +920,17 @@ export function startClientHireProject(clientId: number, contractId: string) {
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
-    ).run(
-      projectRequestId,
-      clientProjectId,
-      clientId,
-      professionalId,
-      "ACTIVE",
-      timestamp,
-      timestamp,
-      timestamp,
-    );
+      )
+      .run(
+        projectRequestId,
+        clientProjectId,
+        clientId,
+        professionalId,
+        "ACTIVE",
+        timestamp,
+        timestamp,
+        timestamp,
+      );
     const trackingId = Number(tracking.lastInsertRowid);
 
     db.prepare(
@@ -1034,7 +1040,9 @@ export function cancelHireProject(userId: number, contractId: string) {
         LIMIT 1
       `,
     )
-    .get(contractId, String(userId), String(userId)) as { id: string; trackingId: number | null } | undefined;
+    .get(contractId, String(userId), String(userId)) as
+    | { id: string; trackingId: number | null }
+    | undefined;
 
   if (!contract) {
     throw new Error("Only started direct hire projects can be cancelled by project participants.");

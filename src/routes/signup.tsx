@@ -8,9 +8,23 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createSessionCookie } from "@/lib/auth-session.server";
 import { hashPassword } from "@/lib/password.server";
 import { normalizePhone, signupSchema, type SignupInput } from "@/lib/validation/signup";
@@ -115,7 +129,7 @@ const submitSignup = createServerFn({ method: "POST" })
         formError: error instanceof Error ? error.message : "Unknown server error",
       };
     }
-});
+  });
 
 const countryCodes = [
   { value: "+1", label: "United States (+1)" },
@@ -128,9 +142,8 @@ const countryCodes = [
 function Signup() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { successMessage, submitError, showPassword, otpStatus, isSendingOtp, isSubmitting } = useAppSelector(
-    (state) => state.auth.signup,
-  );
+  const { successMessage, submitError, showPassword, otpStatus, isSendingOtp, isSubmitting } =
+    useAppSelector((state) => state.auth.signup);
 
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -208,11 +221,17 @@ function Signup() {
           `Account created for ${result.user.firstName} ${result.user.lastName}. Redirecting to profile setup...`,
         ),
       );
-      await navigate({ to: result.user.role === "CLIENT" ? "/profile-setup" : "/professional-profile" });
+      await navigate({
+        to: result.user.role === "CLIENT" ? "/profile-setup" : "/professional-profile",
+      });
     } catch (error) {
       console.error("Signup failed:", error);
       dispatch(
-        setSignupSubmitError(error instanceof Error ? error.message : "Signup failed. Please check your details and try again."),
+        setSignupSubmitError(
+          error instanceof Error
+            ? error.message
+            : "Signup failed. Please check your details and try again.",
+        ),
       );
     } finally {
       dispatch(setSignupSubmitting(false));
@@ -225,23 +244,30 @@ function Signup() {
       subtitle="Complete every field below. Email, phone, and password are all required."
       footer={
         <>
-          Already have an account? <Link to="/login" className="text-primary hover:underline">Log in</Link>
+          Already have an account?{" "}
+          <Link to="/login" className="text-primary hover:underline">
+            Log in
+          </Link>
         </>
       }
     >
       <div className="mb-5">
         <p className="mb-3 text-sm font-medium text-foreground">I’m signing up as</p>
         <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted p-1">
-          {([
-            { value: "client", label: "I'm a client" },
-            { value: "professional", label: "I'm a professional" },
-          ] as const).map((option) => (
+          {(
+            [
+              { value: "client", label: "I'm a client" },
+              { value: "professional", label: "I'm a professional" },
+            ] as const
+          ).map((option) => (
             <button
               key={option.value}
               type="button"
               onClick={() => form.setValue("accountType", option.value, { shouldValidate: true })}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                accountType === option.value ? "bg-card text-foreground shadow-soft" : "text-muted-foreground"
+                accountType === option.value
+                  ? "bg-card text-foreground shadow-soft"
+                  : "text-muted-foreground"
               }`}
             >
               {option.label}
@@ -333,7 +359,11 @@ function Signup() {
                         dispatch(setSignupOtpStatus("OTP sent to your email. Check your inbox."));
                       } catch (error) {
                         console.error("Send OTP error:", error);
-                        dispatch(setSignupOtpStatus("Could not send OTP. Please check the email and try again."));
+                        dispatch(
+                          setSignupOtpStatus(
+                            "Could not send OTP. Please check the email and try again.",
+                          ),
+                        );
                       } finally {
                         dispatch(setSignupSendingOtp(false));
                       }
@@ -344,13 +374,18 @@ function Signup() {
                   </Button>
                 </div>
                 <FormControl>
-                  <Input type="email" placeholder="you@example.com" autoComplete="email" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    {...field}
+                  />
                 </FormControl>
-                <FormDescription>Required. This must be a valid and unique email address.</FormDescription>
+                <FormDescription>
+                  Required. This must be a valid and unique email address.
+                </FormDescription>
                 <FormMessage />
-                {otpStatus ? (
-                  <OtpStatusCard message={otpStatus} isSending={isSendingOtp} />
-                ) : null}
+                {otpStatus ? <OtpStatusCard message={otpStatus} isSending={isSendingOtp} /> : null}
               </FormItem>
             )}
           />
@@ -405,7 +440,9 @@ function Signup() {
                       placeholder="555 123 4567"
                       autoComplete="tel"
                       value={field.value}
-                      onChange={(event) => handlePhoneInputChange(event.target.value, field.onChange)}
+                      onChange={(event) =>
+                        handlePhoneInputChange(event.target.value, field.onChange)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -443,10 +480,20 @@ function Signup() {
             )}
           />
 
-          {submitError ? <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">{submitError}</div> : null}
-          {successMessage ? <div className="rounded-xl border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">{successMessage}</div> : null}
+          {submitError ? (
+            <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+              {submitError}
+            </div>
+          ) : null}
+          {successMessage ? (
+            <div className="rounded-xl border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">
+              {successMessage}
+            </div>
+          ) : null}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>Create account</Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            Create account
+          </Button>
         </form>
       </Form>
     </AuthLayout>
@@ -470,11 +517,7 @@ function OtpStatusCard({ message, isSending }: { message: string; isSending: boo
       <div className="flex items-start gap-3">
         <div
           className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
-            isSending
-              ? "bg-primary/10"
-              : isError
-                ? "bg-destructive/10"
-                : "bg-success/10"
+            isSending ? "bg-primary/10" : isError ? "bg-destructive/10" : "bg-success/10"
           }`}
         >
           <Icon className={`h-4 w-4 ${isSending ? "animate-spin" : ""}`} />

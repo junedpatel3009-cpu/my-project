@@ -138,17 +138,17 @@ export function SiteHeader({ user, onLogout }: SiteHeaderProps) {
                   Sign up
                 </Link>
               </Button>
-              <Button asChild size="sm" className="bg-cta text-cta-foreground hover:bg-cta/90 shadow-soft">
+              <Button
+                asChild
+                size="sm"
+                className="bg-cta text-cta-foreground hover:bg-cta/90 shadow-soft"
+              >
                 <Link to="/post-job">Post a Job</Link>
               </Button>
             </>
           )}
         </div>
-        <button
-          className="lg:hidden"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
+        <button className="lg:hidden" onClick={() => setOpen(!open)} aria-label="Toggle menu">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>

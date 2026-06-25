@@ -1,12 +1,13 @@
-import http from "node:http";
+﻿import http from "node:http";
 import { Readable } from "node:stream";
 import app from "../dist/server/server.js";
 
 const port = Number(process.env.PORT || 3000);
 
 const server = http.createServer(async (incoming, outgoing) => {
+  const start = Date.now();
   try {
-    const origin = `http://${incoming.headers.host || `localhost:${port}`}`;
+    const origin = \`http://\${incoming.headers.host || \`localhost:\${port}\`}\`;
     const init = {
       method: incoming.method,
       headers: new Headers(
@@ -36,7 +37,10 @@ const server = http.createServer(async (incoming, outgoing) => {
     console.error(error);
     if (!outgoing.headersSent) outgoing.writeHead(500, { "content-type": "application/json" });
     outgoing.end(JSON.stringify({ error: { message: "Internal server error." } }));
+  } finally {
+    const end = Date.now();
+    console.log(\`\${incoming.method} \${incoming.url} \${outgoing.statusCode} -\${end - start}ms\`);
   }
 });
 
-server.listen(port, () => console.log(`Servio listening on http://localhost:${port}`));
+server.listen(port, () => console.log(\`Servio listening on http://localhost:\${port}\`));

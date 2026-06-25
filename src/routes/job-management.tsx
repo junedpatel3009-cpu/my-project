@@ -57,7 +57,15 @@ type JobQuickFilter =
   | "COMPLETED"
   | "CANCELLED"
   | "DISPUTED";
-type DisputeQuickFilter = "TOTAL" | "OPEN_ALL" | "NEW" | "UNDER_REVIEW" | "WAITING_CUSTOMER" | "WAITING_PROVIDER" | "RESOLVED" | "CLOSED";
+type DisputeQuickFilter =
+  | "TOTAL"
+  | "OPEN_ALL"
+  | "NEW"
+  | "UNDER_REVIEW"
+  | "WAITING_CUSTOMER"
+  | "WAITING_PROVIDER"
+  | "RESOLVED"
+  | "CLOSED";
 
 type JobFilters = {
   customer: string;
@@ -163,9 +171,16 @@ function JobManagement() {
     () => filterDisputes(disputes, disputeQuery, disputeFilters, disputeQuickFilter),
     [disputes, disputeQuery, disputeFilters, disputeQuickFilter],
   );
-  const displayName = `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
+  const displayName =
+    `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
   const stats = getPageStats(jobs, disputes);
-  const jobStatuses = useMemo(() => uniqueOptions(jobs.flatMap((job) => [job.status, job.trackingStatus].filter(Boolean) as string[])), [jobs]);
+  const jobStatuses = useMemo(
+    () =>
+      uniqueOptions(
+        jobs.flatMap((job) => [job.status, job.trackingStatus].filter(Boolean) as string[]),
+      ),
+    [jobs],
+  );
 
   async function handleDisputeStatus(dispute: AdminDisputeRecord, status: DisputeStatus) {
     setPendingDisputeId(dispute.id);
@@ -194,36 +209,82 @@ function JobManagement() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard icon={BriefcaseBusiness} label="Total jobs" value={stats.totalJobs} caption={`${stats.openJobs} open jobs`} active={jobQuickFilter === "TOTAL"} onClick={() => { setDisputeQuickFilter(null); setJobQuickFilter("TOTAL"); }} />
-        <SummaryCard icon={ListChecks} label="Assigned jobs" value={stats.assignedJobs} caption={`${stats.inProgressJobs} in progress`} active={jobQuickFilter === "ASSIGNED"} onClick={() => { setDisputeQuickFilter(null); setJobQuickFilter("ASSIGNED"); }} />
-        <SummaryCard icon={AlertTriangle} label="Open disputes" value={stats.openDisputes} caption={`${stats.highPriorityDisputes} high priority`} active={disputeQuickFilter === "OPEN_ALL"} onClick={() => { setJobQuickFilter(null); setDisputeQuickFilter("OPEN_ALL"); }} />
-        <SummaryCard icon={CheckCircle2} label="Completed jobs" value={stats.completedJobs} caption={`${stats.resolvedDisputes} disputes resolved`} active={jobQuickFilter === "COMPLETED"} onClick={() => { setDisputeQuickFilter(null); setJobQuickFilter("COMPLETED"); }} />
+        <SummaryCard
+          icon={BriefcaseBusiness}
+          label="Total jobs"
+          value={stats.totalJobs}
+          caption={`${stats.openJobs} open jobs`}
+          active={jobQuickFilter === "TOTAL"}
+          onClick={() => {
+            setDisputeQuickFilter(null);
+            setJobQuickFilter("TOTAL");
+          }}
+        />
+        <SummaryCard
+          icon={ListChecks}
+          label="Assigned jobs"
+          value={stats.assignedJobs}
+          caption={`${stats.inProgressJobs} in progress`}
+          active={jobQuickFilter === "ASSIGNED"}
+          onClick={() => {
+            setDisputeQuickFilter(null);
+            setJobQuickFilter("ASSIGNED");
+          }}
+        />
+        <SummaryCard
+          icon={AlertTriangle}
+          label="Open disputes"
+          value={stats.openDisputes}
+          caption={`${stats.highPriorityDisputes} high priority`}
+          active={disputeQuickFilter === "OPEN_ALL"}
+          onClick={() => {
+            setJobQuickFilter(null);
+            setDisputeQuickFilter("OPEN_ALL");
+          }}
+        />
+        <SummaryCard
+          icon={CheckCircle2}
+          label="Completed jobs"
+          value={stats.completedJobs}
+          caption={`${stats.resolvedDisputes} disputes resolved`}
+          active={jobQuickFilter === "COMPLETED"}
+          onClick={() => {
+            setDisputeQuickFilter(null);
+            setJobQuickFilter("COMPLETED");
+          }}
+        />
       </div>
 
       <div className="mt-6 space-y-6">
-        {!jobQuickFilter ? <DisputeSection
-          disputes={visibleDisputes}
-          query={disputeQuery}
-          filters={disputeFilters}
-          activeQuickFilter={disputeQuickFilter}
-          onQueryChange={setDisputeQuery}
-          onFiltersChange={setDisputeFilters}
-          onQuickFilterClear={() => setDisputeQuickFilter(null)}
-          onOpenDispute={setSelectedDispute}
-        /> : null}
-        {!disputeQuickFilter ? <JobSection
-          jobs={visibleJobs}
-          query={jobQuery}
-          filters={jobFilters}
-          statuses={jobStatuses}
-          activeQuickFilter={jobQuickFilter}
-          onQueryChange={setJobQuery}
-          onFiltersChange={setJobFilters}
-          onQuickFilterClear={() => setJobQuickFilter(null)}
-          onOpenJob={setSelectedJob}
-        /> : null}
+        {!jobQuickFilter ? (
+          <DisputeSection
+            disputes={visibleDisputes}
+            query={disputeQuery}
+            filters={disputeFilters}
+            activeQuickFilter={disputeQuickFilter}
+            onQueryChange={setDisputeQuery}
+            onFiltersChange={setDisputeFilters}
+            onQuickFilterClear={() => setDisputeQuickFilter(null)}
+            onOpenDispute={setSelectedDispute}
+          />
+        ) : null}
+        {!disputeQuickFilter ? (
+          <JobSection
+            jobs={visibleJobs}
+            query={jobQuery}
+            filters={jobFilters}
+            statuses={jobStatuses}
+            activeQuickFilter={jobQuickFilter}
+            onQueryChange={setJobQuery}
+            onFiltersChange={setJobFilters}
+            onQuickFilterClear={() => setJobQuickFilter(null)}
+            onOpenJob={setSelectedJob}
+          />
+        ) : null}
       </div>
-      {selectedJob ? <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} /> : null}
+      {selectedJob ? (
+        <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />
+      ) : null}
       {selectedDispute ? (
         <DisputeDetailModal
           dispute={selectedDispute}
@@ -267,10 +328,25 @@ function DisputeSection({
       />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
-        <FilterSelect label="Status" value={filters.status} values={["ALL", "OPEN", "UNDER_REVIEW", "RESOLVED"]} onChange={(value) => onFiltersChange({ ...filters, status: value })} />
-        <FilterSelect label="Priority" value={filters.priority} values={["ALL", "HIGH", "MEDIUM", "LOW"]} onChange={(value) => onFiltersChange({ ...filters, priority: value })} />
+        <FilterSelect
+          label="Status"
+          value={filters.status}
+          values={["ALL", "OPEN", "UNDER_REVIEW", "RESOLVED"]}
+          onChange={(value) => onFiltersChange({ ...filters, status: value })}
+        />
+        <FilterSelect
+          label="Priority"
+          value={filters.priority}
+          values={["ALL", "HIGH", "MEDIUM", "LOW"]}
+          onChange={(value) => onFiltersChange({ ...filters, priority: value })}
+        />
       </div>
-      {activeQuickFilter ? <ActiveFilterPill label={`Showing ${formatEnum(activeQuickFilter)}`} onClear={onQuickFilterClear} /> : null}
+      {activeQuickFilter ? (
+        <ActiveFilterPill
+          label={`Showing ${formatEnum(activeQuickFilter)}`}
+          onClear={onQuickFilterClear}
+        />
+      ) : null}
 
       {disputes.length ? (
         <div className="overflow-x-auto rounded-lg border border-border">
@@ -285,39 +361,54 @@ function DisputeSection({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-          {disputes.map((dispute) => (
-            <tr key={dispute.id} className="align-top">
-              <td className="px-3 py-3">
-                <p className="font-medium">#{dispute.id}</p>
-                <p className="text-xs text-muted-foreground">{dispute.jobId ? `Job #${dispute.jobId}` : "No job"}</p>
-              </td>
-              <td className="px-3 py-3">
-                <p className="font-medium">{dispute.clientName}</p>
-              </td>
-              <td className="px-3 py-3">
-                <p className="font-medium">{dispute.professionalName}</p>
-              </td>
-              <td className="px-3 py-3">
-                <div className="flex flex-col items-start gap-1">
-                  <Badge variant={getDisputeStatusVariant(dispute.status)}>{formatEnum(dispute.status)}</Badge>
-                  <Badge variant={dispute.priority === "HIGH" ? "destructive" : "outline"}>{formatEnum(dispute.priority)}</Badge>
-                </div>
-              </td>
-              <td className="px-3 py-3">
-                <div className="ml-auto flex justify-end gap-2">
-                  <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => onOpenDispute(dispute)}>
-                    <Eye className="h-3.5 w-3.5" />
-                    Open
-                  </Button>
-                </div>
-              </td>
-            </tr>
-          ))}
+              {disputes.map((dispute) => (
+                <tr key={dispute.id} className="align-top">
+                  <td className="px-3 py-3">
+                    <p className="font-medium">#{dispute.id}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {dispute.jobId ? `Job #${dispute.jobId}` : "No job"}
+                    </p>
+                  </td>
+                  <td className="px-3 py-3">
+                    <p className="font-medium">{dispute.clientName}</p>
+                  </td>
+                  <td className="px-3 py-3">
+                    <p className="font-medium">{dispute.professionalName}</p>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="flex flex-col items-start gap-1">
+                      <Badge variant={getDisputeStatusVariant(dispute.status)}>
+                        {formatEnum(dispute.status)}
+                      </Badge>
+                      <Badge variant={dispute.priority === "HIGH" ? "destructive" : "outline"}>
+                        {formatEnum(dispute.priority)}
+                      </Badge>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="ml-auto flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => onOpenDispute(dispute)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Open
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <EmptyState title="No disputes found" description="Raised disputes will appear here for admin review." />
+        <EmptyState
+          title="No disputes found"
+          description="Raised disputes will appear here for admin review."
+        />
       )}
     </section>
   );
@@ -356,10 +447,25 @@ function JobSection({
       />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
-        <FilterSelect label="Status" value={filters.status} values={["ALL", ...statuses]} onChange={(value) => onFiltersChange({ ...filters, status: value })} />
-        <FilterSelect label="Payment" value={filters.paymentStatus} values={["ALL", "PENDING", "PAID", "REFUND_DUE"]} onChange={(value) => onFiltersChange({ ...filters, paymentStatus: value })} />
+        <FilterSelect
+          label="Status"
+          value={filters.status}
+          values={["ALL", ...statuses]}
+          onChange={(value) => onFiltersChange({ ...filters, status: value })}
+        />
+        <FilterSelect
+          label="Payment"
+          value={filters.paymentStatus}
+          values={["ALL", "PENDING", "PAID", "REFUND_DUE"]}
+          onChange={(value) => onFiltersChange({ ...filters, paymentStatus: value })}
+        />
       </div>
-      {activeQuickFilter ? <ActiveFilterPill label={`Showing ${formatEnum(activeQuickFilter)}`} onClear={onQuickFilterClear} /> : null}
+      {activeQuickFilter ? (
+        <ActiveFilterPill
+          label={`Showing ${formatEnum(activeQuickFilter)}`}
+          onClear={onQuickFilterClear}
+        />
+      ) : null}
 
       {jobs.length ? (
         <div className="overflow-x-auto rounded-lg border border-border">
@@ -374,40 +480,53 @@ function JobSection({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-          {jobs.map((job) => (
-            <tr key={job.id} className="align-top">
-              <td className="px-3 py-3">
-                <p className="font-medium">#{job.id}</p>
-                <p className="max-w-[160px] truncate text-xs text-muted-foreground">{job.title}</p>
-              </td>
-              <td className="px-3 py-3">
-                <p className="font-medium">{job.clientName}</p>
-              </td>
-              <td className="px-3 py-3">
-                <p className="font-medium">{job.professionalName || "Not assigned"}</p>
-              </td>
-              <td className="px-3 py-3">
-                <div className="flex flex-wrap gap-1">
-                  {getJobStatusBadges(job).map((badge) => (
-                    <Badge key={badge.label} variant={badge.variant}>{badge.label}</Badge>
-                  ))}
-                </div>
-              </td>
-              <td className="px-3 py-3">
-                <div className="ml-auto flex justify-end gap-2">
-                  <Button type="button" variant="outline" size="sm" className="gap-1" onClick={() => onOpenJob(job)}>
-                    <Eye className="h-3.5 w-3.5" />
-                    Open
-                  </Button>
-                </div>
-              </td>
-            </tr>
-          ))}
+              {jobs.map((job) => (
+                <tr key={job.id} className="align-top">
+                  <td className="px-3 py-3">
+                    <p className="font-medium">#{job.id}</p>
+                    <p className="max-w-[160px] truncate text-xs text-muted-foreground">
+                      {job.title}
+                    </p>
+                  </td>
+                  <td className="px-3 py-3">
+                    <p className="font-medium">{job.clientName}</p>
+                  </td>
+                  <td className="px-3 py-3">
+                    <p className="font-medium">{job.professionalName || "Not assigned"}</p>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {getJobStatusBadges(job).map((badge) => (
+                        <Badge key={badge.label} variant={badge.variant}>
+                          {badge.label}
+                        </Badge>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="ml-auto flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        onClick={() => onOpenJob(job)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Open
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <EmptyState title="No jobs found" description="Client job posts will appear here after they are created." />
+        <EmptyState
+          title="No jobs found"
+          description="Client job posts will appear here after they are created."
+        />
       )}
     </section>
   );
@@ -422,11 +541,14 @@ function JobDetailModal({ job, onClose }: { job: AdminJobRecord; onClose: () => 
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="truncate text-xl font-semibold">{job.title}</h2>
               {getJobStatusBadges(job).map((badge) => (
-                <Badge key={badge.label} variant={badge.variant}>{badge.label}</Badge>
+                <Badge key={badge.label} variant={badge.variant}>
+                  {badge.label}
+                </Badge>
               ))}
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Job #{job.id} / {job.category} / Uploaded by {job.clientName} on {formatDateTime(job.createdAt)}
+              Job #{job.id} / {job.category} / Uploaded by {job.clientName} on{" "}
+              {formatDateTime(job.createdAt)}
             </p>
           </div>
           <button
@@ -444,13 +566,25 @@ function JobDetailModal({ job, onClose }: { job: AdminJobRecord; onClose: () => 
             <section className="space-y-4">
               <InfoPanel title="Job details" icon={BriefcaseBusiness}>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <InfoLine icon={UserRound} label="Client" value={`${job.clientName} / ${job.clientEmail}`} />
+                  <InfoLine
+                    icon={UserRound}
+                    label="Client"
+                    value={`${job.clientName} / ${job.clientEmail}`}
+                  />
                   <InfoLine
                     icon={BriefcaseBusiness}
                     label="Assigned professional"
-                    value={job.professionalName ? `${job.professionalName} / ${job.professionalEmail}` : "Not assigned"}
+                    value={
+                      job.professionalName
+                        ? `${job.professionalName} / ${job.professionalEmail}`
+                        : "Not assigned"
+                    }
                   />
-                  <InfoLine icon={CalendarDays} label="Posted" value={formatDateTime(job.createdAt)} />
+                  <InfoLine
+                    icon={CalendarDays}
+                    label="Posted"
+                    value={formatDateTime(job.createdAt)}
+                  />
                   <InfoLine icon={Clock3} label="Updated" value={formatDateTime(job.updatedAt)} />
                   <InfoLine icon={CalendarDays} label="Job date" value={formatDate(job.jobDate)} />
                   <InfoLine icon={CalendarDays} label="Deadline" value={formatDate(job.deadline)} />
@@ -458,17 +592,30 @@ function JobDetailModal({ job, onClose }: { job: AdminJobRecord; onClose: () => 
                   <InfoLine icon={Clock3} label="Work mode" value={formatEnum(job.workMode)} />
                 </div>
                 <div className="rounded-lg border border-border bg-muted/30 p-3">
-                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Description</p>
-                  <p className="mt-2 whitespace-pre-wrap text-sm">{job.description || "No description added."}</p>
+                  <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                    Description
+                  </p>
+                  <p className="mt-2 whitespace-pre-wrap text-sm">
+                    {job.description || "No description added."}
+                  </p>
                 </div>
               </InfoPanel>
 
               <InfoPanel title="Timeline" icon={Clock3}>
                 <div className="grid gap-2">
-                  <TimelineRow label="Job uploaded by client" value={formatDateTime(job.createdAt)} />
+                  <TimelineRow
+                    label="Job uploaded by client"
+                    value={formatDateTime(job.createdAt)}
+                  />
                   <TimelineRow label="Last updated" value={formatDateTime(job.updatedAt)} />
-                  <TimelineRow label="Professional accepted" value={formatDateTime(job.acceptedAt)} />
-                  <TimelineRow label="Completion submitted" value={formatDateTime(job.completionSubmittedAt)} />
+                  <TimelineRow
+                    label="Professional accepted"
+                    value={formatDateTime(job.acceptedAt)}
+                  />
+                  <TimelineRow
+                    label="Completion submitted"
+                    value={formatDateTime(job.completionSubmittedAt)}
+                  />
                   <TimelineRow label="Completed / closed" value={formatDateTime(job.completedAt)} />
                 </div>
               </InfoPanel>
@@ -477,17 +624,47 @@ function JobDetailModal({ job, onClose }: { job: AdminJobRecord; onClose: () => 
             <section className="space-y-4">
               <InfoPanel title="Budget & location" icon={MapPin}>
                 <div className="grid gap-3">
-                  <InfoLine icon={BriefcaseBusiness} label="Budget" value={formatBudget(job.budgetMin, job.budgetMax)} />
-                  <InfoLine icon={DollarSign} label="Payment status" value={formatEnum(getPaymentStatus(job))} />
-                  <InfoLine icon={DollarSign} label="Transaction ID" value={job.trackingId ? `Tracking #${job.trackingId}` : "Not available"} />
-                  <InfoLine icon={RotateCcw} label="Refund status" value={getPaymentStatus(job) === "REFUND_DUE" ? "Review needed" : "No refund pending"} />
+                  <InfoLine
+                    icon={BriefcaseBusiness}
+                    label="Budget"
+                    value={formatBudget(job.budgetMin, job.budgetMax)}
+                  />
+                  <InfoLine
+                    icon={DollarSign}
+                    label="Payment status"
+                    value={formatEnum(getPaymentStatus(job))}
+                  />
+                  <InfoLine
+                    icon={DollarSign}
+                    label="Transaction ID"
+                    value={job.trackingId ? `Tracking #${job.trackingId}` : "Not available"}
+                  />
+                  <InfoLine
+                    icon={RotateCcw}
+                    label="Refund status"
+                    value={
+                      getPaymentStatus(job) === "REFUND_DUE" ? "Review needed" : "No refund pending"
+                    }
+                  />
                   <InfoLine icon={Clock3} label="Timing type" value={formatEnum(job.timingType)} />
-                  <InfoLine icon={MapPin} label="Location label" value={job.locationLabel || "Not set"} />
-                  <InfoLine icon={MapPin} label="Address" value={job.locationAddress || "Not set"} />
+                  <InfoLine
+                    icon={MapPin}
+                    label="Location label"
+                    value={job.locationLabel || "Not set"}
+                  />
+                  <InfoLine
+                    icon={MapPin}
+                    label="Address"
+                    value={job.locationAddress || "Not set"}
+                  />
                   <InfoLine
                     icon={MapPin}
                     label="Coordinates"
-                    value={job.locationLat != null && job.locationLng != null ? `${job.locationLat}, ${job.locationLng}` : "Not set"}
+                    value={
+                      job.locationLat != null && job.locationLng != null
+                        ? `${job.locationLat}, ${job.locationLng}`
+                        : "Not set"
+                    }
                   />
                 </div>
               </InfoPanel>
@@ -520,23 +697,36 @@ function JobDetailModal({ job, onClose }: { job: AdminJobRecord; onClose: () => 
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
                           <p className="font-medium">{request.professionalName}</p>
-                          <p className="text-xs text-muted-foreground">{request.professionalEmail}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {request.professionalEmail}
+                          </p>
                         </div>
-                        <Badge variant={request.status === "ACCEPTED" ? "default" : "outline"}>{formatEnum(request.status)}</Badge>
+                        <Badge variant={request.status === "ACCEPTED" ? "default" : "outline"}>
+                          {formatEnum(request.status)}
+                        </Badge>
                       </div>
                       <div className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                        <span>Bid: {request.bidAmount ? formatMoney(request.bidAmount) : "Not set"}</span>
+                        <span>
+                          Bid: {request.bidAmount ? formatMoney(request.bidAmount) : "Not set"}
+                        </span>
                         <span>Duration: {request.duration || "Not set"}</span>
                         <span>Submitted: {formatDateTime(request.createdAt)}</span>
                         <span>Updated: {formatDateTime(request.updatedAt)}</span>
                       </div>
-                      <p className="mt-2 whitespace-pre-wrap text-sm">{request.coverLetter || "No cover letter."}</p>
-                      <AttachmentJsonList value={request.attachmentsJson} uploadedBy={request.professionalName} />
+                      <p className="mt-2 whitespace-pre-wrap text-sm">
+                        {request.coverLetter || "No cover letter."}
+                      </p>
+                      <AttachmentJsonList
+                        value={request.attachmentsJson}
+                        uploadedBy={request.professionalName}
+                      />
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No proposals submitted for this job.</p>
+                <p className="text-sm text-muted-foreground">
+                  No proposals submitted for this job.
+                </p>
               )}
             </InfoPanel>
 
@@ -551,13 +741,23 @@ function JobDetailModal({ job, onClose }: { job: AdminJobRecord; onClose: () => 
                             Round {upload.roundNumber}: {upload.title}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Uploaded by {upload.professionalName} / {formatDateTime(upload.createdAt)}
+                            Uploaded by {upload.professionalName} /{" "}
+                            {formatDateTime(upload.createdAt)}
                           </p>
                         </div>
                       </div>
                       <p className="mt-2 text-sm text-muted-foreground">{upload.note}</p>
-                      {upload.fileName ? <FileRow title={upload.fileName} subtitle="Single uploaded work file" href={upload.fileUrl} /> : null}
-                      <AttachmentJsonList value={upload.filesJson} uploadedBy={upload.professionalName} />
+                      {upload.fileName ? (
+                        <FileRow
+                          title={upload.fileName}
+                          subtitle="Single uploaded work file"
+                          href={upload.fileUrl}
+                        />
+                      ) : null}
+                      <AttachmentJsonList
+                        value={upload.filesJson}
+                        uploadedBy={upload.professionalName}
+                      />
                     </div>
                   ))}
                 </div>
@@ -571,14 +771,42 @@ function JobDetailModal({ job, onClose }: { job: AdminJobRecord; onClose: () => 
             <InfoPanel title="Activity log" icon={ListChecks}>
               <ActivityLogRows
                 rows={[
-                  { date: job.createdAt, user: job.clientName, role: "Customer", action: "Created job", description: job.title },
+                  {
+                    date: job.createdAt,
+                    user: job.clientName,
+                    role: "Customer",
+                    action: "Created job",
+                    description: job.title,
+                  },
                   ...(job.acceptedAt
-                    ? [{ date: job.acceptedAt, user: job.professionalName || "Provider", role: "Provider", action: "Accepted job", description: "Provider assigned to job" }]
+                    ? [
+                        {
+                          date: job.acceptedAt,
+                          user: job.professionalName || "Provider",
+                          role: "Provider",
+                          action: "Accepted job",
+                          description: "Provider assigned to job",
+                        },
+                      ]
                     : []),
                   ...(job.completionSubmittedAt
-                    ? [{ date: job.completionSubmittedAt, user: job.professionalName || "Provider", role: "Provider", action: "Submitted work", description: "Completion request submitted" }]
+                    ? [
+                        {
+                          date: job.completionSubmittedAt,
+                          user: job.professionalName || "Provider",
+                          role: "Provider",
+                          action: "Submitted work",
+                          description: "Completion request submitted",
+                        },
+                      ]
                     : []),
-                  { date: job.updatedAt, user: "System", role: "System", action: "Updated record", description: `Status: ${formatEnum(job.trackingStatus || job.status)}` },
+                  {
+                    date: job.updatedAt,
+                    user: "System",
+                    role: "System",
+                    action: "Updated record",
+                    description: `Status: ${formatEnum(job.trackingStatus || job.status)}`,
+                  },
                 ]}
               />
             </InfoPanel>
@@ -607,11 +835,16 @@ function DisputeDetailModal({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="truncate text-xl font-semibold">Dispute #{dispute.id}</h2>
-              <Badge variant={getDisputeStatusVariant(dispute.status)}>{formatEnum(dispute.status)}</Badge>
-              <Badge variant={dispute.priority === "HIGH" ? "destructive" : "outline"}>{formatEnum(dispute.priority)}</Badge>
+              <Badge variant={getDisputeStatusVariant(dispute.status)}>
+                {formatEnum(dispute.status)}
+              </Badge>
+              <Badge variant={dispute.priority === "HIGH" ? "destructive" : "outline"}>
+                {formatEnum(dispute.priority)}
+              </Badge>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Job #{dispute.jobId || "unlinked"} / {dispute.jobTitle} / Opened {formatDateTime(dispute.createdAt)}
+              Job #{dispute.jobId || "unlinked"} / {dispute.jobTitle} / Opened{" "}
+              {formatDateTime(dispute.createdAt)}
             </p>
           </div>
           <button
@@ -629,43 +862,99 @@ function DisputeDetailModal({
             <InfoPanel title="Dispute information" icon={AlertTriangle}>
               <div className="grid gap-3 sm:grid-cols-2">
                 <InfoLine icon={FileText} label="Reason" value={formatEnum(dispute.issueType)} />
-                <InfoLine icon={BriefcaseBusiness} label="Job ID" value={dispute.jobId ? `#${dispute.jobId}` : "Not linked"} />
-                <InfoLine icon={CalendarDays} label="Created" value={formatDateTime(dispute.createdAt)} />
+                <InfoLine
+                  icon={BriefcaseBusiness}
+                  label="Job ID"
+                  value={dispute.jobId ? `#${dispute.jobId}` : "Not linked"}
+                />
+                <InfoLine
+                  icon={CalendarDays}
+                  label="Created"
+                  value={formatDateTime(dispute.createdAt)}
+                />
                 <InfoLine icon={Clock3} label="Updated" value={formatDateTime(dispute.updatedAt)} />
               </div>
               <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Description</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                  Description
+                </p>
                 <p className="mt-2 whitespace-pre-wrap text-sm">{dispute.message}</p>
               </div>
             </InfoPanel>
 
             <InfoPanel title="People" icon={UserRound}>
               <div className="grid gap-3">
-                <InfoLine icon={UserRound} label="Reporter" value={`${dispute.reporterName} / ${formatEnum(dispute.reporterRole)} / ${dispute.reporterEmail}`} />
-                <InfoLine icon={UserRound} label="Customer" value={`${dispute.clientName} / ${dispute.clientEmail}`} />
-                <InfoLine icon={BriefcaseBusiness} label="Provider" value={`${dispute.professionalName} / ${dispute.professionalEmail}`} />
+                <InfoLine
+                  icon={UserRound}
+                  label="Reporter"
+                  value={`${dispute.reporterName} / ${formatEnum(dispute.reporterRole)} / ${dispute.reporterEmail}`}
+                />
+                <InfoLine
+                  icon={UserRound}
+                  label="Customer"
+                  value={`${dispute.clientName} / ${dispute.clientEmail}`}
+                />
+                <InfoLine
+                  icon={BriefcaseBusiness}
+                  label="Provider"
+                  value={`${dispute.professionalName} / ${dispute.professionalEmail}`}
+                />
               </div>
             </InfoPanel>
           </div>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <InfoPanel title="Evidence & conversation" icon={Paperclip}>
-              <EmptyState title="No evidence files attached" description="Images, videos, PDFs, screenshots, and admin notes will appear here when the evidence table is connected." />
+              <EmptyState
+                title="No evidence files attached"
+                description="Images, videos, PDFs, screenshots, and admin notes will appear here when the evidence table is connected."
+              />
               <div className="mt-3 rounded-lg border border-border bg-background p-3 text-sm">
                 <p className="font-medium">Conversation timeline</p>
-                <p className="mt-1 text-muted-foreground">Customer/provider messages and admin notes are ready to display once message history is exposed to this admin loader.</p>
+                <p className="mt-1 text-muted-foreground">
+                  Customer/provider messages and admin notes are ready to display once message
+                  history is exposed to this admin loader.
+                </p>
               </div>
             </InfoPanel>
 
             <InfoPanel title="Resolution actions" icon={ShieldCheck}>
               <div className="grid gap-2 sm:grid-cols-3">
-                <Button type="button" size="sm" variant={dispute.status === "OPEN" ? "default" : "outline"} disabled={pending} onClick={() => onStatusChange(dispute, "OPEN")}>Open</Button>
-                <Button type="button" size="sm" variant={dispute.status === "UNDER_REVIEW" ? "default" : "outline"} disabled={pending} onClick={() => onStatusChange(dispute, "UNDER_REVIEW")}>Under review</Button>
-                <Button type="button" size="sm" variant={dispute.status === "RESOLVED" ? "default" : "outline"} disabled={pending} onClick={() => onStatusChange(dispute, "RESOLVED")}>Resolved</Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={dispute.status === "OPEN" ? "default" : "outline"}
+                  disabled={pending}
+                  onClick={() => onStatusChange(dispute, "OPEN")}
+                >
+                  Open
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={dispute.status === "UNDER_REVIEW" ? "default" : "outline"}
+                  disabled={pending}
+                  onClick={() => onStatusChange(dispute, "UNDER_REVIEW")}
+                >
+                  Under review
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={dispute.status === "RESOLVED" ? "default" : "outline"}
+                  disabled={pending}
+                  onClick={() => onStatusChange(dispute, "RESOLVED")}
+                >
+                  Resolved
+                </Button>
               </div>
               <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
-                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Status update</p>
-                <p className="mt-1 text-sm text-muted-foreground">Use these actions after reviewing the dispute details and party information.</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                  Status update
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Use these actions after reviewing the dispute details and party information.
+                </p>
               </div>
             </InfoPanel>
           </div>
@@ -674,8 +963,20 @@ function DisputeDetailModal({
             <InfoPanel title="Resolution history" icon={ListChecks}>
               <ActivityLogRows
                 rows={[
-                  { date: dispute.createdAt, user: dispute.reporterName, role: formatEnum(dispute.reporterRole), action: "Opened dispute", description: dispute.message },
-                  { date: dispute.updatedAt, user: "Admin/System", role: "Admin", action: "Updated status", description: `Current status: ${formatEnum(dispute.status)}` },
+                  {
+                    date: dispute.createdAt,
+                    user: dispute.reporterName,
+                    role: formatEnum(dispute.reporterRole),
+                    action: "Opened dispute",
+                    description: dispute.message,
+                  },
+                  {
+                    date: dispute.updatedAt,
+                    user: "Admin/System",
+                    role: "Admin",
+                    action: "Updated status",
+                    description: `Current status: ${formatEnum(dispute.status)}`,
+                  },
                 ]}
               />
             </InfoPanel>
@@ -706,11 +1007,24 @@ function InfoPanel({
   );
 }
 
-function FilterInput({ value, placeholder, onChange }: { value: string; placeholder: string; onChange: (value: string) => void }) {
+function FilterInput({
+  value,
+  placeholder,
+  onChange,
+}: {
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <div className="relative">
       <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <Input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="h-11 rounded-xl pl-9 shadow-sm" />
+      <Input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="h-11 rounded-xl pl-9 shadow-sm"
+      />
     </div>
   );
 }
@@ -746,14 +1060,27 @@ function ActiveFilterPill({ label, onClear }: { label: string; onClear: () => vo
   return (
     <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
       {label}
-      <button type="button" onClick={onClear} className="rounded-full p-0.5 hover:bg-primary/10" aria-label="Clear quick filter">
+      <button
+        type="button"
+        onClick={onClear}
+        className="rounded-full p-0.5 hover:bg-primary/10"
+        aria-label="Clear quick filter"
+      >
         <X className="h-3 w-3" />
       </button>
     </div>
   );
 }
 
-function AdminActionButton({ label, block, destructive }: { label: string; block?: boolean; destructive?: boolean }) {
+function AdminActionButton({
+  label,
+  block,
+  destructive,
+}: {
+  label: string;
+  block?: boolean;
+  destructive?: boolean;
+}) {
   return (
     <Button
       type="button"
@@ -769,12 +1096,28 @@ function AdminActionButton({ label, block, destructive }: { label: string; block
   );
 }
 
-function AnalyticsStrip({ jobs, disputes }: { jobs: AdminJobRecord[]; disputes: AdminDisputeRecord[] }) {
+function AnalyticsStrip({
+  jobs,
+  disputes,
+}: {
+  jobs: AdminJobRecord[];
+  disputes: AdminDisputeRecord[];
+}) {
   const stats = getPageStats(jobs, disputes);
-  const completionRate = stats.totalJobs ? Math.round((stats.completedJobs / stats.totalJobs) * 100) : 0;
-  const cancellationRate = stats.totalJobs ? Math.round((stats.cancelledJobs / stats.totalJobs) * 100) : 0;
-  const resolutionRate = stats.totalDisputes ? Math.round((stats.resolvedDisputes / stats.totalDisputes) * 100) : 0;
-  const revenue = jobs.reduce((total, job) => total + (getPaymentStatus(job) === "PAID" ? job.budgetMax || job.budgetMin || 0 : 0), 0);
+  const completionRate = stats.totalJobs
+    ? Math.round((stats.completedJobs / stats.totalJobs) * 100)
+    : 0;
+  const cancellationRate = stats.totalJobs
+    ? Math.round((stats.cancelledJobs / stats.totalJobs) * 100)
+    : 0;
+  const resolutionRate = stats.totalDisputes
+    ? Math.round((stats.resolvedDisputes / stats.totalDisputes) * 100)
+    : 0;
+  const revenue = jobs.reduce(
+    (total, job) =>
+      total + (getPaymentStatus(job) === "PAID" ? job.budgetMax || job.budgetMin || 0 : 0),
+    0,
+  );
 
   return (
     <section className="mt-6 rounded-xl border border-border bg-card p-4 shadow-soft">
@@ -806,7 +1149,13 @@ function Metric({ label, value }: { label: string; value: string }) {
 function ActivityLogRows({
   rows,
 }: {
-  rows: Array<{ date: string | null; user: string; role: string; action: string; description: string }>;
+  rows: Array<{
+    date: string | null;
+    user: string;
+    role: string;
+    action: string;
+    description: string;
+  }>;
 }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border">
@@ -838,7 +1187,15 @@ function ActivityLogRows({
   );
 }
 
-function InfoLine({ icon: Icon, label, value }: { icon: typeof UserRound; label: string; value: string }) {
+function InfoLine({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof UserRound;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="min-w-0 rounded-lg border border-border bg-background p-3">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-muted-foreground">
@@ -859,7 +1216,15 @@ function TimelineRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function FileRow({ title, subtitle, href }: { title: string; subtitle: string; href?: string | null }) {
+function FileRow({
+  title,
+  subtitle,
+  href,
+}: {
+  title: string;
+  subtitle: string;
+  href?: string | null;
+}) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background p-3">
       <div className="min-w-0">
@@ -867,7 +1232,12 @@ function FileRow({ title, subtitle, href }: { title: string; subtitle: string; h
         <p className="text-xs text-muted-foreground">{subtitle}</p>
       </div>
       {href ? (
-        <a href={href} target="_blank" rel="noreferrer" className="shrink-0 text-sm font-medium text-primary">
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          className="shrink-0 text-sm font-medium text-primary"
+        >
           Open
         </a>
       ) : null}
@@ -986,23 +1356,32 @@ function EmptyState({ title, description }: { title: string; description: string
 
 function getPageStats(jobs: AdminJobRecord[], disputes: AdminDisputeRecord[]) {
   const unresolvedDisputes = disputes.filter((dispute) => dispute.status !== "RESOLVED");
-  const disputedJobIds = new Set(disputes.map((dispute) => dispute.jobId).filter((id): id is number => id != null));
+  const disputedJobIds = new Set(
+    disputes.map((dispute) => dispute.jobId).filter((id): id is number => id != null),
+  );
 
   return {
     totalJobs: jobs.length,
-    pendingJobs: jobs.filter((job) => job.status === "DRAFT" || (!job.trackingId && job.status !== "OPEN")).length,
+    pendingJobs: jobs.filter(
+      (job) => job.status === "DRAFT" || (!job.trackingId && job.status !== "OPEN"),
+    ).length,
     openJobs: jobs.filter((job) => job.status === "OPEN").length,
     assignedJobs: jobs.filter((job) => Boolean(job.trackingId)).length,
     inProgressJobs: jobs.filter((job) => job.trackingStatus === "ACTIVE").length,
-    completedJobs: jobs.filter((job) => job.status === "CLOSED" || job.trackingStatus === "COMPLETED").length,
-    cancelledJobs: jobs.filter((job) => job.status === "CANCELLED" || job.trackingStatus === "CANCELLED").length,
+    completedJobs: jobs.filter(
+      (job) => job.status === "CLOSED" || job.trackingStatus === "COMPLETED",
+    ).length,
+    cancelledJobs: jobs.filter(
+      (job) => job.status === "CANCELLED" || job.trackingStatus === "CANCELLED",
+    ).length,
     disputedJobs: jobs.filter((job) => disputedJobIds.has(job.id)).length,
     totalDisputes: disputes.length,
     openDisputes: unresolvedDisputes.length,
     newDisputes: disputes.filter((dispute) => dispute.status === "OPEN").length,
     underReviewDisputes: disputes.filter((dispute) => dispute.status === "UNDER_REVIEW").length,
     resolvedDisputes: disputes.filter((dispute) => dispute.status === "RESOLVED").length,
-    highPriorityDisputes: unresolvedDisputes.filter((dispute) => dispute.priority === "HIGH").length,
+    highPriorityDisputes: unresolvedDisputes.filter((dispute) => dispute.priority === "HIGH")
+      .length,
   };
 }
 
@@ -1014,7 +1393,9 @@ function filterJobs(
   quickFilter: JobQuickFilter | null,
 ) {
   const term = query.trim().toLowerCase();
-  const disputedJobIds = new Set(disputes.map((dispute) => dispute.jobId).filter((id): id is number => id != null));
+  const disputedJobIds = new Set(
+    disputes.map((dispute) => dispute.jobId).filter((id): id is number => id != null),
+  );
 
   return jobs.filter((job) => {
     const searchable = [
@@ -1037,14 +1418,24 @@ function filterJobs(
     const statusValues = [job.status, job.trackingStatus].filter(Boolean).map(String);
 
     if (term && !searchable.includes(term)) return false;
-    if (filters.customer.trim() && !`${job.clientName} ${job.clientEmail}`.toLowerCase().includes(filters.customer.trim().toLowerCase())) return false;
+    if (
+      filters.customer.trim() &&
+      !`${job.clientName} ${job.clientEmail}`
+        .toLowerCase()
+        .includes(filters.customer.trim().toLowerCase())
+    )
+      return false;
     if (
       filters.provider.trim() &&
-      !`${job.professionalName || ""} ${job.professionalEmail || ""}`.toLowerCase().includes(filters.provider.trim().toLowerCase())
-    ) return false;
+      !`${job.professionalName || ""} ${job.professionalEmail || ""}`
+        .toLowerCase()
+        .includes(filters.provider.trim().toLowerCase())
+    )
+      return false;
     if (filters.category !== "ALL" && job.category !== filters.category) return false;
     if (filters.status !== "ALL" && !statusValues.includes(filters.status)) return false;
-    if (filters.paymentStatus !== "ALL" && getPaymentStatus(job) !== filters.paymentStatus) return false;
+    if (filters.paymentStatus !== "ALL" && getPaymentStatus(job) !== filters.paymentStatus)
+      return false;
     if (!matchesJobQuickFilter(job, quickFilter, disputedJobIds)) return false;
 
     return true;
@@ -1082,32 +1473,52 @@ function filterDisputes(
     if (term && !searchable.includes(term)) return false;
     if (filters.status !== "ALL" && dispute.status !== filters.status) return false;
     if (filters.priority !== "ALL" && dispute.priority !== filters.priority) return false;
-    if (filters.customer.trim() && !`${dispute.clientName} ${dispute.clientEmail}`.toLowerCase().includes(filters.customer.trim().toLowerCase())) return false;
+    if (
+      filters.customer.trim() &&
+      !`${dispute.clientName} ${dispute.clientEmail}`
+        .toLowerCase()
+        .includes(filters.customer.trim().toLowerCase())
+    )
+      return false;
     if (
       filters.provider.trim() &&
-      !`${dispute.professionalName} ${dispute.professionalEmail}`.toLowerCase().includes(filters.provider.trim().toLowerCase())
-    ) return false;
+      !`${dispute.professionalName} ${dispute.professionalEmail}`
+        .toLowerCase()
+        .includes(filters.provider.trim().toLowerCase())
+    )
+      return false;
     if (!matchesDisputeQuickFilter(dispute, quickFilter)) return false;
 
     return true;
   });
 }
 
-function matchesJobQuickFilter(job: AdminJobRecord, quickFilter: JobQuickFilter | null, disputedJobIds: Set<number>) {
+function matchesJobQuickFilter(
+  job: AdminJobRecord,
+  quickFilter: JobQuickFilter | null,
+  disputedJobIds: Set<number>,
+) {
   if (!quickFilter || quickFilter === "TOTAL") return true;
-  if (quickFilter === "PENDING") return job.status === "DRAFT" || (!job.trackingId && job.status !== "OPEN");
+  if (quickFilter === "PENDING")
+    return job.status === "DRAFT" || (!job.trackingId && job.status !== "OPEN");
   if (quickFilter === "OPEN") return job.status === "OPEN";
   if (quickFilter === "ASSIGNED") return Boolean(job.trackingId);
   if (quickFilter === "IN_PROGRESS") return job.trackingStatus === "ACTIVE";
-  if (quickFilter === "COMPLETED") return job.status === "CLOSED" || job.trackingStatus === "COMPLETED";
-  if (quickFilter === "CANCELLED") return job.status === "CANCELLED" || job.trackingStatus === "CANCELLED";
+  if (quickFilter === "COMPLETED")
+    return job.status === "CLOSED" || job.trackingStatus === "COMPLETED";
+  if (quickFilter === "CANCELLED")
+    return job.status === "CANCELLED" || job.trackingStatus === "CANCELLED";
   if (quickFilter === "DISPUTED") return disputedJobIds.has(job.id);
   return true;
 }
 
-function matchesDisputeQuickFilter(dispute: AdminDisputeRecord, quickFilter: DisputeQuickFilter | null) {
+function matchesDisputeQuickFilter(
+  dispute: AdminDisputeRecord,
+  quickFilter: DisputeQuickFilter | null,
+) {
   if (!quickFilter || quickFilter === "TOTAL") return true;
-  if (quickFilter === "OPEN_ALL") return dispute.status === "OPEN" || dispute.status === "UNDER_REVIEW";
+  if (quickFilter === "OPEN_ALL")
+    return dispute.status === "OPEN" || dispute.status === "UNDER_REVIEW";
   if (quickFilter === "NEW") return dispute.status === "OPEN";
   if (quickFilter === "UNDER_REVIEW") return dispute.status === "UNDER_REVIEW";
   if (quickFilter === "WAITING_CUSTOMER" || quickFilter === "WAITING_PROVIDER") return false;

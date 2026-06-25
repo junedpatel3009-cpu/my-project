@@ -259,8 +259,16 @@ function seedTestSchema(database: ReturnType<typeof Database>) {
 
   // Seed test data
   const now = new Date().toISOString();
-  database.prepare(`INSERT INTO "ServiceCategory" (id, name, slug, description, sortOrder, createdAt, updatedAt) VALUES (1, 'Web Development', 'web-development', 'Web development services', 1, ?, ?)`).run(now, now);
-  database.prepare(`INSERT INTO "ServiceCategory" (id, name, slug, description, sortOrder, createdAt, updatedAt) VALUES (2, 'Design', 'design', 'Design services', 2, ?, ?)`).run(now, now);
+  database
+    .prepare(
+      `INSERT INTO "ServiceCategory" (id, name, slug, description, sortOrder, createdAt, updatedAt) VALUES (1, 'Web Development', 'web-development', 'Web development services', 1, ?, ?)`,
+    )
+    .run(now, now);
+  database
+    .prepare(
+      `INSERT INTO "ServiceCategory" (id, name, slug, description, sortOrder, createdAt, updatedAt) VALUES (2, 'Design', 'design', 'Design services', 2, ?, ?)`,
+    )
+    .run(now, now);
 }
 
 export function cleanTestDb() {
@@ -270,7 +278,10 @@ export function cleanTestDb() {
   }
 }
 
-export function createTestUser(database: ReturnType<typeof Database>, overrides: Record<string, unknown> = {}) {
+export function createTestUser(
+  database: ReturnType<typeof Database>,
+  overrides: Record<string, unknown> = {},
+) {
   counter++;
   const now = new Date().toISOString();
   const defaults: Record<string, unknown> = {
@@ -280,6 +291,11 @@ export function createTestUser(database: ReturnType<typeof Database>, overrides:
     email: `test-${Date.now()}-${counter}@example.com`,
     passwordHash: "abc123hash",
     authProvider: "LOCAL",
+    isVerified: 0,
+    averageRating: 0,
+    reviewCount: 0,
+    workMode: "both",
+    availabilityStatus: "available",
     isActive: 1,
     createdAt: now,
     updatedAt: now,
@@ -288,11 +304,22 @@ export function createTestUser(database: ReturnType<typeof Database>, overrides:
   const cols = Object.keys(fields);
   const vals = Object.values(fields);
   const placeholders = cols.map(() => "?").join(", ");
-  const result = database.prepare(`INSERT INTO "User" (${cols.map(c => `"${c}"`).join(", ")}) VALUES (${placeholders})`).run(...vals);
-  return { id: Number(result.lastInsertRowid), ...fields } as { id: number; [key: string]: unknown };
+  const result = database
+    .prepare(
+      `INSERT INTO "User" (${cols.map((c) => `"${c}"`).join(", ")}) VALUES (${placeholders})`,
+    )
+    .run(...vals);
+  return { id: Number(result.lastInsertRowid), ...fields } as {
+    id: number;
+    [key: string]: unknown;
+  };
 }
 
-export function createTestJob(database: ReturnType<typeof Database>, userId: number, overrides: Record<string, unknown> = {}) {
+export function createTestJob(
+  database: ReturnType<typeof Database>,
+  userId: number,
+  overrides: Record<string, unknown> = {},
+) {
   const now = new Date().toISOString();
   const defaults: Record<string, unknown> = {
     userId,
@@ -310,12 +337,28 @@ export function createTestJob(database: ReturnType<typeof Database>, userId: num
   const cols = Object.keys(fields);
   const vals = Object.values(fields);
   const placeholders = cols.map(() => "?").join(", ");
-  const result = database.prepare(`INSERT INTO "ClientJob" (${cols.map(c => `"${c}"`).join(", ")}) VALUES (${placeholders})`).run(...vals);
+  const result = database
+    .prepare(
+      `INSERT INTO "ClientJob" (${cols.map((c) => `"${c}"`).join(", ")}) VALUES (${placeholders})`,
+    )
+    .run(...vals);
   return { id: Number(result.lastInsertRowid), ...fields };
 }
 
-export function createTestWallet(database: ReturnType<typeof Database>, userId: number, balance = 1000) {
+export function createTestWallet(
+  database: ReturnType<typeof Database>,
+  userId: number,
+  balance = 1000,
+) {
   const now = new Date().toISOString();
-  database.prepare(`INSERT INTO "Wallet" (userId, currency, balance, pendingBalance, updatedAt) VALUES (?, 'USD', ?, 0, ?)`).run(userId, balance, now);
-  return database.prepare(`SELECT * FROM "Wallet" WHERE userId=?`).get(userId) as { id: number; userId: number; balance: number };
+  database
+    .prepare(
+      `INSERT INTO "Wallet" (userId, currency, balance, pendingBalance, updatedAt) VALUES (?, 'USD', ?, 0, ?)`,
+    )
+    .run(userId, balance, now);
+  return database.prepare(`SELECT * FROM "Wallet" WHERE userId=?`).get(userId) as {
+    id: number;
+    userId: number;
+    balance: number;
+  };
 }

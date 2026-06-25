@@ -12,7 +12,9 @@ const SMTP_FROM = process.env.SMTP_FROM || SMTP_EMAIL;
 
 async function createTransporter() {
   if (!SMTP_EMAIL || !SMTP_PASSWORD) {
-    throw new Error("SMTP credentials must be configured with SMTP_EMAIL/SMTP_PASSWORD or SMTP_USER/SMTP_PASS.");
+    throw new Error(
+      "SMTP credentials must be configured with SMTP_EMAIL/SMTP_PASSWORD or SMTP_USER/SMTP_PASS.",
+    );
   }
 
   const nodemailer = (await import("nodemailer")).default;
@@ -139,7 +141,8 @@ export async function sendSignupOtpEmail(email: string) {
     "SIGNUP",
     email,
     "Your signup OTP code",
-    (code) => `Your signup verification code is ${code}. It expires in ${OTP_EXPIRATION_MINUTES} minutes.`,
+    (code) =>
+      `Your signup verification code is ${code}. It expires in ${OTP_EXPIRATION_MINUTES} minutes.`,
   );
 }
 
@@ -148,7 +151,8 @@ export async function sendPasswordResetOtpEmail(email: string) {
     "PASSWORD_RESET",
     email,
     "Reset your Servio password",
-    (code) => `Your password reset code is ${code}. It expires in ${OTP_EXPIRATION_MINUTES} minutes.`,
+    (code) =>
+      `Your password reset code is ${code}. It expires in ${OTP_EXPIRATION_MINUTES} minutes.`,
   );
 }
 

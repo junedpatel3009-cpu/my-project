@@ -20,11 +20,20 @@ export function Logo({
   );
 
   if (!linked) {
-    return <div className={`flex items-center gap-2 font-display font-bold text-foreground ${className}`}>{content}</div>;
+    return (
+      <div
+        className={`flex items-center gap-2 font-display font-bold text-foreground ${className}`}
+      >
+        {content}
+      </div>
+    );
   }
 
   return (
-    <Link to="/" className={`flex items-center gap-2 font-display font-bold text-foreground ${className}`}>
+    <Link
+      to="/"
+      className={`flex items-center gap-2 font-display font-bold text-foreground ${className}`}
+    >
       {content}
     </Link>
   );

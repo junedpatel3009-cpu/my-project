@@ -112,7 +112,12 @@ const submitAdminLogin = createServerFn({ method: "POST" })
     const existingAdmin = findUserByEmail(email);
     const passwordCheck = await verifyPassword(data.password, existingAdmin?.passwordHash ?? null);
 
-    if (!existingAdmin || existingAdmin.role !== "ADMIN" || !existingAdmin.isActive || !passwordCheck.valid) {
+    if (
+      !existingAdmin ||
+      existingAdmin.role !== "ADMIN" ||
+      !existingAdmin.isActive ||
+      !passwordCheck.valid
+    ) {
       return {
         ok: false as const,
         formError: "Invalid admin username or password.",
@@ -173,7 +178,9 @@ const updateManagedUserStatus = createServerFn({ method: "POST" })
   });
 
 const updateManagedDisputeStatus = createServerFn({ method: "POST" })
-  .inputValidator((input: { disputeId: number; status: "OPEN" | "UNDER_REVIEW" | "RESOLVED" }) => input)
+  .inputValidator(
+    (input: { disputeId: number; status: "OPEN" | "UNDER_REVIEW" | "RESOLVED" }) => input,
+  )
   .handler(async ({ data }) => {
     const viewer = getCurrentUser();
 
@@ -195,7 +202,12 @@ type OverviewResult = "total-users" | "today-jobs" | "today-transactions" | "ope
 
 const shortcutConfig = [
   { key: "overview", label: "Overview", icon: TrendingUp, description: "Live platform metrics" },
-  { key: "jobs", label: "Jobs & Disputes", icon: BriefcaseBusiness, description: "Job posts, tracked work, and dispute queue" },
+  {
+    key: "jobs",
+    label: "Jobs & Disputes",
+    icon: BriefcaseBusiness,
+    description: "Job posts, tracked work, and dispute queue",
+  },
   { key: "users", label: "Users", icon: Users, description: "User roles and access" },
   { key: "payments", label: "Payments", icon: ReceiptText, description: "Revenue and payouts" },
 ] as const;
@@ -232,11 +244,7 @@ function Admin() {
     setDisputeQuery("");
     setPaymentQuery("");
     setTab(
-      result === "total-users"
-        ? "users"
-        : result === "today-transactions"
-          ? "payments"
-          : "jobs",
+      result === "total-users" ? "users" : result === "today-transactions" ? "payments" : "jobs",
     );
   }
 
@@ -277,7 +285,12 @@ function Admin() {
     let jobs = data.jobRecords as JobRecord[];
 
     if (overviewResult === "today-jobs") {
-      jobs = jobs.filter((job) => isOnDashboardDay(job.createdAt, data.dashboard.generatedAt));
+      const generatedAt = data.dashboard?.generatedAt;
+      if (generatedAt) {
+        jobs = jobs.filter((job) => isOnDashboardDay(job.createdAt, generatedAt));
+      } else {
+        jobs = [];
+      }
     } else if (overviewResult === "open-disputes") {
       const disputedJobIds = new Set(
         (data.disputeRecords as DisputeRecord[])
@@ -309,7 +322,7 @@ function Admin() {
 
       return haystack.includes(term);
     });
-  }, [data.dashboard.generatedAt, data.disputeRecords, data.jobRecords, jobQuery, overviewResult]);
+  }, [data.dashboard?.generatedAt, data.disputeRecords, data.jobRecords, jobQuery, overviewResult]);
 
   const filteredDisputes = useMemo(() => {
     const term = disputeQuery.trim().toLowerCase();
@@ -352,11 +365,15 @@ function Admin() {
     let payments = data.paymentTransactions as PaymentRecord[];
 
     if (overviewResult === "today-transactions") {
-      payments = payments.filter(
-        (payment) =>
-          payment.status === "COMPLETED" &&
-          isOnDashboardDay(payment.dateTime, data.dashboard.generatedAt),
-      );
+      const generatedAt = data.dashboard?.generatedAt;
+      if (generatedAt) {
+        payments = payments.filter(
+          (payment) =>
+            payment.status === "COMPLETED" && isOnDashboardDay(payment.dateTime, generatedAt),
+        );
+      } else {
+        payments = [];
+      }
     }
 
     if (!term) {
@@ -377,7 +394,7 @@ function Admin() {
 
       return haystack.includes(term);
     });
-  }, [data.dashboard.generatedAt, data.paymentTransactions, overviewResult, paymentQuery]);
+  }, [data.dashboard?.generatedAt, data.paymentTransactions, overviewResult, paymentQuery]);
 
   useEffect(() => {
     if (!data?.viewer || data.viewer.role !== "ADMIN") {
@@ -442,17 +459,11 @@ function Admin() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => setSearchOpen(true)}
-          >
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setSearchOpen(true)}>
             <Search className="h-4 w-4" />
             <span className="hidden sm:inline">Global search</span>
             <kbd className="hidden items-center gap-1 rounded border border-border bg-muted/50 px-1.5 py-0.5 text-xs md:inline-flex">
-              <Command className="h-3 w-3" />
-              K
+              <Command className="h-3 w-3" />K
             </kbd>
           </Button>
           <Badge variant="secondary" className="w-fit gap-2">
@@ -527,11 +538,17 @@ function Admin() {
         </div>
 
         <div className="p-4">
-          {tab === "overview" && <Overview dashboard={data.dashboard} onSelectResult={showOverviewResult} />}
+          {tab === "overview" && (
+            <Overview dashboard={data.dashboard} onSelectResult={showOverviewResult} />
+          )}
           {tab === "users" && (
             <div className="space-y-4">
               {overviewResult === "total-users" && (
-                <ResultNotice label="Total users" count={filteredUsers.length} onClear={() => selectTab("users")} />
+                <ResultNotice
+                  label="Total users"
+                  count={filteredUsers.length}
+                  onClear={() => selectTab("users")}
+                />
               )}
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 p-4">
                 <div>
@@ -554,10 +571,18 @@ function Admin() {
               stats={shortcutStats[activeShortcut.key]}
             >
               {overviewResult === "today-jobs" && (
-                <ResultNotice label="Jobs posted today" count={filteredJobs.length} onClear={() => selectTab("jobs")} />
+                <ResultNotice
+                  label="Jobs posted today"
+                  count={filteredJobs.length}
+                  onClear={() => selectTab("jobs")}
+                />
               )}
               {overviewResult === "open-disputes" && (
-                <ResultNotice label="Open disputes" count={filteredDisputes.length} onClear={() => selectTab("jobs")} />
+                <ResultNotice
+                  label="Open disputes"
+                  count={filteredDisputes.length}
+                  onClear={() => selectTab("jobs")}
+                />
               )}
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background p-4">
                 <div>
@@ -577,7 +602,13 @@ function Admin() {
                 disputeQuery={disputeQuery}
                 onJobQueryChange={setJobQuery}
                 onDisputeQueryChange={setDisputeQuery}
-                resultMode={overviewResult === "today-jobs" ? "jobs" : overviewResult === "open-disputes" ? "disputes" : "all"}
+                resultMode={
+                  overviewResult === "today-jobs"
+                    ? "jobs"
+                    : overviewResult === "open-disputes"
+                      ? "disputes"
+                      : "all"
+                }
               />
             </ShortcutPanel>
           )}
@@ -588,13 +619,18 @@ function Admin() {
               stats={shortcutStats[activeShortcut.key]}
             >
               {overviewResult === "today-transactions" && (
-                <ResultNotice label="Today transactions" count={filteredPayments.length} onClear={() => selectTab("payments")} />
+                <ResultNotice
+                  label="Today transactions"
+                  count={filteredPayments.length}
+                  onClear={() => selectTab("payments")}
+                />
               )}
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-background p-4">
                 <div>
                   <h3 className="font-semibold">Earnings, Commission & Payout Reports</h3>
                   <p className="text-sm text-muted-foreground">
-                    Open the complete admin report for gross earnings, commission, net payouts, and withdrawal requests.
+                    Open the complete admin report for gross earnings, commission, net payouts, and
+                    withdrawal requests.
                   </p>
                 </div>
                 <Button asChild>
@@ -652,7 +688,11 @@ function getShortcutStats(
       { label: "Total jobs", value: totalJobs, caption: "All posted jobs" },
       { label: "Active jobs", value: openJobs, caption: "Running and open work" },
       { label: "Completed jobs", value: completedJobs, caption: "Closed successfully" },
-      { label: "Open disputes", value: dashboard.stats.openDisputes, caption: "Needs admin review" },
+      {
+        label: "Open disputes",
+        value: dashboard.stats.openDisputes,
+        caption: "Needs admin review",
+      },
     ],
     users: [
       {
@@ -750,7 +790,9 @@ function JobDisputeManagement({
   resultMode: "all" | "jobs" | "disputes";
 }) {
   const openDisputes = disputes.filter((dispute) => dispute.status !== "RESOLVED").length;
-  const highPriorityDisputes = disputes.filter((dispute) => dispute.priority === "HIGH" && dispute.status !== "RESOLVED").length;
+  const highPriorityDisputes = disputes.filter(
+    (dispute) => dispute.priority === "HIGH" && dispute.status !== "RESOLVED",
+  ).length;
 
   return (
     <div className="mt-5 space-y-5">
@@ -773,7 +815,11 @@ function JobDisputeManagement({
       </div>
 
       {resultMode !== "jobs" && (
-        <DisputesTable disputes={disputes} query={disputeQuery} onQueryChange={onDisputeQueryChange} />
+        <DisputesTable
+          disputes={disputes}
+          query={disputeQuery}
+          onQueryChange={onDisputeQueryChange}
+        />
       )}
       {resultMode !== "disputes" && (
         <JobsTable jobs={jobs} query={jobQuery} onQueryChange={onJobQueryChange} />
@@ -838,7 +884,15 @@ function DisputesTable({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate font-semibold">{dispute.jobTitle}</p>
-                  <Badge variant={dispute.status === "OPEN" ? "destructive" : dispute.status === "UNDER_REVIEW" ? "secondary" : "outline"}>
+                  <Badge
+                    variant={
+                      dispute.status === "OPEN"
+                        ? "destructive"
+                        : dispute.status === "UNDER_REVIEW"
+                          ? "secondary"
+                          : "outline"
+                    }
+                  >
                     {formatEnum(dispute.status)}
                   </Badge>
                   <Badge variant={dispute.priority === "HIGH" ? "destructive" : "outline"}>
@@ -855,7 +909,8 @@ function DisputesTable({
                 <p className="mt-2 text-sm text-muted-foreground">
                   Client: <span className="font-medium text-foreground">{dispute.clientName}</span>
                   {" / "}
-                  Professional: <span className="font-medium text-foreground">{dispute.professionalName}</span>
+                  Professional:{" "}
+                  <span className="font-medium text-foreground">{dispute.professionalName}</span>
                 </p>
               </div>
               <div className="space-y-2">
@@ -1261,7 +1316,9 @@ function MetricCard({
       className="group rounded-lg border border-border bg-card p-5 text-left shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <Icon className="h-5 w-5 text-primary" />
-      <p className="mt-4 text-sm text-muted-foreground transition-colors group-hover:text-foreground">{label}</p>
+      <p className="mt-4 text-sm text-muted-foreground transition-colors group-hover:text-foreground">
+        {label}
+      </p>
       <p className="mt-1 text-2xl font-semibold">
         {typeof value === "number" ? value.toLocaleString() : value}
       </p>
@@ -1282,8 +1339,12 @@ function ResultNotice({
   return (
     <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
       <div>
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">Showing card results</p>
-        <p className="mt-1 font-semibold">{label}: {count.toLocaleString()}</p>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
+          Showing card results
+        </p>
+        <p className="mt-1 font-semibold">
+          {label}: {count.toLocaleString()}
+        </p>
       </div>
       <Button type="button" variant="outline" size="sm" onClick={onClear}>
         Show all

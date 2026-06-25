@@ -20,7 +20,9 @@ export const Route = createFileRoute("/terms-and-conditions")({
 });
 
 function TermsAndConditions() {
-  const { cmsPage } = Route.useLoaderData() as { cmsPage: { title: string; content: string } | null };
+  const { cmsPage } = Route.useLoaderData() as {
+    cmsPage: { title: string; content: string } | null;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -41,12 +43,21 @@ function TermsAndConditions() {
           />
         ) : (
           <div className="text-sm leading-7 text-muted-foreground">
-            <h2 className="font-display text-2xl font-semibold text-foreground">Acceptance of Terms</h2>
+            <h2 className="font-display text-2xl font-semibold text-foreground">
+              Acceptance of Terms
+            </h2>
             <p className="mt-3">By accessing or using Servio, you agree to follow these terms.</p>
-            <h2 className="font-display mt-8 text-2xl font-semibold text-foreground">User Accounts</h2>
+            <h2 className="font-display mt-8 text-2xl font-semibold text-foreground">
+              User Accounts
+            </h2>
             <p className="mt-3">You are responsible for your account credentials and activity.</p>
-            <h2 className="font-display mt-8 text-2xl font-semibold text-foreground">Payments & Services</h2>
-            <p className="mt-3">Clients and professionals are responsible for agreed work, payments, and platform rules.</p>
+            <h2 className="font-display mt-8 text-2xl font-semibold text-foreground">
+              Payments & Services
+            </h2>
+            <p className="mt-3">
+              Clients and professionals are responsible for agreed work, payments, and platform
+              rules.
+            </p>
           </div>
         )}
       </section>

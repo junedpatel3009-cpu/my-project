@@ -11,7 +11,12 @@ export function BenefitsSection({ config, children }: BenefitsSectionProps) {
   if (!config.visible) return null;
 
   const spacingClass = getSpacingClass(config.spacing || "normal");
-  const colsClass = config.columns === 2 ? "md:grid-cols-2" : config.columns === 4 ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-2 lg:grid-cols-3";
+  const colsClass =
+    config.columns === 2
+      ? "md:grid-cols-2"
+      : config.columns === 4
+        ? "md:grid-cols-2 lg:grid-cols-4"
+        : "md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -44,8 +49,11 @@ export function BenefitsSection({ config, children }: BenefitsSectionProps) {
 
 function getSpacingClass(spacing: "compact" | "normal" | "spacious"): string {
   switch (spacing) {
-    case "compact": return "py-10";
-    case "spacious": return "py-28";
-    default: return "py-20";
+    case "compact":
+      return "py-10";
+    case "spacious":
+      return "py-28";
+    default:
+      return "py-20";
   }
 }

@@ -20,15 +20,32 @@ import {
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getCurrentUser } from "@/lib/current-user.server";
 import { getFavoriteJobsByUserId } from "@/lib/job-db.server";
 import { formatApproximateLocation } from "@/lib/location-privacy";
 import { clientProfileSchema, type ClientProfileInput } from "@/lib/validation/client-profile";
-import { findUserByEmailOrPhone, getClientProfileByUserId, updateClientProfileByUserId } from "@/lib/user-db.server";
+import {
+  findUserByEmailOrPhone,
+  getClientProfileByUserId,
+  updateClientProfileByUserId,
+} from "@/lib/user-db.server";
 
 const teamSizeOptions = [
   "Just me",
@@ -138,7 +155,9 @@ function MyInfoPage() {
   const [newLocationLabel, setNewLocationLabel] = useState("");
   const [newLocationAddress, setNewLocationAddress] = useState("");
   const [newHiringNeed, setNewHiringNeed] = useState("");
-  const [profilePhotoPreview, setProfilePhotoPreview] = useState(data?.clientProfile?.avatarUrl ?? "");
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(
+    data?.clientProfile?.avatarUrl ?? "",
+  );
   const [isEditing, setIsEditing] = useState(false);
 
   if (!data) {
@@ -161,13 +180,12 @@ function MyInfoPage() {
       companyDescription: clientProfile?.companyDescription ?? "",
       address: clientProfile?.address ?? "",
       profilePhotoUrl: clientProfile?.avatarUrl ?? viewer.avatarUrl ?? "",
-      savedLocations:
-        clientProfile?.savedLocations?.length
-          ? clientProfile.savedLocations.map((location) => ({
-              label: location.label,
-              address: location.address,
-            }))
-          : [{ label: "Primary office", address: "" }],
+      savedLocations: clientProfile?.savedLocations?.length
+        ? clientProfile.savedLocations.map((location) => ({
+            label: location.label,
+            address: location.address,
+          }))
+        : [{ label: "Primary office", address: "" }],
       hiringNeeds: clientProfile?.hiringNeeds?.length ? clientProfile.hiringNeeds : [],
     },
   });
@@ -175,8 +193,16 @@ function MyInfoPage() {
   const savedLocations = form.watch("savedLocations");
   const hiringNeeds = form.watch("hiringNeeds");
   const primaryLocationAddress =
-    form.watch("address")?.trim() || savedLocations?.[0]?.address?.trim() || clientProfile?.address?.trim() || clientProfile?.savedLocations?.[0]?.address?.trim() || "";
-  const profileImage = profilePhotoPreview || clientProfile?.avatarUrl || viewer.avatarUrl || "https://i.pravatar.cc/120?u=client-my-info";
+    form.watch("address")?.trim() ||
+    savedLocations?.[0]?.address?.trim() ||
+    clientProfile?.address?.trim() ||
+    clientProfile?.savedLocations?.[0]?.address?.trim() ||
+    "";
+  const profileImage =
+    profilePhotoPreview ||
+    clientProfile?.avatarUrl ||
+    viewer.avatarUrl ||
+    "https://i.pravatar.cc/120?u=client-my-info";
 
   async function handlePhotoUpload(file: File | undefined) {
     if (!file) {
@@ -288,14 +314,22 @@ function MyInfoPage() {
             <CardContent className="p-6">
               <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                 <div className="flex items-start gap-4">
-                  <img src={profileImage} alt={displayName} className="h-24 w-24 rounded-2xl object-cover" />
+                  <img
+                    src={profileImage}
+                    alt={displayName}
+                    className="h-24 w-24 rounded-2xl object-cover"
+                  />
                   <div>
                     <div className="flex items-center gap-2 text-sm text-primary">
                       <UserRound className="h-4 w-4" />
                       Client profile
                     </div>
-                    <h1 className="mt-2 text-2xl font-semibold tracking-tight">{displayName || "Client"}</h1>
-                    <p className="mt-1 text-muted-foreground">{clientProfile?.companyName || "Company not added"}</p>
+                    <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+                      {displayName || "Client"}
+                    </h1>
+                    <p className="mt-1 text-muted-foreground">
+                      {clientProfile?.companyName || "Company not added"}
+                    </p>
                     <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
                       {clientProfile?.companyDescription || "No company description added yet."}
                     </p>
@@ -313,7 +347,9 @@ function MyInfoPage() {
             <Card className="border-border shadow-soft">
               <CardHeader>
                 <CardTitle>Profile information</CardTitle>
-                <CardDescription>All information saved from the client profile setup.</CardDescription>
+                <CardDescription>
+                  All information saved from the client profile setup.
+                </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
                 <SummaryItem label="Contact name" value={form.watch("fullName") || "Not added"} />
@@ -334,11 +370,18 @@ function MyInfoPage() {
                   <CardDescription>Skills and services this client hires for.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {hiringNeeds.length ? hiringNeeds.map((need) => (
-                    <span key={need} className="rounded-full border border-border bg-muted/30 px-3 py-1 text-sm">
-                      {need}
-                    </span>
-                  )) : <p className="text-sm text-muted-foreground">No hiring needs added yet.</p>}
+                  {hiringNeeds.length ? (
+                    hiringNeeds.map((need) => (
+                      <span
+                        key={need}
+                        className="rounded-full border border-border bg-muted/30 px-3 py-1 text-sm"
+                      >
+                        {need}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No hiring needs added yet.</p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -351,12 +394,17 @@ function MyInfoPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {savedLocations.filter((location) => location.address).length ? (
-                    savedLocations.filter((location) => location.address).map((location, index) => (
-                      <div key={`${location.label}-${index}`} className="rounded-2xl border border-border bg-muted/30 p-4">
-                        <p className="font-medium">{location.label || "Saved location"}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">{location.address}</p>
-                      </div>
-                    ))
+                    savedLocations
+                      .filter((location) => location.address)
+                      .map((location, index) => (
+                        <div
+                          key={`${location.label}-${index}`}
+                          className="rounded-2xl border border-border bg-muted/30 p-4"
+                        >
+                          <p className="font-medium">{location.label || "Saved location"}</p>
+                          <p className="mt-1 text-sm text-muted-foreground">{location.address}</p>
+                        </div>
+                      ))
                   ) : (
                     <p className="text-sm text-muted-foreground">No saved locations added yet.</p>
                   )}
@@ -385,7 +433,8 @@ function MyInfoPage() {
             </div>
             <CardTitle>Edit your onboarding details</CardTitle>
             <CardDescription>
-              Everything the client entered during signup onboarding can be reviewed and updated here.
+              Everything the client entered during signup onboarding can be reviewed and updated
+              here.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -393,7 +442,12 @@ function MyInfoPage() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="flex items-start gap-4 rounded-2xl border border-border bg-muted/40 p-4">
                   <img
-                    src={profilePhotoPreview || clientProfile?.avatarUrl || viewer.avatarUrl || "https://i.pravatar.cc/120?u=client-my-info"}
+                    src={
+                      profilePhotoPreview ||
+                      clientProfile?.avatarUrl ||
+                      viewer.avatarUrl ||
+                      "https://i.pravatar.cc/120?u=client-my-info"
+                    }
                     alt={displayName}
                     className="h-20 w-20 rounded-2xl object-cover"
                   />
@@ -402,7 +456,11 @@ function MyInfoPage() {
                       <ImagePlus className="h-4 w-4" />
                       Company or profile photo
                     </div>
-                    <Input type="file" accept="image/*" onChange={(event) => handlePhotoUpload(event.target.files?.[0])} />
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => handlePhotoUpload(event.target.files?.[0])}
+                    />
                   </div>
                 </div>
 
@@ -536,7 +594,11 @@ function MyInfoPage() {
                     <FormItem>
                       <FormLabel>Primary company location</FormLabel>
                       <FormControl>
-                        <Textarea className="min-h-24" placeholder="Full office or billing address" {...field} />
+                        <Textarea
+                          className="min-h-24"
+                          placeholder="Full office or billing address"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -559,15 +621,24 @@ function MyInfoPage() {
                       value={newLocationAddress}
                       onChange={(event) => setNewLocationAddress(event.target.value)}
                     />
-                    <Button type="button" onClick={addSavedLocation}>Add</Button>
+                    <Button type="button" onClick={addSavedLocation}>
+                      Add
+                    </Button>
                   </div>
                   {savedLocations.map((location, index) => (
-                    <div key={`${location.label}-${index}`} className="flex items-start justify-between gap-3 rounded-2xl border border-border bg-muted/30 p-4">
+                    <div
+                      key={`${location.label}-${index}`}
+                      className="flex items-start justify-between gap-3 rounded-2xl border border-border bg-muted/30 p-4"
+                    >
                       <div>
                         <p className="font-medium">{location.label}</p>
                         <p className="mt-1 text-sm text-muted-foreground">{location.address}</p>
                       </div>
-                      <Button type="button" variant="outline" onClick={() => removeSavedLocation(index)}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => removeSavedLocation(index)}
+                      >
                         Remove
                       </Button>
                     </div>
@@ -607,11 +678,16 @@ function MyInfoPage() {
                         value={newHiringNeed}
                         onChange={(event) => setNewHiringNeed(event.target.value)}
                       />
-                      <Button type="button" onClick={() => addHiringNeed()}>Add skill</Button>
+                      <Button type="button" onClick={() => addHiringNeed()}>
+                        Add skill
+                      </Button>
                     </div>
                   </div>
                   {hiringNeeds.map((need) => (
-                    <div key={need} className="flex items-center justify-between rounded-2xl border border-border bg-muted/30 px-4 py-3">
+                    <div
+                      key={need}
+                      className="flex items-center justify-between rounded-2xl border border-border bg-muted/30 px-4 py-3"
+                    >
                       <span className="font-medium">{need}</span>
                       <button
                         type="button"
@@ -634,8 +710,16 @@ function MyInfoPage() {
                   />
                 </div>
 
-                {submitError ? <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">{submitError}</div> : null}
-                {successMessage ? <div className="rounded-xl border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">{successMessage}</div> : null}
+                {submitError ? (
+                  <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                    {submitError}
+                  </div>
+                ) : null}
+                {successMessage ? (
+                  <div className="rounded-xl border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">
+                    {successMessage}
+                  </div>
+                ) : null}
 
                 <div className="flex gap-3">
                   <Button type="submit">
@@ -686,7 +770,10 @@ function MyInfoPage() {
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {hiringNeeds.map((need) => (
-                <span key={need} className="rounded-full border border-border bg-muted/30 px-3 py-1 text-sm">
+                <span
+                  key={need}
+                  className="rounded-full border border-border bg-muted/30 px-3 py-1 text-sm"
+                >
                   {need}
                 </span>
               ))}
@@ -700,9 +787,7 @@ function MyInfoPage() {
                 Saved favorites
               </div>
               <CardTitle>Favorite jobs</CardTitle>
-              <CardDescription>
-                Jobs you saved from the home page or job details.
-              </CardDescription>
+              <CardDescription>Jobs you saved from the home page or job details.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {favoriteJobs.length ? (
@@ -728,7 +813,12 @@ function MyInfoPage() {
                       </span>
                       <span className="flex min-w-0 items-center gap-1 sm:col-span-2">
                         <MapPin className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">{formatApproximateLocation(job.locationAddress || job.locationLabel, "Remote job")}</span>
+                        <span className="truncate">
+                          {formatApproximateLocation(
+                            job.locationAddress || job.locationLabel,
+                            "Remote job",
+                          )}
+                        </span>
                       </span>
                     </div>
                   </Link>
@@ -826,8 +916,8 @@ function ClientLocationMap({ locationAddress }: { locationAddress: string }) {
           {currentCoords
             ? `Current location: ${currentCoords.lat.toFixed(4)}, ${currentCoords.lng.toFixed(4)}`
             : locationAddress
-            ? locationAddress
-            : "No location is available yet."}
+              ? locationAddress
+              : "No location is available yet."}
         </p>
         {statusMessage ? <p className="text-sm text-muted-foreground">{statusMessage}</p> : null}
       </CardContent>

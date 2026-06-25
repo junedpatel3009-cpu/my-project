@@ -30,9 +30,7 @@ async function createPrismaClient() {
   return new PrismaClient(options);
 }
 
-export const prisma =
-  globalForPrisma.prisma ??
-  (await createPrismaClient());
+export const prisma = globalForPrisma.prisma ?? (await createPrismaClient());
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

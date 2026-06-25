@@ -11,7 +11,12 @@ export function HeroSection({ config, children }: HeroSectionProps) {
   if (!config.visible) return null;
 
   const spacingClass = getSpacingClass(config.spacing || "normal");
-  const layoutClass = config.layoutStyle === "left" ? "text-left" : config.layoutStyle === "split" ? "text-left lg:grid lg:grid-cols-2 lg:items-center" : "text-center";
+  const layoutClass =
+    config.layoutStyle === "left"
+      ? "text-left"
+      : config.layoutStyle === "split"
+        ? "text-left lg:grid lg:grid-cols-2 lg:items-center"
+        : "text-center";
 
   return (
     <section className="gradient-hero">
@@ -61,8 +66,11 @@ export function HeroSectionSkeleton() {
 
 function getSpacingClass(spacing: "compact" | "normal" | "spacious"): string {
   switch (spacing) {
-    case "compact": return "py-10";
-    case "spacious": return "py-28";
-    default: return "py-20";
+    case "compact":
+      return "py-10";
+    case "spacious":
+      return "py-28";
+    default:
+      return "py-20";
   }
 }

@@ -58,7 +58,9 @@ const getUserManagementData = createServerFn({ method: "GET" }).handler(async ()
     };
   }
 
-  const users = getAdminUsers().filter((user) => user.role === "CLIENT" || user.role === "PROFESSIONAL");
+  const users = getAdminUsers().filter(
+    (user) => user.role === "CLIENT" || user.role === "PROFESSIONAL",
+  );
 
   return {
     viewer,
@@ -124,7 +126,9 @@ function UserManagement() {
   const [professionalQuery, setProfessionalQuery] = useState("");
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const [summaryFilter, setSummaryFilter] = useState<"clients" | "professionals" | "verified" | "inactive" | null>(null);
+  const [summaryFilter, setSummaryFilter] = useState<
+    "clients" | "professionals" | "verified" | "inactive" | null
+  >(null);
 
   if (!data.viewer || data.viewer.role !== "ADMIN") {
     return (
@@ -158,7 +162,8 @@ function UserManagement() {
         : professionals,
     professionalQuery,
   );
-  const displayName = `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
+  const displayName =
+    `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
   const selectedUser = users.find((user) => user.id === selectedUserId) || null;
   const selectedUserDetail = selectedUserId
     ? (data.userDetails[selectedUserId] as AdminManagedUserDetail | undefined)
@@ -216,14 +221,23 @@ function UserManagement() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard icon={Users} label="Clients" value={clients.length} caption={`${activeCount(clients)} active`} active={summaryFilter === "clients"} onClick={() => setSummaryFilter(summaryFilter === "clients" ? null : "clients")} />
+        <SummaryCard
+          icon={Users}
+          label="Clients"
+          value={clients.length}
+          caption={`${activeCount(clients)} active`}
+          active={summaryFilter === "clients"}
+          onClick={() => setSummaryFilter(summaryFilter === "clients" ? null : "clients")}
+        />
         <SummaryCard
           icon={BriefcaseBusiness}
           label="Professionals"
           value={professionals.length}
           caption={`${activeCount(professionals)} active`}
           active={summaryFilter === "professionals"}
-          onClick={() => setSummaryFilter(summaryFilter === "professionals" ? null : "professionals")}
+          onClick={() =>
+            setSummaryFilter(summaryFilter === "professionals" ? null : "professionals")
+          }
         />
         <SummaryCard
           icon={BadgeCheck}
@@ -245,37 +259,50 @@ function UserManagement() {
 
       {summaryFilter ? (
         <div className="mt-4 flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
-          <span className="font-medium">Showing: {summaryFilter === "verified" ? "Verified professionals" : summaryFilter === "inactive" ? "Inactive users" : summaryFilter}</span>
-          <Button type="button" size="sm" variant="outline" onClick={() => setSummaryFilter(null)}>Show all</Button>
+          <span className="font-medium">
+            Showing:{" "}
+            {summaryFilter === "verified"
+              ? "Verified professionals"
+              : summaryFilter === "inactive"
+                ? "Inactive users"
+                : summaryFilter}
+          </span>
+          <Button type="button" size="sm" variant="outline" onClick={() => setSummaryFilter(null)}>
+            Show all
+          </Button>
         </div>
       ) : null}
 
       <div className="mt-6 grid gap-5 xl:grid-cols-2">
-        {summaryFilter !== "professionals" && summaryFilter !== "verified" ? <UserSection
-          title="Clients"
-          description="People or companies posting jobs and hiring professionals."
-          icon={Users}
-          query={clientQuery}
-          onQueryChange={setClientQuery}
-          placeholder="Search clients..."
-          users={visibleClients}
-          pendingAction={pendingAction}
-          onStatusChange={handleStatusChange}
-          onUserSelect={setSelectedUserId}
-        /> : null}
-        {summaryFilter !== "clients" ? <UserSection
-          title="Professionals"
-          description="Service providers, verification, rates, and availability."
-          icon={BriefcaseBusiness}
-          query={professionalQuery}
-          onQueryChange={setProfessionalQuery}
-          placeholder="Search professionals..."
-          users={visibleProfessionals}
-          pendingAction={pendingAction}
-          onStatusChange={handleStatusChange}
-          onVerificationChange={handleVerificationChange}
-          onUserSelect={setSelectedUserId}
-        /> : null}
+        {summaryFilter !== "professionals" && summaryFilter !== "verified" ? (
+          <UserSection
+            title="Clients"
+            description="People or companies posting jobs and hiring professionals."
+            icon={Users}
+            query={clientQuery}
+            onQueryChange={setClientQuery}
+            placeholder="Search clients..."
+            users={visibleClients}
+            pendingAction={pendingAction}
+            onStatusChange={handleStatusChange}
+            onUserSelect={setSelectedUserId}
+          />
+        ) : null}
+        {summaryFilter !== "clients" ? (
+          <UserSection
+            title="Professionals"
+            description="Service providers, verification, rates, and availability."
+            icon={BriefcaseBusiness}
+            query={professionalQuery}
+            onQueryChange={setProfessionalQuery}
+            placeholder="Search professionals..."
+            users={visibleProfessionals}
+            pendingAction={pendingAction}
+            onStatusChange={handleStatusChange}
+            onVerificationChange={handleVerificationChange}
+            onUserSelect={setSelectedUserId}
+          />
+        ) : null}
       </div>
 
       <UserDetailDialog
@@ -465,7 +492,10 @@ function UserDetailDialog({
 }) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordMessage, setPasswordMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
+  const [passwordMessage, setPasswordMessage] = useState<{
+    type: "error" | "success";
+    text: string;
+  } | null>(null);
 
   if (!user) return null;
 
@@ -492,7 +522,10 @@ function UserDetailDialog({
       await onPasswordChange(user, newPassword);
       setNewPassword("");
       setConfirmPassword("");
-      setPasswordMessage({ type: "success", text: "Password changed successfully. The user can now log in with it." });
+      setPasswordMessage({
+        type: "success",
+        text: "Password changed successfully. The user can now log in with it.",
+      });
     } catch (error) {
       setPasswordMessage({
         type: "error",
@@ -562,7 +595,9 @@ function UserDetailDialog({
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="projects">Projects ({detail?.projectCount || 0})</TabsTrigger>
-              <TabsTrigger value="payments">Payments ({detail?.transactions.length || 0})</TabsTrigger>
+              <TabsTrigger value="payments">
+                Payments ({detail?.transactions.length || 0})
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-4">
@@ -579,9 +614,15 @@ function UserDetailDialog({
                     <>
                       <InfoRow label="Category" value={user.professionalCategory || "Not set"} />
                       <InfoRow label="City" value={user.professionalCity || "Not set"} />
-                      <InfoRow label="Experience" value={user.experienceYears ? `${user.experienceYears} years` : "Not set"} />
+                      <InfoRow
+                        label="Experience"
+                        value={user.experienceYears ? `${user.experienceYears} years` : "Not set"}
+                      />
                       <InfoRow label="Rate" value={formatProfessionalRate(user)} />
-                      <InfoRow label="Availability" value={formatEnum(user.availabilityStatus || "available")} />
+                      <InfoRow
+                        label="Availability"
+                        value={formatEnum(user.availabilityStatus || "available")}
+                      />
                     </>
                   ) : (
                     <>
@@ -594,12 +635,28 @@ function UserDetailDialog({
                 <DetailPanel title="Project status">
                   <InfoRow label="Active" value={String(detail?.activeProjectCount || 0)} />
                   <InfoRow label="Completed" value={String(detail?.completedProjectCount || 0)} />
-                  <InfoRow label="Other / unassigned" value={String(Math.max(0, (detail?.projectCount || 0) - (detail?.activeProjectCount || 0) - (detail?.completedProjectCount || 0)))} />
+                  <InfoRow
+                    label="Other / unassigned"
+                    value={String(
+                      Math.max(
+                        0,
+                        (detail?.projectCount || 0) -
+                          (detail?.activeProjectCount || 0) -
+                          (detail?.completedProjectCount || 0),
+                      ),
+                    )}
+                  />
                 </DetailPanel>
                 <DetailPanel title="Money summary">
-                  <InfoRow label={isProfessional ? "Gross earnings" : "Completed payments"} value={formatMoney(detail?.totalMoney || 0)} />
+                  <InfoRow
+                    label={isProfessional ? "Gross earnings" : "Completed payments"}
+                    value={formatMoney(detail?.totalMoney || 0)}
+                  />
                   {isProfessional ? (
-                    <InfoRow label="Estimated net after 10% fee" value={formatMoney((detail?.totalMoney || 0) * 0.9)} />
+                    <InfoRow
+                      label="Estimated net after 10% fee"
+                      value={formatMoney((detail?.totalMoney || 0) * 0.9)}
+                    />
                   ) : null}
                   <InfoRow label="Transactions" value={String(detail?.transactions.length || 0)} />
                 </DetailPanel>
@@ -646,12 +703,22 @@ function UserDetailDialog({
                       Use 8+ characters with uppercase, lowercase, number, and special character.
                     </p>
                     {passwordMessage ? (
-                      <p className={`text-xs ${passwordMessage.type === "error" ? "text-destructive" : "text-emerald-600"}`}>
+                      <p
+                        className={`text-xs ${passwordMessage.type === "error" ? "text-destructive" : "text-emerald-600"}`}
+                      >
                         {passwordMessage.text}
                       </p>
                     ) : null}
-                    <Button type="submit" size="sm" disabled={passwordPending || !newPassword || !confirmPassword}>
-                      {passwordPending ? "Changing password..." : user.hasPassword ? "Change password" : "Create password"}
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={passwordPending || !newPassword || !confirmPassword}
+                    >
+                      {passwordPending
+                        ? "Changing password..."
+                        : user.hasPassword
+                          ? "Change password"
+                          : "Create password"}
                     </Button>
                   </form>
                 </DetailPanel>
@@ -660,42 +727,68 @@ function UserDetailDialog({
 
             <TabsContent value="projects" className="mt-4">
               <div className="space-y-3">
-                {detail?.projects.length ? detail.projects.map((project) => (
-                  <div key={project.id} className="rounded-lg border p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div>
-                        <p className="font-medium">{project.title}</p>
-                        <p className="text-sm text-muted-foreground">{project.category} · Created {formatDate(project.createdAt)}</p>
+                {detail?.projects.length ? (
+                  detail.projects.map((project) => (
+                    <div key={project.id} className="rounded-lg border p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <p className="font-medium">{project.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {project.category} · Created {formatDate(project.createdAt)}
+                          </p>
+                        </div>
+                        <Badge variant="outline">
+                          {formatEnum(project.trackingStatus || project.status)}
+                        </Badge>
                       </div>
-                      <Badge variant="outline">{formatEnum(project.trackingStatus || project.status)}</Badge>
+                      <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                        <InfoRow
+                          label={isProfessional ? "Client" : "Professional"}
+                          value={project.counterpartName || "Not assigned"}
+                        />
+                        <InfoRow
+                          label="Agreed amount"
+                          value={
+                            project.agreedAmount ? formatMoney(project.agreedAmount) : "Not set"
+                          }
+                        />
+                      </div>
                     </div>
-                    <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                      <InfoRow label={isProfessional ? "Client" : "Professional"} value={project.counterpartName || "Not assigned"} />
-                      <InfoRow label="Agreed amount" value={project.agreedAmount ? formatMoney(project.agreedAmount) : "Not set"} />
-                    </div>
-                  </div>
-                )) : <EmptyState message="No projects are connected to this user yet." />}
+                  ))
+                ) : (
+                  <EmptyState message="No projects are connected to this user yet." />
+                )}
               </div>
             </TabsContent>
 
             <TabsContent value="payments" className="mt-4">
               <div className="space-y-3">
-                {detail?.transactions.length ? detail.transactions.map((transaction) => (
-                  <div key={transaction.id} className="flex flex-col justify-between gap-3 rounded-lg border p-4 sm:flex-row sm:items-center">
-                    <div>
-                      <p className="font-medium">{transaction.projectTitle}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {isProfessional ? "Client" : "Professional"}: {transaction.counterpartName} · {formatDateTime(transaction.createdAt)}
-                      </p>
+                {detail?.transactions.length ? (
+                  detail.transactions.map((transaction) => (
+                    <div
+                      key={transaction.id}
+                      className="flex flex-col justify-between gap-3 rounded-lg border p-4 sm:flex-row sm:items-center"
+                    >
+                      <div>
+                        <p className="font-medium">{transaction.projectTitle}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {isProfessional ? "Client" : "Professional"}:{" "}
+                          {transaction.counterpartName} · {formatDateTime(transaction.createdAt)}
+                        </p>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <p className="font-semibold">
+                          {formatMoney(transaction.amount, transaction.currency)}
+                        </p>
+                        <Badge variant={transaction.status === "COMPLETED" ? "default" : "outline"}>
+                          {formatEnum(transaction.status)}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="text-left sm:text-right">
-                      <p className="font-semibold">{formatMoney(transaction.amount, transaction.currency)}</p>
-                      <Badge variant={transaction.status === "COMPLETED" ? "default" : "outline"}>
-                        {formatEnum(transaction.status)}
-                      </Badge>
-                    </div>
-                  </div>
-                )) : <EmptyState message="No payment transactions are recorded for this user." />}
+                  ))
+                ) : (
+                  <EmptyState message="No payment transactions are recorded for this user." />
+                )}
               </div>
             </TabsContent>
           </Tabs>
@@ -705,7 +798,15 @@ function UserDetailDialog({
   );
 }
 
-function DetailStat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
+function DetailStat({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Users;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="rounded-lg border bg-card p-4">
       <Icon className="h-5 w-5 text-primary" />
@@ -734,7 +835,11 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 function EmptyState({ message }: { message: string }) {
-  return <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">{message}</div>;
+  return (
+    <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+      {message}
+    </div>
+  );
 }
 
 function UserDetails({ user }: { user: AdminUserRecord }) {
@@ -754,7 +859,10 @@ function UserDetails({ user }: { user: AdminUserRecord }) {
       <Detail icon={BriefcaseBusiness} label={user.professionalCategory || "Category not set"} />
       <Detail icon={MapPin} label={user.professionalCity || "City not set"} />
       <Detail icon={Wallet} label={formatProfessionalRate(user)} />
-      <Detail icon={Star} label={`${user.averageRating.toFixed(1)} rating / ${user.reviewCount} reviews`} />
+      <Detail
+        icon={Star}
+        label={`${user.averageRating.toFixed(1)} rating / ${user.reviewCount} reviews`}
+      />
       <Detail icon={ShieldCheck} label={`Joined ${formatDate(user.createdAt)}`} />
       <Detail icon={UserRound} label={formatEnum(user.availabilityStatus || "available")} />
     </div>
@@ -777,7 +885,11 @@ function SummaryCard({
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}
+    >
       <Icon className="h-5 w-5 text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value.toLocaleString()}</p>

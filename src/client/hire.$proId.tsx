@@ -99,20 +99,31 @@ export const Route = createFileRoute("/hire/$proId")({
 function HireProfessional() {
   const { viewer, profile: pro, projects } = useLoaderData({ from: "/hire/$proId" });
   const clientProjects = (projects ?? []) as ClientJobRecord[];
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(clientProjects[0]?.id ?? null);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+    clientProjects[0]?.id ?? null,
+  );
   const [workDescription, setWorkDescription] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isStartingMessage, setIsStartingMessage] = useState(false);
-  const selectedProject = clientProjects.find((project) => project.id === selectedProjectId) ?? null;
+  const selectedProject =
+    clientProjects.find((project) => project.id === selectedProjectId) ?? null;
   const displayName = viewer ? `${viewer.firstName} ${viewer.lastName}`.trim() : "Guest";
   const rateLabel = pro.hourlyRate != null ? `$${pro.hourlyRate}/hr` : "Contact for rate";
   const fixedLabel = pro.fixedRate != null ? `$${pro.fixedRate}` : "Flexible";
-  const locationLabel = formatApproximateLocation(pro.professionalCity || pro.serviceArea || pro.address, "Location not provided");
+  const locationLabel = formatApproximateLocation(
+    pro.professionalCity || pro.serviceArea || pro.address,
+    "Location not provided",
+  );
   const ratingLabel = `${pro.averageRating.toFixed(1)} - ${pro.reviewCount} ${pro.reviewCount === 1 ? "review" : "reviews"}`;
   const availabilityLabel = formatAvailability(pro.availabilityStatus);
-  const workModeLabel = pro.workMode === "remote" ? "Remote" : pro.workMode === "onsite" ? "On-site" : "Remote and on-site";
+  const workModeLabel =
+    pro.workMode === "remote"
+      ? "Remote"
+      : pro.workMode === "onsite"
+        ? "On-site"
+        : "Remote and on-site";
 
   const openSocketMessages = (firstMessage: string, job: string) => {
     if (!viewer) {
@@ -176,7 +187,9 @@ function HireProfessional() {
           description: `${displayName || "A client"} sent a direct hire request for ${selectedProject.title}.`,
           href: "/professional-stats",
         });
-        setSuccessMessage("Hire request sent successfully. The professional will see it in My Stats and notifications.");
+        setSuccessMessage(
+          "Hire request sent successfully. The professional will see it in My Stats and notifications.",
+        );
         window.setTimeout(() => {
           if (window.history.length > 1) {
             window.history.back();
@@ -187,7 +200,11 @@ function HireProfessional() {
         }, 900);
       }
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Could not save contract. Please check the details.");
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Could not save contract. Please check the details.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -217,7 +234,11 @@ function HireProfessional() {
       userAvatarUrl={viewer?.avatarUrl}
     >
       <div className="mb-5">
-        <Link to="/pro/$proId" params={{ proId: String(pro.id) }} className="text-sm text-primary hover:underline">
+        <Link
+          to="/pro/$proId"
+          params={{ proId: String(pro.id) }}
+          className="text-sm text-primary hover:underline"
+        >
           Back to profile
         </Link>
       </div>
@@ -237,7 +258,9 @@ function HireProfessional() {
                   <h1 className="text-2xl font-semibold tracking-tight">{pro.fullName}</h1>
                   {pro.isVerified ? <BadgeCheck className="h-5 w-5 text-primary" /> : null}
                 </div>
-                <p className="text-sm text-muted-foreground">{pro.professionalCategory || "Professional services"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {pro.professionalCategory || "Professional services"}
+                </p>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1 text-foreground">
                     <Star className="h-3 w-3 fill-warning text-warning" />
@@ -254,7 +277,12 @@ function HireProfessional() {
                 </div>
               </div>
             </div>
-            <Button type="button" className="gap-2 sm:mb-2" onClick={messageBeforeHiring} disabled={isStartingMessage}>
+            <Button
+              type="button"
+              className="gap-2 sm:mb-2"
+              onClick={messageBeforeHiring}
+              disabled={isStartingMessage}
+            >
               <MessageSquare className="h-4 w-4" />
               {isStartingMessage ? "Opening..." : "Message before hiring"}
             </Button>
@@ -338,10 +366,18 @@ function HireProfessional() {
             <div className="mt-4 grid gap-3">
               <InfoCard label="Hourly money" value={rateLabel} icon={DollarSign} />
               <InfoCard label="Fixed rate" value={fixedLabel} icon={DollarSign} />
-              <InfoCard label="Service area" value={formatApproximateLocation(pro.serviceArea, locationLabel)} icon={MapPin} />
+              <InfoCard
+                label="Service area"
+                value={formatApproximateLocation(pro.serviceArea, locationLabel)}
+                icon={MapPin}
+              />
               <InfoCard label="Work mode" value={workModeLabel} icon={BriefcaseBusiness} />
               <InfoCard label="Availability" value={availabilityLabel} icon={CalendarDays} />
-              <InfoCard label="Service radius" value={pro.serviceRadiusKm ? `${pro.serviceRadiusKm} km` : "Not set"} icon={MapPin} />
+              <InfoCard
+                label="Service radius"
+                value={pro.serviceRadiusKm ? `${pro.serviceRadiusKm} km` : "Not set"}
+                icon={MapPin}
+              />
             </div>
             <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
               {pro.companyDescription || "This professional has not added a full description yet."}
@@ -355,7 +391,12 @@ function HireProfessional() {
               <ChecklistRow text="Project budget and deadline included" />
               <ChecklistRow text="Description added for the professional" />
             </div>
-            <Button type="button" className="mt-5 w-full gap-2" onClick={saveContract} disabled={isSaving || !clientProjects.length}>
+            <Button
+              type="button"
+              className="mt-5 w-full gap-2"
+              onClick={saveContract}
+              disabled={isSaving || !clientProjects.length}
+            >
               <ShieldCheck className="h-4 w-4" />
               {isSaving ? "Sending..." : "Send hire request"}
             </Button>
@@ -378,7 +419,9 @@ function ProjectOptionCard({
   return (
     <div
       className={`flex min-h-[260px] flex-col rounded-xl border bg-background p-5 text-left transition ${
-        checked ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/60"
+        checked
+          ? "border-primary bg-primary/5"
+          : "border-border bg-background hover:border-primary/60"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -391,7 +434,9 @@ function ProjectOptionCard({
             {checked ? <Badge variant="outline">Selected</Badge> : null}
           </div>
           <h3 className="mt-3 line-clamp-2 text-lg font-semibold">{project.title}</h3>
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{project.description}</p>
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+            {project.description}
+          </p>
         </div>
         <Button type="button" variant="ghost" size="sm" asChild>
           <Link to="/project/$projectId" params={{ projectId: String(project.id) }}>
@@ -421,11 +466,21 @@ function ProjectOptionCard({
 
       <div className="mt-auto flex items-center gap-2 border-t border-border pt-4 text-sm text-muted-foreground">
         <MapPin className="h-4 w-4 shrink-0 text-primary" />
-        <span className="truncate">{formatApproximateLocation(project.locationAddress || project.locationLabel, "Remote or no location saved")}</span>
+        <span className="truncate">
+          {formatApproximateLocation(
+            project.locationAddress || project.locationLabel,
+            "Remote or no location saved",
+          )}
+        </span>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" size="sm" onClick={onSelect} variant={checked ? "default" : "outline"}>
+        <Button
+          type="button"
+          size="sm"
+          onClick={onSelect}
+          variant={checked ? "default" : "outline"}
+        >
           {checked ? "Selected project" : "Select project"}
         </Button>
         <Button type="button" size="sm" variant="outline" asChild>
@@ -498,10 +553,9 @@ function getSocketUrl() {
 }
 
 function buildHireDescription(project: ClientJobRecord, note: string) {
-  const parts = [
-    project.description,
-    note.trim() ? `Client note: ${note.trim()}` : "",
-  ].filter(Boolean);
+  const parts = [project.description, note.trim() ? `Client note: ${note.trim()}` : ""].filter(
+    Boolean,
+  );
 
   return parts.join("\n\n");
 }

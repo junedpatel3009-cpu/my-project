@@ -32,7 +32,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { getCurrentUser } from "@/lib/current-user.server";
@@ -380,7 +386,8 @@ function ProfessionalProfileSetup() {
     workPhotosText: profile?.workPhotos.join("\n") || "",
     certificationsText: profile?.certifications.join(", ") || "",
     tradeLicenseUrl: profile?.tradeLicenseUrl || "",
-    availabilityStatus: (profile?.availabilityStatus as ProfessionalProfileForm["availabilityStatus"]) || "available",
+    availabilityStatus:
+      (profile?.availabilityStatus as ProfessionalProfileForm["availabilityStatus"]) || "available",
     serviceArea: profile?.serviceArea || "",
     serviceRadiusKm: profile?.serviceRadiusKm ?? 10,
     workMode: (profile?.workMode as ProfessionalProfileForm["workMode"]) || "both",
@@ -400,7 +407,9 @@ function ProfessionalProfileSetup() {
   const [isVerificationSaving, setIsVerificationSaving] = useState(false);
   const [isWorkPhotosSaving, setIsWorkPhotosSaving] = useState(false);
   const [isProfilePhotoSaving, setIsProfilePhotoSaving] = useState(false);
-  const [browserPermission, setBrowserPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [browserPermission, setBrowserPermission] = useState<
+    NotificationPermission | "unsupported"
+  >("unsupported");
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -409,12 +418,17 @@ function ProfessionalProfileSetup() {
   const [customSkill, setCustomSkill] = useState("");
   const [selectedVerificationDoc, setSelectedVerificationDoc] =
     useState<VerificationDocumentKey>("governmentIdUrl");
-  const [locationPickerTarget, setLocationPickerTarget] = useState<LocationPickerTarget | null>(null);
+  const [locationPickerTarget, setLocationPickerTarget] = useState<LocationPickerTarget | null>(
+    null,
+  );
   const [locationPickerValue, setLocationPickerValue] = useState("");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const displayName = form.fullName || `${viewer?.firstName ?? ""} ${viewer?.lastName ?? ""}`.trim() || "Professional";
+  const displayName =
+    form.fullName ||
+    `${viewer?.firstName ?? ""} ${viewer?.lastName ?? ""}`.trim() ||
+    "Professional";
   const completion = useMemo(() => getCompletion(form), [form]);
   const selectedSkills = splitList(form.skillsText);
   const verificationStatus = getVerificationStatus({
@@ -493,7 +507,11 @@ function ProfessionalProfileSetup() {
             <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
               <div className="flex items-start gap-4">
                 <img
-                  src={form.profilePhotoUrl || viewer.avatarUrl || "https://i.pravatar.cc/140?u=professional-profile"}
+                  src={
+                    form.profilePhotoUrl ||
+                    viewer.avatarUrl ||
+                    "https://i.pravatar.cc/140?u=professional-profile"
+                  }
                   alt={displayName}
                   className="h-24 w-24 rounded-2xl object-cover"
                 />
@@ -503,7 +521,9 @@ function ProfessionalProfileSetup() {
                     Professional profile
                   </div>
                   <h1 className="mt-2 text-2xl font-semibold tracking-tight">{displayName}</h1>
-                  <p className="mt-1 text-muted-foreground">{form.professionalCategory || "Service category not added"}</p>
+                  <p className="mt-1 text-muted-foreground">
+                    {form.professionalCategory || "Service category not added"}
+                  </p>
                   <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
                     {form.companyDescription || "No professional bio added yet."}
                   </p>
@@ -518,19 +538,46 @@ function ProfessionalProfileSetup() {
 
           <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
             <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-              <SectionTitle title="Profile information" subtitle="All information saved in your professional profile." />
+              <SectionTitle
+                title="Profile information"
+                subtitle="All information saved in your professional profile."
+              />
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <ProfileInfoItem label="Name" value={form.fullName || "Not added"} />
-                <ProfileInfoItem label="Category" value={form.professionalCategory || "Not added"} />
+                <ProfileInfoItem
+                  label="Category"
+                  value={form.professionalCategory || "Not added"}
+                />
                 <ProfileInfoItem label="City" value={form.professionalCity || "Not added"} />
                 <ProfileInfoItem label="Address" value={form.address || "Not added"} />
                 <ProfileInfoItem label="Service area" value={form.serviceArea || "Not added"} />
-                <ProfileInfoItem label="Service radius" value={formatServiceRadius(clampServiceRadius(Number(form.serviceRadiusKm ?? 0)))} />
+                <ProfileInfoItem
+                  label="Service radius"
+                  value={formatServiceRadius(clampServiceRadius(Number(form.serviceRadiusKm ?? 0)))}
+                />
                 <ProfileInfoItem label="Work mode" value={capitalizeWords(form.workMode)} />
-                <ProfileInfoItem label="Availability" value={capitalizeWords(form.availabilityStatus)} />
-                <ProfileInfoItem label="Experience" value={`${Number(form.experienceYears ?? 0)} years`} />
-                <ProfileInfoItem label="Hourly rate" value={form.hourlyRate ? `$${Number(form.hourlyRate).toLocaleString()} / hour` : "Not added"} />
-                <ProfileInfoItem label="Fixed rate" value={form.fixedRate ? `$${Number(form.fixedRate).toLocaleString()}` : "Not added"} />
+                <ProfileInfoItem
+                  label="Availability"
+                  value={capitalizeWords(form.availabilityStatus)}
+                />
+                <ProfileInfoItem
+                  label="Experience"
+                  value={`${Number(form.experienceYears ?? 0)} years`}
+                />
+                <ProfileInfoItem
+                  label="Hourly rate"
+                  value={
+                    form.hourlyRate
+                      ? `$${Number(form.hourlyRate).toLocaleString()} / hour`
+                      : "Not added"
+                  }
+                />
+                <ProfileInfoItem
+                  label="Fixed rate"
+                  value={
+                    form.fixedRate ? `$${Number(form.fixedRate).toLocaleString()}` : "Not added"
+                  }
+                />
                 <ProfileInfoItem label="Portfolio" value={form.portfolioUrl || "Not added"} />
               </div>
             </div>
@@ -539,20 +586,33 @@ function ProfessionalProfileSetup() {
               <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
                 <SectionTitle title="Skills" subtitle="Services clients can match with." />
                 <div className="mt-5 flex flex-wrap gap-2">
-                  {selectedSkills.length ? selectedSkills.map((skill) => (
-                    <span key={skill} className="rounded-full border border-border bg-muted/30 px-3 py-1 text-sm">
-                      {skill}
-                    </span>
-                  )) : <p className="text-sm text-muted-foreground">No skills added yet.</p>}
+                  {selectedSkills.length ? (
+                    selectedSkills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full border border-border bg-muted/30 px-3 py-1 text-sm"
+                      >
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No skills added yet.</p>
+                  )}
                 </div>
               </div>
 
               <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-                <SectionTitle title="Profile status" subtitle="Completion and verification summary." />
+                <SectionTitle
+                  title="Profile status"
+                  subtitle="Completion and verification summary."
+                />
                 <div className="mt-5 space-y-3">
                   <ProfileInfoItem label="Completion" value={`${completion}%`} />
                   <ProfileInfoItem label="Verification" value={verificationStatus.label} />
-                  <ProfileInfoItem label="Documents uploaded" value={`${verificationStatus.uploadedCount}/5`} />
+                  <ProfileInfoItem
+                    label="Documents uploaded"
+                    value={`${verificationStatus.uploadedCount}/5`}
+                  />
                 </div>
               </div>
             </div>
@@ -810,16 +870,15 @@ function ProfessionalProfileSetup() {
       setStatusMessage(`${documentLabel} uploaded and saved to verification records.`);
       await router.invalidate();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Could not save verification document.");
+      setSubmitError(
+        error instanceof Error ? error.message : "Could not save verification document.",
+      );
     } finally {
       setIsVerificationSaving(false);
     }
   };
 
-  const handleVerificationFile = async (
-    key: VerificationDocumentKey,
-    file: File | undefined,
-  ) => {
+  const handleVerificationFile = async (key: VerificationDocumentKey, file: File | undefined) => {
     if (!file) {
       return;
     }
@@ -898,21 +957,27 @@ function ProfessionalProfileSetup() {
       setStatusMessage("Professional profile saved. Clients can now discover this profile.");
       await router.invalidate();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Could not save professional profile.");
+      setSubmitError(
+        error instanceof Error ? error.message : "Could not save professional profile.",
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <AppShell userName={displayName} userRole="Professional" userAvatarUrl={form.profilePhotoUrl || viewer.avatarUrl}>
+    <AppShell
+      userName={displayName}
+      userRole="Professional"
+      userAvatarUrl={form.profilePhotoUrl || viewer.avatarUrl}
+    >
       <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Professional profile setup</h1>
         </div>
         <div className="rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
           {completion}% complete
-        </div>  
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[320px_1fr]">
@@ -920,7 +985,9 @@ function ProfessionalProfileSetup() {
           <div className="flex items-start gap-4">
             <div
               className="relative grid h-24 w-24 shrink-0 place-items-center rounded-full"
-              style={{ background: `conic-gradient(hsl(var(--primary)) ${completion * 3.6}deg, hsl(var(--muted)) 0deg)` }}
+              style={{
+                background: `conic-gradient(hsl(var(--primary)) ${completion * 3.6}deg, hsl(var(--muted)) 0deg)`,
+              }}
             >
               <div className="grid h-[86px] w-[86px] place-items-center rounded-full bg-card">
                 <img
@@ -967,15 +1034,25 @@ function ProfessionalProfileSetup() {
 
         <div className="space-y-6">
           <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-            <SectionTitle title="Basic profile" subtitle="Your public identity on the professional side." />
+            <SectionTitle
+              title="Basic profile"
+              subtitle="Your public identity on the professional side."
+            />
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <Field label="Full name" error={fieldErrors.fullName}>
-                <Input value={form.fullName} onChange={(event) => updateField("fullName", capitalizeWords(event.target.value))} />
+                <Input
+                  value={form.fullName}
+                  onChange={(event) => updateField("fullName", capitalizeWords(event.target.value))}
+                />
               </Field>
               <Field label="Profile picture" error={fieldErrors.profilePhotoUrl}>
                 <label className="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-input text-sm hover:bg-muted">
                   <Camera className="h-4 w-4" />
-                  {isProfilePhotoSaving ? "Saving..." : form.profilePhotoUrl ? "Change photo" : "Upload photo"}
+                  {isProfilePhotoSaving
+                    ? "Saving..."
+                    : form.profilePhotoUrl
+                      ? "Change photo"
+                      : "Upload photo"}
                   <input
                     type="file"
                     accept="image/*"
@@ -986,12 +1063,29 @@ function ProfessionalProfileSetup() {
                 </label>
               </Field>
               <Field label="Main category / service" error={fieldErrors.professionalCategory}>
-                <Input placeholder="e.g. Electrician, UI Designer, Cleaner" value={form.professionalCategory} onChange={(event) => updateField("professionalCategory", capitalizeWords(event.target.value))} />
+                <Input
+                  placeholder="e.g. Electrician, UI Designer, Cleaner"
+                  value={form.professionalCategory}
+                  onChange={(event) =>
+                    updateField("professionalCategory", capitalizeWords(event.target.value))
+                  }
+                />
               </Field>
               <Field label="Professional city" error={fieldErrors.professionalCity}>
                 <div className="flex gap-2">
-                  <Input placeholder="e.g. Surat" value={form.professionalCity} onChange={(event) => updateField("professionalCity", capitalizeWords(event.target.value))} />
-                  <Button type="button" variant="outline" className="shrink-0 gap-2" onClick={() => openLocationPicker("professionalCity")}>
+                  <Input
+                    placeholder="e.g. Surat"
+                    value={form.professionalCity}
+                    onChange={(event) =>
+                      updateField("professionalCity", capitalizeWords(event.target.value))
+                    }
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0 gap-2"
+                    onClick={() => openLocationPicker("professionalCity")}
+                  >
                     <MapPin className="h-4 w-4" />
                     Map
                   </Button>
@@ -1001,9 +1095,16 @@ function ProfessionalProfileSetup() {
           </section>
 
           <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-            <SectionTitle title="Skills, experience, and pricing" subtitle="Tell clients what you do and how you charge." />
+            <SectionTitle
+              title="Skills, experience, and pricing"
+              subtitle="Tell clients what you do and how you charge."
+            />
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <Field label="Skills / services" error={fieldErrors.skillsText} className="md:col-span-2">
+              <Field
+                label="Skills / services"
+                error={fieldErrors.skillsText}
+                className="md:col-span-2"
+              >
                 <div className="space-y-4">
                   <div className="grid gap-3 md:grid-cols-[1fr_auto]">
                     <Select value={selectedSkillOption} onValueChange={setSelectedSkillOption}>
@@ -1064,22 +1165,44 @@ function ProfessionalProfileSetup() {
                 </div>
               </Field>
               <Field label="Experience years" error={fieldErrors.experienceYears}>
-                <Input type="number" min={0} value={form.experienceYears ?? 0} onChange={(event) => updateField("experienceYears", Number(event.target.value))} />
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.experienceYears ?? 0}
+                  onChange={(event) => updateField("experienceYears", Number(event.target.value))}
+                />
               </Field>
               <Field label="Hourly rate" error={fieldErrors.hourlyRate}>
-                <Input type="number" min={0} value={form.hourlyRate ?? 0} onChange={(event) => updateField("hourlyRate", Number(event.target.value))} />
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.hourlyRate ?? 0}
+                  onChange={(event) => updateField("hourlyRate", Number(event.target.value))}
+                />
               </Field>
               <Field label="Fixed rate" error={fieldErrors.fixedRate}>
-                <Input type="number" min={0} value={form.fixedRate ?? 0} onChange={(event) => updateField("fixedRate", Number(event.target.value))} />
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.fixedRate ?? 0}
+                  onChange={(event) => updateField("fixedRate", Number(event.target.value))}
+                />
               </Field>
               <Field label="Portfolio link" error={fieldErrors.portfolioUrl}>
-                <Input placeholder="https://your-work.com" value={form.portfolioUrl} onChange={(event) => updateField("portfolioUrl", event.target.value)} />
+                <Input
+                  placeholder="https://your-work.com"
+                  value={form.portfolioUrl}
+                  onChange={(event) => updateField("portfolioUrl", event.target.value)}
+                />
               </Field>
             </div>
           </section>
 
           <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-            <SectionTitle title="Work proof and documents" subtitle="Add photos, certificates, and license details clients can trust." />
+            <SectionTitle
+              title="Work proof and documents"
+              subtitle="Add photos, certificates, and license details clients can trust."
+            />
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <Field label="Work photos" error={fieldErrors.workPhotosText}>
                 <label
@@ -1094,7 +1217,11 @@ function ProfessionalProfileSetup() {
                   ) : (
                     <ImagePlus className="h-4 w-4" />
                   )}
-                  {isWorkPhotosSaving ? "Saving..." : form.workPhotosText ? "Uploaded" : "Upload work photos"}
+                  {isWorkPhotosSaving
+                    ? "Saving..."
+                    : form.workPhotosText
+                      ? "Uploaded"
+                      : "Upload work photos"}
                   <input
                     type="file"
                     accept="image/*"
@@ -1119,11 +1246,24 @@ function ProfessionalProfileSetup() {
                     <FileBadge className="h-4 w-4" />
                   )}
                   {form.certificationsText ? "Uploaded" : "Upload certificate"}
-                  <input type="file" accept="image/*,.pdf" className="sr-only" onChange={(event) => appendCertification(event.target.files?.[0])} />
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    className="sr-only"
+                    onChange={(event) => appendCertification(event.target.files?.[0])}
+                  />
                 </label>
               </Field>
-              <Field label="Trade license URL" error={fieldErrors.tradeLicenseUrl} className="md:col-span-2">
-                <Input placeholder="Paste trade license link if you already have one" value={form.tradeLicenseUrl} onChange={(event) => updateField("tradeLicenseUrl", event.target.value)} />
+              <Field
+                label="Trade license URL"
+                error={fieldErrors.tradeLicenseUrl}
+                className="md:col-span-2"
+              >
+                <Input
+                  placeholder="Paste trade license link if you already have one"
+                  value={form.tradeLicenseUrl}
+                  onChange={(event) => updateField("tradeLicenseUrl", event.target.value)}
+                />
               </Field>
             </div>
           </section>
@@ -1139,7 +1279,9 @@ function ProfessionalProfileSetup() {
                 <Field label="Select document type">
                   <Select
                     value={selectedVerificationDoc}
-                    onValueChange={(value) => setSelectedVerificationDoc(value as VerificationDocumentKey)}
+                    onValueChange={(value) =>
+                      setSelectedVerificationDoc(value as VerificationDocumentKey)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -1154,7 +1296,8 @@ function ProfessionalProfileSetup() {
                   </Select>
                 </Field>
                 <div className="mt-4 rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-                  Only one file is uploaded for the selected document type. Uploading again replaces that document.
+                  Only one file is uploaded for the selected document type. Uploading again replaces
+                  that document.
                 </div>
               </div>
 
@@ -1166,7 +1309,9 @@ function ProfessionalProfileSetup() {
                     </div>
                     <div>
                       <h3 className="font-semibold">{selectedVerificationOption.label}</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{selectedVerificationOption.description}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedVerificationOption.description}
+                      </p>
                     </div>
                   </div>
                   <Badge variant={selectedVerificationUploaded ? "default" : "secondary"}>
@@ -1193,7 +1338,9 @@ function ProfessionalProfileSetup() {
                           type="file"
                           accept="image/*"
                           className="sr-only"
-                          onChange={(event) => handleVerificationFile("selfieUrl", event.target.files?.[0])}
+                          onChange={(event) =>
+                            handleVerificationFile("selfieUrl", event.target.files?.[0])
+                          }
                         />
                       </label>
                     </div>
@@ -1210,7 +1357,9 @@ function ProfessionalProfileSetup() {
                           onCanPlay={() => setIsCameraReady(true)}
                         />
                         {!isCameraReady ? (
-                          <p className="mt-2 text-sm text-muted-foreground">Camera preview is starting...</p>
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            Camera preview is starting...
+                          </p>
                         ) : null}
                         <div className="mt-3 grid gap-3 sm:grid-cols-2">
                           <Button
@@ -1239,7 +1388,9 @@ function ProfessionalProfileSetup() {
                       type="file"
                       accept="image/*,.pdf"
                       className="sr-only"
-                      onChange={(event) => handleVerificationFile(selectedVerificationDoc, event.target.files?.[0])}
+                      onChange={(event) =>
+                        handleVerificationFile(selectedVerificationDoc, event.target.files?.[0])
+                      }
                     />
                   </label>
                 )}
@@ -1248,7 +1399,8 @@ function ProfessionalProfileSetup() {
               <div className="rounded-xl border border-border bg-background p-4">
                 <h3 className="font-semibold">Verification badges display</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Completed documents can appear as trust badges on your public profile after review.
+                  Completed documents can appear as trust badges on your public profile after
+                  review.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Badge variant={form.governmentIdUrl ? "default" : "secondary"}>ID</Badge>
@@ -1261,15 +1413,28 @@ function ProfessionalProfileSetup() {
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-4">
-              <VerificationStatusBox label="Document upload" done={verificationStatus.uploadedCount > 0} />
+              <VerificationStatusBox
+                label="Document upload"
+                done={verificationStatus.uploadedCount > 0}
+              />
               <VerificationStatusBox label="Selfie verification" done={Boolean(form.selfieUrl)} />
-              <VerificationStatusBox label="Badges ready" done={verificationStatus.requiredComplete} />
-              <VerificationStatusBox label="Status tracking" value={verificationStatus.label} done={verificationStatus.status === "approved"} />
+              <VerificationStatusBox
+                label="Badges ready"
+                done={verificationStatus.requiredComplete}
+              />
+              <VerificationStatusBox
+                label="Status tracking"
+                value={verificationStatus.label}
+                done={verificationStatus.status === "approved"}
+              />
             </div>
           </section>
 
           <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-            <SectionTitle title="Email & Browser Notifications" subtitle="Choose how you want to hear about projects, messages, reviews, and payments." />
+            <SectionTitle
+              title="Email & Browser Notifications"
+              subtitle="Choose how you want to hear about projects, messages, reviews, and payments."
+            />
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <NotificationPreference
                 icon={Mail}
@@ -1295,7 +1460,12 @@ function ProfessionalProfileSetup() {
                 onChange={handleBrowserNotificationChange}
                 action={
                   browserPermission === "default" ? (
-                    <Button type="button" size="sm" variant="outline" onClick={requestBrowserNotificationPermission}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={requestBrowserNotificationPermission}
+                    >
                       Allow browser alerts
                     </Button>
                   ) : null
@@ -1313,11 +1483,24 @@ function ProfessionalProfileSetup() {
           </section>
 
           <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-            <SectionTitle title="Availability and service area" subtitle="Control where and how clients can hire you." />
+            <SectionTitle
+              title="Availability and service area"
+              subtitle="Control where and how clients can hire you."
+            />
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <Field label="Availability" error={fieldErrors.availabilityStatus}>
-                <Select value={form.availabilityStatus} onValueChange={(value) => updateField("availabilityStatus", value as ProfessionalProfileForm["availabilityStatus"])}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.availabilityStatus}
+                  onValueChange={(value) =>
+                    updateField(
+                      "availabilityStatus",
+                      value as ProfessionalProfileForm["availabilityStatus"],
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="available">Available now</SelectItem>
                     <SelectItem value="busy">Busy</SelectItem>
@@ -1326,8 +1509,15 @@ function ProfessionalProfileSetup() {
                 </Select>
               </Field>
               <Field label="Remote / on-site / both" error={fieldErrors.workMode}>
-                <Select value={form.workMode} onValueChange={(value) => updateField("workMode", value as ProfessionalProfileForm["workMode"])}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.workMode}
+                  onValueChange={(value) =>
+                    updateField("workMode", value as ProfessionalProfileForm["workMode"])
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="onsite">On-site</SelectItem>
                     <SelectItem value="remote">Remote</SelectItem>
@@ -1335,7 +1525,10 @@ function ProfessionalProfileSetup() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Service location" error={fieldErrors.serviceArea || fieldErrors.address}>
+              <Field
+                label="Service location"
+                error={fieldErrors.serviceArea || fieldErrors.address}
+              >
                 <div className="flex gap-2">
                   <Input
                     placeholder="Address, area, or landmark"
@@ -1347,7 +1540,12 @@ function ProfessionalProfileSetup() {
                       updateField("address", location);
                     }}
                   />
-                  <Button type="button" variant="outline" className="shrink-0 gap-2" onClick={() => openLocationPicker("serviceArea")}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0 gap-2"
+                    onClick={() => openLocationPicker("serviceArea")}
+                  >
                     <MapPin className="h-4 w-4" />
                     Map
                   </Button>
@@ -1361,7 +1559,8 @@ function ProfessionalProfileSetup() {
                         {formatServiceRadius(form.serviceRadiusKm ?? 0)}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Clients nearby can find you from {form.serviceArea || form.address || "your service location"}.
+                        Clients nearby can find you from{" "}
+                        {form.serviceArea || form.address || "your service location"}.
                       </p>
                     </div>
                     <Input
@@ -1369,7 +1568,12 @@ function ProfessionalProfileSetup() {
                       min={0}
                       max={500}
                       value={form.serviceRadiusKm ?? 0}
-                      onChange={(event) => updateField("serviceRadiusKm", clampServiceRadius(Number(event.target.value)))}
+                      onChange={(event) =>
+                        updateField(
+                          "serviceRadiusKm",
+                          clampServiceRadius(Number(event.target.value)),
+                        )
+                      }
                       className="w-full sm:w-28"
                     />
                   </div>
@@ -1416,7 +1620,11 @@ function ProfessionalProfileSetup() {
                   </div>
                 </div>
               </Field>
-              <Field label="Professional bio" error={fieldErrors.companyDescription} className="md:col-span-2">
+              <Field
+                label="Professional bio"
+                error={fieldErrors.companyDescription}
+                className="md:col-span-2"
+              >
                 <Textarea
                   className="min-h-28"
                   placeholder="Write a short profile clients will read before hiring you"
@@ -1447,7 +1655,10 @@ function ProfessionalProfileSetup() {
         </div>
       </form>
 
-      <Dialog open={Boolean(locationPickerTarget)} onOpenChange={(open) => !open && setLocationPickerTarget(null)}>
+      <Dialog
+        open={Boolean(locationPickerTarget)}
+        onOpenChange={(open) => !open && setLocationPickerTarget(null)}
+      >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Select location on map</DialogTitle>
@@ -1464,7 +1675,11 @@ function ProfessionalProfileSetup() {
             <Button type="button" variant="outline" onClick={() => setLocationPickerTarget(null)}>
               Cancel
             </Button>
-            <Button type="button" onClick={applyLocationPicker} disabled={!locationPickerValue.trim()}>
+            <Button
+              type="button"
+              onClick={applyLocationPicker}
+              disabled={!locationPickerValue.trim()}
+            >
               Use this location
             </Button>
           </DialogFooter>
@@ -1536,10 +1751,14 @@ function NotificationPreference({
               : "border-border bg-muted text-muted-foreground"
           } ${disabled ? "cursor-not-allowed opacity-50" : "hover:shadow-sm"}`}
         >
-          <span className={`z-10 flex-1 text-center transition-opacity ${checked ? "opacity-100" : "opacity-40"}`}>
+          <span
+            className={`z-10 flex-1 text-center transition-opacity ${checked ? "opacity-100" : "opacity-40"}`}
+          >
             On
           </span>
-          <span className={`z-10 flex-1 text-center transition-opacity ${checked ? "opacity-40" : "opacity-100"}`}>
+          <span
+            className={`z-10 flex-1 text-center transition-opacity ${checked ? "opacity-40" : "opacity-100"}`}
+          >
             Off
           </span>
           <span
@@ -1586,7 +1805,8 @@ function LocationMapPicker({
   targetLabel: string;
 }) {
   const useGoogleMapsJs = import.meta.env.VITE_GOOGLE_MAPS_JS_ENABLED === "true";
-  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyCZHfjLWVc0CJ4LMg3CP7fcBc3ncdR9Vtw";
+  const googleMapsApiKey =
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyCZHfjLWVc0CJ4LMg3CP7fcBc3ncdR9Vtw";
   const googleKey = useGoogleMapsJs ? googleMapsApiKey : "";
   const inputRef = useRef<HTMLInputElement | null>(null);
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -1779,8 +1999,10 @@ function LocationMapPicker({
 
         const moveBy = 0.00005;
         const nextPosition = new win.google.maps.LatLng(
-          position.lat() + (event.key === "ArrowUp" ? moveBy : event.key === "ArrowDown" ? -moveBy : 0),
-          position.lng() + (event.key === "ArrowRight" ? moveBy : event.key === "ArrowLeft" ? -moveBy : 0),
+          position.lat() +
+            (event.key === "ArrowUp" ? moveBy : event.key === "ArrowDown" ? -moveBy : 0),
+          position.lng() +
+            (event.key === "ArrowRight" ? moveBy : event.key === "ArrowLeft" ? -moveBy : 0),
         );
 
         setSelectedPosition(nextPosition);
@@ -1802,7 +2024,9 @@ function LocationMapPicker({
         marker.setPosition(location);
         map.setCenter(location);
         map.setZoom(20);
-        updateSelectedLocation(place.formatted_address || place.name || inputRef.current?.value || "");
+        updateSelectedLocation(
+          place.formatted_address || place.name || inputRef.current?.value || "",
+        );
       });
 
       const previewLocation = value.trim() || placeholder.trim();
@@ -1828,7 +2052,9 @@ function LocationMapPicker({
       };
     }
 
-    const existingScript = document.querySelector<HTMLScriptElement>('script[data-google-maps-places="true"]');
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[data-google-maps-places="true"]',
+    );
 
     if (existingScript) {
       existingScript.addEventListener("load", initMap, { once: true });
@@ -1965,7 +2191,9 @@ function VerificationStatusBox({
         <BadgeCheck className={`h-4 w-4 ${done ? "text-primary" : "text-muted-foreground"}`} />
         <span className="font-medium">{label}</span>
       </div>
-      <p className="mt-2 text-muted-foreground">{value || (done ? "Complete" : optional ? "Optional" : "Pending")}</p>
+      <p className="mt-2 text-muted-foreground">
+        {value || (done ? "Complete" : optional ? "Optional" : "Pending")}
+      </p>
     </div>
   );
 }
@@ -1994,24 +2222,22 @@ function ProfileHint({
 
 function splitList(value: string) {
   if (value.includes("data:")) {
-    return value
-      .split(/\n+/)
-      .flatMap((line) => {
-        const trimmedLine = line.trim();
+    return value.split(/\n+/).flatMap((line) => {
+      const trimmedLine = line.trim();
 
-        if (!trimmedLine) {
-          return [];
-        }
+      if (!trimmedLine) {
+        return [];
+      }
 
-        if (trimmedLine.startsWith("data:")) {
-          return [trimmedLine];
-        }
+      if (trimmedLine.startsWith("data:")) {
+        return [trimmedLine];
+      }
 
-        return trimmedLine
-          .split(",")
-          .map((entry) => entry.trim())
-          .filter(Boolean);
-      });
+      return trimmedLine
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean);
+    });
   }
 
   return value
@@ -2122,10 +2348,10 @@ function getVerificationStatus(input: {
   ].filter(Boolean).length;
   const requiredComplete = Boolean(
     input.governmentIdUrl &&
-      input.licenseUrl &&
-      input.certificationsText &&
-      input.insuranceUrl &&
-      input.selfieUrl,
+    input.licenseUrl &&
+    input.certificationsText &&
+    input.insuranceUrl &&
+    input.selfieUrl,
   );
   const status = uploadedCount > 0 ? input.status || "pending" : "not_started";
 

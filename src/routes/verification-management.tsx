@@ -119,7 +119,8 @@ function VerificationManagement() {
     );
   }
 
-  const displayName = `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
+  const displayName =
+    `${data.viewer.firstName} ${data.viewer.lastName}`.trim() || data.viewer.email;
   const counts = getStatusCounts(records);
 
   async function handleReview(record: AdminVerificationRecord, status: VerificationStatus) {
@@ -138,8 +139,12 @@ function VerificationManagement() {
     <AppShell userName={displayName} userRole="Admin" userAvatarUrl={data.viewer.avatarUrl}>
       <div className="mb-6 flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-primary">Verification management</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Verification Management Dashboard</h1>
+          <p className="text-xs uppercase tracking-[0.18em] text-primary">
+            Verification management
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+            Verification Management Dashboard
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Review professional identity documents and approve verified providers.
           </p>
@@ -155,11 +160,46 @@ function VerificationManagement() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <SummaryCard icon={UserRound} label="Professionals" value={records.length} caption="Total accounts" active={statusFilter === "all"} onClick={() => setStatusFilter("all")} />
-        <SummaryCard icon={Clock3} label="Pending" value={counts.pending} caption="Need admin review" active={statusFilter === "pending"} onClick={() => setStatusFilter("pending")} />
-        <SummaryCard icon={CheckCircle2} label="Approved" value={counts.approved} caption="Verified providers" active={statusFilter === "approved"} onClick={() => setStatusFilter("approved")} />
-        <SummaryCard icon={XCircle} label="Rejected" value={counts.rejected} caption="Needs correction" active={statusFilter === "rejected"} onClick={() => setStatusFilter("rejected")} />
-        <SummaryCard icon={FileText} label="Not started" value={counts.not_started} caption="No review yet" active={statusFilter === "not_started"} onClick={() => setStatusFilter("not_started")} />
+        <SummaryCard
+          icon={UserRound}
+          label="Professionals"
+          value={records.length}
+          caption="Total accounts"
+          active={statusFilter === "all"}
+          onClick={() => setStatusFilter("all")}
+        />
+        <SummaryCard
+          icon={Clock3}
+          label="Pending"
+          value={counts.pending}
+          caption="Need admin review"
+          active={statusFilter === "pending"}
+          onClick={() => setStatusFilter("pending")}
+        />
+        <SummaryCard
+          icon={CheckCircle2}
+          label="Approved"
+          value={counts.approved}
+          caption="Verified providers"
+          active={statusFilter === "approved"}
+          onClick={() => setStatusFilter("approved")}
+        />
+        <SummaryCard
+          icon={XCircle}
+          label="Rejected"
+          value={counts.rejected}
+          caption="Needs correction"
+          active={statusFilter === "rejected"}
+          onClick={() => setStatusFilter("rejected")}
+        />
+        <SummaryCard
+          icon={FileText}
+          label="Not started"
+          value={counts.not_started}
+          caption="No review yet"
+          active={statusFilter === "not_started"}
+          onClick={() => setStatusFilter("not_started")}
+        />
       </div>
 
       <section className="mt-6 rounded-xl border border-border bg-card p-4 shadow-soft">
@@ -181,17 +221,19 @@ function VerificationManagement() {
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              {(["all", "pending", "approved", "rejected", "not_started"] as StatusFilter[]).map((status) => (
-                <Button
-                  key={status}
-                  type="button"
-                  size="sm"
-                  variant={statusFilter === status ? "default" : "outline"}
-                  onClick={() => setStatusFilter(status)}
-                >
-                  {status === "all" ? "All" : formatEnum(status)}
-                </Button>
-              ))}
+              {(["all", "pending", "approved", "rejected", "not_started"] as StatusFilter[]).map(
+                (status) => (
+                  <Button
+                    key={status}
+                    type="button"
+                    size="sm"
+                    variant={statusFilter === status ? "default" : "outline"}
+                    onClick={() => setStatusFilter(status)}
+                  >
+                    {status === "all" ? "All" : formatEnum(status)}
+                  </Button>
+                ),
+              )}
             </div>
           </div>
         </div>
@@ -208,7 +250,10 @@ function VerificationManagement() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
                         <img
-                          src={record.avatarUrl || `https://i.pravatar.cc/100?u=verification-${record.userId}`}
+                          src={
+                            record.avatarUrl ||
+                            `https://i.pravatar.cc/100?u=verification-${record.userId}`
+                          }
                           className="h-12 w-12 rounded-full object-cover"
                           alt=""
                         />
@@ -243,10 +288,15 @@ function VerificationManagement() {
 
                       <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
                         {documents.map((document) => (
-                          <div key={document.label} className="rounded-lg border border-border bg-background p-3">
+                          <div
+                            key={document.label}
+                            className="rounded-lg border border-border bg-background p-3"
+                          >
                             <div className="flex items-center gap-2">
                               <document.icon className="h-4 w-4 text-primary" />
-                              <p className="min-w-0 truncate text-sm font-medium">{document.label}</p>
+                              <p className="min-w-0 truncate text-sm font-medium">
+                                {document.label}
+                              </p>
                             </div>
                             <div className="mt-2 flex items-center justify-between gap-2">
                               <Badge variant={document.hasValue ? "default" : "outline"}>
@@ -258,7 +308,9 @@ function VerificationManagement() {
                                     size="sm"
                                     variant="ghost"
                                     type="button"
-                                    onClick={() => setPreviewFile({ url: document.href, label: document.label })}
+                                    onClick={() =>
+                                      setPreviewFile({ url: document.href, label: document.label })
+                                    }
                                   >
                                     Open
                                   </Button>
@@ -317,13 +369,25 @@ function VerificationManagement() {
       </section>
 
       {previewFile ? (
-        <FilePreviewModal url={previewFile.url} label={previewFile.label} onClose={handleClosePreview} />
+        <FilePreviewModal
+          url={previewFile.url}
+          label={previewFile.label}
+          onClose={handleClosePreview}
+        />
       ) : null}
     </AppShell>
   );
 }
 
-function FilePreviewModal({ url, label, onClose }: { url: string; label: string; onClose: () => void }) {
+function FilePreviewModal({
+  url,
+  label,
+  onClose,
+}: {
+  url: string;
+  label: string;
+  onClose: () => void;
+}) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const previewType = getPreviewType(url);
 
@@ -349,7 +413,12 @@ function FilePreviewModal({ url, label, onClose }: { url: string; label: string;
             <h2 className="text-base font-semibold">{label}</h2>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" type="button" onClick={() => openDocumentInNewTab(url)}>
+            <Button
+              size="sm"
+              variant="outline"
+              type="button"
+              onClick={() => openDocumentInNewTab(url)}
+            >
               <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
               Open in new tab
             </Button>
@@ -372,11 +441,7 @@ function FilePreviewModal({ url, label, onClose }: { url: string; label: string;
               />
             </div>
           ) : previewType === "pdf" ? (
-            <iframe
-              src={`${url}#toolbar=1`}
-              title={label}
-              className="h-[70vh] w-full rounded-lg"
-            />
+            <iframe src={`${url}#toolbar=1`} title={label} className="h-[70vh] w-full rounded-lg" />
           ) : (
             <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
               <FileText className="h-16 w-16 text-muted-foreground" />
@@ -401,7 +466,10 @@ function FilePreviewModal({ url, label, onClose }: { url: string; label: string;
 function getPreviewType(url: string) {
   const normalized = url.trim().toLowerCase();
 
-  if (normalized.startsWith("data:image/") || /\.(jpe?g|png|gif|bmp|webp|svg)(\?|#|$)/i.test(normalized)) {
+  if (
+    normalized.startsWith("data:image/") ||
+    /\.(jpe?g|png|gif|bmp|webp|svg)(\?|#|$)/i.test(normalized)
+  ) {
     return "image";
   }
 
@@ -464,7 +532,11 @@ function SummaryCard({
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-lg border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary/40 hover:bg-muted/30 ${active ? "border-primary bg-primary/5" : "border-border"}`}
+    >
       <Icon className="h-5 w-5 text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value.toLocaleString()}</p>
@@ -523,7 +595,11 @@ function getStatusCounts(records: AdminVerificationRecord[]) {
   );
 }
 
-function filterRecords(records: AdminVerificationRecord[], query: string, statusFilter: StatusFilter) {
+function filterRecords(
+  records: AdminVerificationRecord[],
+  query: string,
+  statusFilter: StatusFilter,
+) {
   const term = query.trim().toLowerCase();
 
   return records.filter((record) => {

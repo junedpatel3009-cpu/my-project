@@ -89,10 +89,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Servio — Hire trusted professionals near you" },
-      { name: "description", content: "Servio is the trusted marketplace to post jobs, hire vetted professionals, track work and manage payments — all in one place." },
+      {
+        name: "description",
+        content:
+          "Servio is the trusted marketplace to post jobs, hire vetted professionals, track work and manage payments — all in one place.",
+      },
       { name: "author", content: "Servio" },
       { property: "og:title", content: "Servio — Hire trusted professionals near you" },
-      { property: "og:description", content: "Post jobs, hire experts, track work and manage projects in one platform." },
+      {
+        property: "og:description",
+        content: "Post jobs, hire experts, track work and manage projects in one platform.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -100,7 +107,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap",
+      },
       { rel: "stylesheet", href: appCss },
     ],
   }),
@@ -130,9 +140,8 @@ function RootComponent() {
   const location = useLocation();
   // Home contains live jobs and professionals. Its CMS content is integrated
   // inside the real route instead of replacing the complete React page.
-  const editorPage = location.pathname === "/"
-    ? undefined
-    : pages.find((page) => page.path === location.pathname);
+  const editorPage =
+    location.pathname === "/" ? undefined : pages.find((page) => page.path === location.pathname);
 
   return (
     <Provider store={store}>
@@ -257,7 +266,11 @@ function getActivityMessage(label: string, element: HTMLElement) {
     return "Opening job";
   }
 
-  if (normalized.includes("open messages") || normalized === "message" || href.includes("messages")) {
+  if (
+    normalized.includes("open messages") ||
+    normalized === "message" ||
+    href.includes("messages")
+  ) {
     return "Opening messages";
   }
 

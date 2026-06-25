@@ -13,7 +13,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TrendingUp, ShieldCheck, MapPin, Wallet, BadgeCheck, Briefcase, CalendarClock, LocateFixed, Paperclip, Search, SlidersHorizontal } from "lucide-react";
+import {
+  TrendingUp,
+  ShieldCheck,
+  MapPin,
+  Wallet,
+  BadgeCheck,
+  Briefcase,
+  CalendarClock,
+  LocateFixed,
+  Paperclip,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { getOpenClientJobs } from "@/lib/job-db.server";
 import { formatApproximateCoordinates, formatApproximateLocation } from "@/lib/location-privacy";
 
@@ -27,7 +39,10 @@ export const Route = createFileRoute("/for-professionals")({
   head: () => ({
     meta: [
       { title: "For Professionals — Grow your business | Servio" },
-      { name: "description", content: "Find quality jobs near you, get paid safely, and grow your business with Servio." },
+      {
+        name: "description",
+        content: "Find quality jobs near you, get paid safely, and grow your business with Servio.",
+      },
     ],
   }),
   loader: () => getHomeData(),
@@ -64,44 +79,44 @@ function ForPros() {
             : null,
       }))
       .filter((job) => {
-      const jobBudgetMin = job.budgetMin ?? job.budgetMax ?? 0;
-      const jobBudgetMax = job.budgetMax ?? job.budgetMin ?? 0;
-      const locationText = [job.locationLabel, job.locationAddress].filter(Boolean).join(" ");
-      const searchable = [
-        job.title,
-        job.description,
-        job.category,
-        job.urgency,
-        job.workMode,
-        locationText,
-        job.clientCompanyName,
-        job.clientName,
-        formatBudget(job.budgetMin, job.budgetMax, job.timingType),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+        const jobBudgetMin = job.budgetMin ?? job.budgetMax ?? 0;
+        const jobBudgetMax = job.budgetMax ?? job.budgetMin ?? 0;
+        const locationText = [job.locationLabel, job.locationAddress].filter(Boolean).join(" ");
+        const searchable = [
+          job.title,
+          job.description,
+          job.category,
+          job.urgency,
+          job.workMode,
+          locationText,
+          job.clientCompanyName,
+          job.clientName,
+          formatBudget(job.budgetMin, job.budgetMax, job.timingType),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
 
-      const matchesSearch = !normalizedSearch || searchable.includes(normalizedSearch);
-      const matchesCity = !normalizedCity || locationText.toLowerCase().includes(normalizedCity);
-      const matchesBudgetMin = min == null || jobBudgetMax >= min;
-      const matchesBudgetMax = max == null || jobBudgetMin <= max;
-      const matchesUrgency = urgency === "all" || job.urgency === urgency;
-      const matchesType = type === "all" || job.workMode === type;
-      const matchesDistance =
-        maxDistance == null ||
-        job.workMode === "REMOTE" ||
-        (userLocation != null && job.distanceKm != null && job.distanceKm <= maxDistance);
+        const matchesSearch = !normalizedSearch || searchable.includes(normalizedSearch);
+        const matchesCity = !normalizedCity || locationText.toLowerCase().includes(normalizedCity);
+        const matchesBudgetMin = min == null || jobBudgetMax >= min;
+        const matchesBudgetMax = max == null || jobBudgetMin <= max;
+        const matchesUrgency = urgency === "all" || job.urgency === urgency;
+        const matchesType = type === "all" || job.workMode === type;
+        const matchesDistance =
+          maxDistance == null ||
+          job.workMode === "REMOTE" ||
+          (userLocation != null && job.distanceKm != null && job.distanceKm <= maxDistance);
 
-      return (
-        matchesSearch &&
-        matchesCity &&
-        matchesBudgetMin &&
-        matchesBudgetMax &&
-        matchesUrgency &&
-        matchesType &&
-        matchesDistance
-      );
+        return (
+          matchesSearch &&
+          matchesCity &&
+          matchesBudgetMin &&
+          matchesBudgetMax &&
+          matchesUrgency &&
+          matchesType &&
+          matchesDistance
+        );
       })
       .sort((left, right) => {
         if (!userLocation) {
@@ -130,13 +145,17 @@ function ForPros() {
     type !== "all";
   const selectedMapJob =
     filteredJobs.find((job) => job.id === selectedMapJobId) ||
-    filteredJobs.find((job) => job.locationAddress || (job.locationLat != null && job.locationLng != null));
+    filteredJobs.find(
+      (job) => job.locationAddress || (job.locationLat != null && job.locationLng != null),
+    );
   const selectedMapQuery =
     selectedMapJob?.locationLat != null && selectedMapJob.locationLng != null
       ? `${selectedMapJob.locationLat},${selectedMapJob.locationLng}`
       : selectedMapJob?.locationAddress ||
         (userLocation ? `${userLocation.lat},${userLocation.lng}` : city);
-  const mappableJobs = filteredJobs.filter((job) => job.locationAddress || (job.locationLat != null && job.locationLng != null));
+  const mappableJobs = filteredJobs.filter(
+    (job) => job.locationAddress || (job.locationLat != null && job.locationLng != null),
+  );
   const activeFilterCount = [
     city,
     budgetMin,
@@ -185,16 +204,26 @@ function ForPros() {
       <section className="bg-ink text-ink-foreground">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-cta">For professionals</p>
-            <h1 className="font-display mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl">Find quality jobs. Get paid safely. Grow your business.</h1>
+            <p className="text-xs font-semibold uppercase tracking-wider text-cta">
+              For professionals
+            </p>
+            <h1 className="font-display mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl">
+              Find quality jobs. Get paid safely. Grow your business.
+            </h1>
             <p className="mt-4 max-w-lg text-white/70">
-              No more chasing leads or waiting on payments. Servio brings nearby and remote jobs straight to you.
+              No more chasing leads or waiting on payments. Servio brings nearby and remote jobs
+              straight to you.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild size="lg" className="bg-cta text-cta-foreground hover:bg-cta/90">
                 <Link to="/signup">Join as a Pro — free</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white/30 bg-white/10 text-white hover:bg-white/20"
+              >
                 <Link to="/discover">See sample jobs</Link>
               </Button>
             </div>
@@ -213,10 +242,26 @@ function ForPros() {
           </div>
           <div className="grid gap-4">
             {[
-              { icon: TrendingUp, t: "Grow", d: "Algorithmic match-making puts you in front of the right clients." },
-              { icon: ShieldCheck, t: "Trusted", d: "Verified badges and ratings build long-term reputation." },
-              { icon: MapPin, t: "Nearby", d: "See jobs by distance, urgency, and budget — at a glance." },
-              { icon: Wallet, t: "Paid weekly", d: "Withdraw earnings to your bank or wallet, anytime." },
+              {
+                icon: TrendingUp,
+                t: "Grow",
+                d: "Algorithmic match-making puts you in front of the right clients.",
+              },
+              {
+                icon: ShieldCheck,
+                t: "Trusted",
+                d: "Verified badges and ratings build long-term reputation.",
+              },
+              {
+                icon: MapPin,
+                t: "Nearby",
+                d: "See jobs by distance, urgency, and budget — at a glance.",
+              },
+              {
+                icon: Wallet,
+                t: "Paid weekly",
+                d: "Withdraw earnings to your bank or wallet, anytime.",
+              },
             ].map((b) => (
               <div key={b.t} className="rounded-2xl border border-white/10 bg-white/5 p-5">
                 <div className="flex items-center gap-3">
@@ -232,12 +277,26 @@ function ForPros() {
         </div>
       </section>
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <h2 className="font-display text-3xl font-bold tracking-tight">Built for professionals like you</h2>
+        <h2 className="font-display text-3xl font-bold tracking-tight">
+          Built for professionals like you
+        </h2>
         <div className="mt-8 grid gap-5 md:grid-cols-3">
           {[
-            { icon: Briefcase, t: "All trades welcome", d: "Plumbers, designers, photographers, tutors — there's a market for you." },
-            { icon: BadgeCheck, t: "Get verified", d: "Free identity & license verification builds trust with clients." },
-            { icon: TrendingUp, t: "Insights & analytics", d: "Track win-rates, response times, and earnings in one dashboard." },
+            {
+              icon: Briefcase,
+              t: "All trades welcome",
+              d: "Plumbers, designers, photographers, tutors — there's a market for you.",
+            },
+            {
+              icon: BadgeCheck,
+              t: "Get verified",
+              d: "Free identity & license verification builds trust with clients.",
+            },
+            {
+              icon: TrendingUp,
+              t: "Insights & analytics",
+              d: "Track win-rates, response times, and earnings in one dashboard.",
+            },
           ].map((b) => (
             <div key={b.t} className="rounded-2xl border border-border bg-card p-6 shadow-soft">
               <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
@@ -253,9 +312,12 @@ function ForPros() {
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="font-display text-3xl font-bold tracking-tight">Jobs posted by clients</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight">
+              Jobs posted by clients
+            </h2>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              These are live open jobs created by clients. Professionals can use this feed to browse, review, and apply.
+              These are live open jobs created by clients. Professionals can use this feed to
+              browse, review, and apply.
             </p>
           </div>
           <div className="rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
@@ -274,7 +336,12 @@ function ForPros() {
                 placeholder="Search jobs, client, category"
               />
             </div>
-            <Button type="button" variant="outline" className="h-9 gap-2" onClick={() => setIsFilterOpen(true)}>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 gap-2"
+              onClick={() => setIsFilterOpen(true)}
+            >
               <SlidersHorizontal className="h-4 w-4" />
               Filters
               {activeFilterCount ? (
@@ -291,7 +358,11 @@ function ForPros() {
             <span>
               Showing {filteredJobs.length} of {openJobs.length} jobs
             </span>
-            {activeFilterCount ? <span>{activeFilterCount} filter{activeFilterCount === 1 ? "" : "s"} active</span> : null}
+            {activeFilterCount ? (
+              <span>
+                {activeFilterCount} filter{activeFilterCount === 1 ? "" : "s"} active
+              </span>
+            ) : null}
           </div>
         </div>
 
@@ -307,7 +378,11 @@ function ForPros() {
             <div className="grid gap-4 py-2 sm:grid-cols-2">
               <label className="space-y-2 text-sm font-medium">
                 <span>City</span>
-                <Input value={city} onChange={(event) => setCity(event.target.value)} placeholder="e.g. Mumbai" />
+                <Input
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                  placeholder="e.g. Mumbai"
+                />
               </label>
 
               <label className="space-y-2 text-sm font-medium">
@@ -379,7 +454,13 @@ function ForPros() {
             <div className="rounded-xl border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <span>{locationStatus || "Use your current location for distance filters."}</span>
-                <Button type="button" variant="outline" size="sm" className="gap-2" onClick={useCurrentLocation}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={useCurrentLocation}
+                >
                   <MapPin className="h-4 w-4" />
                   Use my location
                 </Button>
@@ -411,7 +492,13 @@ function ForPros() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" size="sm" className="gap-2" onClick={useCurrentLocation}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={useCurrentLocation}
+                >
                   <LocateFixed className="h-4 w-4" />
                   Use my location
                 </Button>
@@ -436,7 +523,9 @@ function ForPros() {
               />
               <div className="max-h-[380px] overflow-y-auto border-t border-border bg-background p-3 lg:border-l lg:border-t-0">
                 <div className="mb-3 flex items-center justify-between gap-2 text-sm">
-                  <span className="font-medium">{mappableJobs.length} mapped job{mappableJobs.length === 1 ? "" : "s"}</span>
+                  <span className="font-medium">
+                    {mappableJobs.length} mapped job{mappableJobs.length === 1 ? "" : "s"}
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {userLocation ? "Nearest first" : "Select a job"}
                   </span>
@@ -456,7 +545,9 @@ function ForPros() {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-foreground">{job.title}</p>
+                            <p className="truncate text-sm font-semibold text-foreground">
+                              {job.title}
+                            </p>
                             <p className="mt-1 truncate text-xs text-muted-foreground">
                               {formatJobLocation(job)}
                             </p>
@@ -467,7 +558,9 @@ function ForPros() {
                         </div>
                         <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
                           <span className="rounded-full bg-muted px-2 py-1">{job.category}</span>
-                          <span className="rounded-full bg-muted px-2 py-1">{formatBudget(job.budgetMin, job.budgetMax, job.timingType)}</span>
+                          <span className="rounded-full bg-muted px-2 py-1">
+                            {formatBudget(job.budgetMin, job.budgetMax, job.timingType)}
+                          </span>
                         </div>
                       </button>
                     ))}
@@ -485,7 +578,10 @@ function ForPros() {
         {filteredJobs.length ? (
           <div className="mt-8 grid gap-3 lg:grid-cols-2">
             {filteredJobs.map((job) => (
-              <div key={job.id} className="group rounded-lg border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/60 hover:bg-muted/10">
+              <div
+                key={job.id}
+                className="group rounded-lg border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/60 hover:bg-muted/10"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-1.5">
@@ -493,33 +589,53 @@ function ForPros() {
                         {job.category}
                       </span>
                       <span className="inline-flex rounded-md bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-                        {job.workMode === "ON_SITE" ? "On-site" : job.workMode === "REMOTE" ? "Remote" : "Both"}
+                        {job.workMode === "ON_SITE"
+                          ? "On-site"
+                          : job.workMode === "REMOTE"
+                            ? "Remote"
+                            : "Both"}
                       </span>
-                      <span className={`inline-flex rounded-md px-2 py-0.5 text-[11px] ${
-                        job.urgency === "HIGH"
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-muted text-muted-foreground"
-                      }`}>
+                      <span
+                        className={`inline-flex rounded-md px-2 py-0.5 text-[11px] ${
+                          job.urgency === "HIGH"
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
                         {formatEnum(job.urgency)}
                       </span>
                     </div>
-                    <h3 className="mt-3 line-clamp-2 text-base font-semibold leading-6 text-foreground">{job.title}</h3>
+                    <h3 className="mt-3 line-clamp-2 text-base font-semibold leading-6 text-foreground">
+                      {job.title}
+                    </h3>
                   </div>
                   <div className="shrink-0 rounded-lg border border-primary/20 bg-primary/10 px-3 py-2 text-right">
                     <p className="text-[10px] font-semibold uppercase text-primary/80">Budget</p>
-                    <p className="mt-0.5 whitespace-nowrap text-sm font-semibold text-primary">{formatBudget(job.budgetMin, job.budgetMax, job.timingType)}</p>
+                    <p className="mt-0.5 whitespace-nowrap text-sm font-semibold text-primary">
+                      {formatBudget(job.budgetMin, job.budgetMax, job.timingType)}
+                    </p>
                   </div>
                 </div>
-                <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-muted-foreground">{job.description}</p>
+                <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-muted-foreground">
+                  {job.description}
+                </p>
 
                 <div className="mt-3 grid gap-1.5 text-xs text-muted-foreground sm:grid-cols-2">
                   <div className="flex min-w-0 items-center gap-1.5 rounded-md border border-border/70 bg-background px-2 py-1.5">
                     <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(job.deadline))}</span>
+                    <span className="truncate">
+                      {new Intl.DateTimeFormat("en", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(new Date(job.deadline))}
+                    </span>
                   </div>
                   <div className="flex min-w-0 items-center gap-1.5 rounded-md border border-border/70 bg-background px-2 py-1.5">
                     <Paperclip className="h-3.5 w-3.5 shrink-0" />
-                    <span>{job.attachments.length} file{job.attachments.length === 1 ? "" : "s"}</span>
+                    <span>
+                      {job.attachments.length} file{job.attachments.length === 1 ? "" : "s"}
+                    </span>
                   </div>
                   <div className="flex min-w-0 items-center gap-1.5 rounded-md border border-border/70 bg-background px-2 py-1.5">
                     <MapPin className="h-3.5 w-3.5 shrink-0" />
@@ -532,7 +648,10 @@ function ForPros() {
                 </div>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
                   <p className="text-xs text-muted-foreground">
-                    Posted by <span className="font-medium text-foreground">{job.clientCompanyName || job.clientName}</span>
+                    Posted by{" "}
+                    <span className="font-medium text-foreground">
+                      {job.clientCompanyName || job.clientName}
+                    </span>
                   </p>
                   {job.locationAddress || (job.locationLat != null && job.locationLng != null) ? (
                     <Button
@@ -552,8 +671,12 @@ function ForPros() {
           </div>
         ) : (
           <div className="mt-8 rounded-2xl border border-border bg-muted/10 p-8 text-center">
-            <p className="text-sm font-semibold text-muted-foreground">No jobs match these filters.</p>
-            <p className="mt-2 text-sm text-muted-foreground">Try clearing filters or broadening the budget, city, urgency, or type.</p>
+            <p className="text-sm font-semibold text-muted-foreground">
+              No jobs match these filters.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Try clearing filters or broadening the budget, city, urgency, or type.
+            </p>
           </div>
         )}
       </section>
@@ -581,7 +704,11 @@ function formatBudget(min: number | null, max: number | null, timingType = "FIXE
   return "Budget not set";
 }
 
-function formatJobLocation(job: { locationAddress?: string | null; locationLabel?: string | null; workMode?: string | null }) {
+function formatJobLocation(job: {
+  locationAddress?: string | null;
+  locationLabel?: string | null;
+  workMode?: string | null;
+}) {
   if (job.workMode === "REMOTE") {
     return "Remote";
   }

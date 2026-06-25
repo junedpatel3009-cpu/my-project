@@ -1,11 +1,31 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createFileRoute, Link, notFound, useLoaderData, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  useLoaderData,
+  useNavigate,
+} from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { getCurrentUser } from "@/lib/current-user.server";
 import { getProfessionalVerificationByUserId } from "@/lib/pro-verification-db.server";
 import { getProfessionalProfileByUserId } from "@/lib/user-db.server";
 import { formatApproximateLocation } from "@/lib/location-privacy";
-import { Star, MapPin, BadgeCheck, Clock, MessageSquare, Heart, Share2, Mail, Phone, FileText, FileBadge, ShieldCheck, Camera } from "lucide-react";
+import {
+  Star,
+  MapPin,
+  BadgeCheck,
+  Clock,
+  MessageSquare,
+  Heart,
+  Share2,
+  Mail,
+  Phone,
+  FileText,
+  FileBadge,
+  ShieldCheck,
+  Camera,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/pro/$proId")({
@@ -45,8 +65,19 @@ const getProDetails = createServerFn({ method: "GET" })
 
 function ProProfile() {
   const navigate = useNavigate();
-  const { viewer, profile: pro, verification } = useLoaderData({ from: "/pro/$proId" }) as {
-    viewer: { id: number; firstName: string; lastName: string; email: string; role: string; avatarUrl?: string | null } | null;
+  const {
+    viewer,
+    profile: pro,
+    verification,
+  } = useLoaderData({ from: "/pro/$proId" }) as {
+    viewer: {
+      id: number;
+      firstName: string;
+      lastName: string;
+      email: string;
+      role: string;
+      avatarUrl?: string | null;
+    } | null;
     profile: {
       id: number;
       fullName: string;
@@ -85,17 +116,24 @@ function ProProfile() {
   };
   const rateLabel = pro.hourlyRate != null ? `$${pro.hourlyRate}/hr` : "Contact for rate";
   const fixedLabel = pro.fixedRate != null ? `$${pro.fixedRate}` : "Flexible";
-  const locationLabel = formatApproximateLocation(pro.professionalCity || pro.serviceArea || pro.address, "Location not provided");
+  const locationLabel = formatApproximateLocation(
+    pro.professionalCity || pro.serviceArea || pro.address,
+    "Location not provided",
+  );
   const mapLocation = locationLabel;
   const certificationLabels = getCertificationLabels(pro.certifications);
   const workPhotoUrls = getWorkPhotoUrls(pro.workPhotos);
-  const workModeLabel = pro.workMode === "remote" ? "Remote" : pro.workMode === "onsite" ? "On-site" : "Remote & on-site";
+  const workModeLabel =
+    pro.workMode === "remote"
+      ? "Remote"
+      : pro.workMode === "onsite"
+        ? "On-site"
+        : "Remote & on-site";
   const ratingLabel = `${pro.averageRating.toFixed(1)} · ${pro.reviewCount} ${pro.reviewCount === 1 ? "review" : "reviews"}`;
   const verificationMeta = getVerificationMeta(verification.status);
   const verificationDocs = getVerificationDocuments(verification);
   const verificationBadges = verificationDocs.filter((document) => document.done);
   const uploadedVerificationCount = verificationDocs.filter((document) => document.done).length;
-
 
   return (
     <AppShell
@@ -116,12 +154,18 @@ function ProProfile() {
               <div className="pb-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-2xl font-semibold tracking-tight">{pro.fullName}</h1>
-                  {verification.status === "approved" ? <BadgeCheck className="h-5 w-5 text-primary" /> : null}
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${verificationMeta.badgeClass}`}>
+                  {verification.status === "approved" ? (
+                    <BadgeCheck className="h-5 w-5 text-primary" />
+                  ) : null}
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${verificationMeta.badgeClass}`}
+                  >
                     {verificationMeta.label}
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground">{pro.professionalCategory || "Professional services"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {pro.professionalCategory || "Professional services"}
+                </p>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1 text-foreground">
                     <Star className="h-3 w-3 fill-warning text-warning" />
@@ -184,14 +228,18 @@ function ProProfile() {
         <div className="space-y-6 lg:col-span-2">
           <Section title="About this pro">
             <p className="text-sm leading-relaxed text-muted-foreground">
-              {pro.companyDescription || "This professional has not yet added a description. Contact them to learn more about their experience and services."}
+              {pro.companyDescription ||
+                "This professional has not yet added a description. Contact them to learn more about their experience and services."}
             </p>
           </Section>
 
           <Section title="Services">
             <div className="grid gap-4 sm:grid-cols-2">
               <InfoCard label="Category" value={pro.professionalCategory || "Not specified"} />
-              <InfoCard label="Service area" value={formatApproximateLocation(pro.serviceArea, locationLabel)} />
+              <InfoCard
+                label="Service area"
+                value={formatApproximateLocation(pro.serviceArea, locationLabel)}
+              />
               <InfoCard label="Work mode" value={workModeLabel} />
               <InfoCard label="Availability" value={pro.availabilityStatus || "Not specified"} />
               <InfoCard label="Hourly rate" value={rateLabel} />
@@ -218,7 +266,10 @@ function ProProfile() {
             <div className="flex flex-wrap gap-2">
               {pro.skills.length > 0 ? (
                 pro.skills.map((skill) => (
-                  <span key={skill} className="rounded-full border border-border bg-background px-3 py-1 text-xs">
+                  <span
+                    key={skill}
+                    className="rounded-full border border-border bg-background px-3 py-1 text-xs"
+                  >
                     {skill}
                   </span>
                 ))
@@ -229,12 +280,19 @@ function ProProfile() {
             <div className="mt-4 grid gap-3 sm:grid-cols-2 text-sm text-muted-foreground">
               <div>
                 <p className="text-foreground font-medium">Experience</p>
-                <p>{pro.experienceYears != null ? `${pro.experienceYears} years` : "Not specified"}</p>
+                <p>
+                  {pro.experienceYears != null ? `${pro.experienceYears} years` : "Not specified"}
+                </p>
               </div>
               <div>
                 <p className="text-foreground font-medium">Trade license</p>
                 {pro.tradeLicenseUrl ? (
-                  <a href={pro.tradeLicenseUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                  <a
+                    href={pro.tradeLicenseUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary hover:underline"
+                  >
                     View license
                   </a>
                 ) : (
@@ -258,12 +316,16 @@ function ProProfile() {
             <div className="rounded-2xl border border-border bg-background p-4">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="flex items-start gap-3">
-                  <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${verificationMeta.iconClass}`}>
+                  <div
+                    className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${verificationMeta.iconClass}`}
+                  >
                     <verificationMeta.icon className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="font-semibold">{verificationMeta.label}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{verificationMeta.description}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {verificationMeta.description}
+                    </p>
                     {verification.updatedAt ? (
                       <p className="mt-2 text-xs text-muted-foreground">
                         Last updated {formatDateTime(verification.updatedAt)}
@@ -272,7 +334,9 @@ function ProProfile() {
                   </div>
                 </div>
                 <div className="rounded-xl bg-muted px-4 py-3 text-center">
-                  <p className="text-xl font-semibold">{uploadedVerificationCount}/{verificationDocs.length}</p>
+                  <p className="text-xl font-semibold">
+                    {uploadedVerificationCount}/{verificationDocs.length}
+                  </p>
                   <p className="text-xs text-muted-foreground">items uploaded</p>
                 </div>
               </div>
@@ -308,14 +372,19 @@ function ProProfile() {
             <div className="mt-4 space-y-4 text-sm text-muted-foreground">
               <StatRow label="Verification" value={verificationMeta.label} />
               <StatRow label="Rating" value={ratingLabel} />
-              <StatRow label="Service radius" value={pro.serviceRadiusKm ? `${pro.serviceRadiusKm} km` : "Not set"} />
+              <StatRow
+                label="Service radius"
+                value={pro.serviceRadiusKm ? `${pro.serviceRadiusKm} km` : "Not set"}
+              />
               <StatRow label="Work mode" value={workModeLabel} />
             </div>
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
             <h3 className="font-semibold">Availability</h3>
-            <p className="mt-4 text-sm text-muted-foreground">{pro.availabilityStatus} and accepting new inquiries.</p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              {pro.availabilityStatus} and accepting new inquiries.
+            </p>
           </div>
         </div>
       </div>
@@ -323,7 +392,15 @@ function ProProfile() {
   );
 }
 
-function ProLocationMap({ location, label, proName }: { location: string; label: string; proName: string }) {
+function ProLocationMap({
+  location,
+  label,
+  proName,
+}: {
+  location: string;
+  label: string;
+  proName: string;
+}) {
   const hasLocation = Boolean(location.trim());
   const mapQuery = encodeURIComponent(location || label);
 
@@ -408,7 +485,9 @@ function VerificationCard({
           <Icon className="h-4 w-4 text-primary" />
           {label}
         </span>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${done ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${done ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+        >
           {value || (done ? "Uploaded" : optional ? "Optional" : "Missing")}
         </span>
       </div>
@@ -448,7 +527,10 @@ function openProfessionalMessage(
   });
 }
 
-function rememberPendingProfessionalMessage(viewerId: number, pro: { id: number; fullName: string; avatarUrl: string | null }) {
+function rememberPendingProfessionalMessage(
+  viewerId: number,
+  pro: { id: number; fullName: string; avatarUrl: string | null },
+) {
   if (typeof window === "undefined") {
     return;
   }
@@ -473,7 +555,15 @@ function rememberPendingProfessionalMessage(viewerId: number, pro: { id: number;
   );
 }
 
-function ContactRow({ icon: Icon, label, value }: { icon: typeof Mail; label: string; value: string }) {
+function ContactRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Mail;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex items-start gap-3">
       <Icon className="h-4 w-4 text-primary mt-1" />
@@ -551,7 +641,11 @@ function getVerificationDocuments(verification: {
   return [
     { label: "Government ID", icon: FileText, done: Boolean(verification.governmentIdUrl) },
     { label: "Trade license", icon: FileBadge, done: Boolean(verification.licenseUrl) },
-    { label: "Certifications", icon: BadgeCheck, done: Boolean(verification.certifications.length) },
+    {
+      label: "Certifications",
+      icon: BadgeCheck,
+      done: Boolean(verification.certifications.length),
+    },
     { label: "Insurance", icon: ShieldCheck, done: Boolean(verification.insuranceUrl) },
     { label: "Selfie verification", icon: Camera, done: Boolean(verification.selfieUrl) },
   ];

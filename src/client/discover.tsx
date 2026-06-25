@@ -73,7 +73,9 @@ function Discover() {
   const [showMap, setShowMap] = useState(false);
   const [selectedMapProfessionalId, setSelectedMapProfessionalId] = useState<number | null>(null);
   const [clientLocation, setClientLocation] = useState<ClientLocation | null>(null);
-  const [distanceByProfessionalId, setDistanceByProfessionalId] = useState<Record<number, number>>({});
+  const [distanceByProfessionalId, setDistanceByProfessionalId] = useState<Record<number, number>>(
+    {},
+  );
   const [isLocatingClient, setIsLocatingClient] = useState(false);
   const [isResolvingDistances, setIsResolvingDistances] = useState(false);
   const [distanceError, setDistanceError] = useState<string | null>(null);
@@ -128,10 +130,7 @@ function Discover() {
           return [professional.id, null] as const;
         }
 
-        return [
-          professional.id,
-          getDistanceKm(clientLocation, coordinates),
-        ] as const;
+        return [professional.id, getDistanceKm(clientLocation, coordinates)] as const;
       }),
     )
       .then((entries) => {
@@ -149,7 +148,9 @@ function Discover() {
 
         setDistanceByProfessionalId(nextDistances);
         if (!Object.keys(nextDistances).length && professionals.length) {
-          setDistanceError("Could not resolve professional addresses. Check that profiles have a city, service area, or address.");
+          setDistanceError(
+            "Could not resolve professional addresses. Check that profiles have a city, service area, or address.",
+          );
         }
       })
       .catch(() => {
@@ -179,47 +180,49 @@ function Discover() {
         distanceKm: distanceByProfessionalId[professional.id] ?? null,
       }))
       .filter((professional) => {
-      const fullName = `${professional.firstName} ${professional.lastName}`.trim();
-      const professionalLocation =
-        professional.professionalCity ||
-        professional.serviceArea ||
-        getCityFromAddress(professional.address);
-      const averageRating = Number(professional.averageRating || 0);
-      const searchable = [
-        fullName,
-        professional.email,
-        professional.companyName,
-        professional.professionalCategory,
-        professional.industry,
-        professional.companyDescription,
-        professional.professionalCity,
-        professional.serviceArea,
-        professional.address,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      const matchesSearch = !normalizedSearch || searchable.includes(normalizedSearch);
-      const matchesCity =
-        !normalizedCity ||
-        professionalLocation.toLowerCase().includes(normalizedCity) ||
-        (professional.address || "").toLowerCase().includes(normalizedCity);
-      const matchesVerified = !verifiedOnly || Boolean(professional.isVerified);
-      const matchesAvailability =
-        availability === "all" || professional.availabilityStatus === availability;
-      const matchesRating = rating === "any" || averageRating >= Number(rating);
-      const matchesDistance =
-        maxDistanceKm == null ||
-        (clientLocation != null && professional.distanceKm != null && professional.distanceKm <= maxDistanceKm);
+        const fullName = `${professional.firstName} ${professional.lastName}`.trim();
+        const professionalLocation =
+          professional.professionalCity ||
+          professional.serviceArea ||
+          getCityFromAddress(professional.address);
+        const averageRating = Number(professional.averageRating || 0);
+        const searchable = [
+          fullName,
+          professional.email,
+          professional.companyName,
+          professional.professionalCategory,
+          professional.industry,
+          professional.companyDescription,
+          professional.professionalCity,
+          professional.serviceArea,
+          professional.address,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        const matchesSearch = !normalizedSearch || searchable.includes(normalizedSearch);
+        const matchesCity =
+          !normalizedCity ||
+          professionalLocation.toLowerCase().includes(normalizedCity) ||
+          (professional.address || "").toLowerCase().includes(normalizedCity);
+        const matchesVerified = !verifiedOnly || Boolean(professional.isVerified);
+        const matchesAvailability =
+          availability === "all" || professional.availabilityStatus === availability;
+        const matchesRating = rating === "any" || averageRating >= Number(rating);
+        const matchesDistance =
+          maxDistanceKm == null ||
+          (clientLocation != null &&
+            professional.distanceKm != null &&
+            professional.distanceKm <= maxDistanceKm);
 
-      return (
-        matchesSearch &&
-        matchesCity &&
-        matchesVerified &&
-        matchesAvailability &&
-        matchesRating &&
-        matchesDistance
-      );
+        return (
+          matchesSearch &&
+          matchesCity &&
+          matchesVerified &&
+          matchesAvailability &&
+          matchesRating &&
+          matchesDistance
+        );
       })
       .sort((left, right) => {
         if (!clientLocation) {
@@ -240,7 +243,17 @@ function Discover() {
 
         return left.distanceKm - right.distanceKm;
       });
-  }, [availability, city, clientLocation, distance, distanceByProfessionalId, professionals, rating, search, verifiedOnly]);
+  }, [
+    availability,
+    city,
+    clientLocation,
+    distance,
+    distanceByProfessionalId,
+    professionals,
+    rating,
+    search,
+    verifiedOnly,
+  ]);
 
   const selectedMapProfessional = filteredProfessionals.find(
     (professional) => professional.id === selectedMapProfessionalId,
@@ -250,7 +263,10 @@ function Discover() {
     selectedMapProfessional?.serviceArea ||
     formatApproximateLocation(selectedMapProfessional?.address, "") ||
     city ||
-    formatApproximateLocation(filteredProfessionals.find((professional) => professional.address)?.address, "") ||
+    formatApproximateLocation(
+      filteredProfessionals.find((professional) => professional.address)?.address,
+      "",
+    ) ||
     "India";
 
   const resetFilters = () => {
@@ -359,7 +375,8 @@ function Discover() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Find professionals</h1>
           <p className="text-sm text-muted-foreground">
-            Search saved professional accounts by name, city, service, availability, rating, and verified status.
+            Search saved professional accounts by name, city, service, availability, rating, and
+            verified status.
           </p>
         </div>
         <Button variant="outline" className="gap-2" onClick={() => setShowMap((value) => !value)}>
@@ -479,7 +496,9 @@ function Discover() {
                   {isLocatingClient ? "Finding" : "Use"}
                 </Button>
               </div>
-              {distanceError ? <p className="mt-2 text-xs text-destructive">{distanceError}</p> : null}
+              {distanceError ? (
+                <p className="mt-2 text-xs text-destructive">{distanceError}</p>
+              ) : null}
             </div>
             <select
               className="h-9 w-full rounded-lg border border-input bg-background px-2 text-sm"
@@ -561,7 +580,8 @@ function Discover() {
                 <div>
                   <h2 className="font-semibold">View Professionals on Map</h2>
                   <p className="text-sm text-muted-foreground">
-                    Showing map around {mapQuery}. Nearby results sort by client distance when location is enabled.
+                    Showing map around {mapQuery}. Nearby results sort by client distance when
+                    location is enabled.
                   </p>
                 </div>
                 <Badge variant="secondary">{filteredProfessionals.length} results</Badge>
@@ -606,7 +626,11 @@ function Discover() {
           {filteredProfessionals.length ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
               {filteredProfessionals.map((professional) => (
-                <ProfessionalResultCard key={professional.id} professional={professional} distanceKm={professional.distanceKm} />
+                <ProfessionalResultCard
+                  key={professional.id}
+                  professional={professional}
+                  distanceKm={professional.distanceKm}
+                />
               ))}
             </div>
           ) : (
@@ -614,7 +638,8 @@ function Discover() {
               <BriefcaseBusiness className="mx-auto h-9 w-9 text-muted-foreground" />
               <h3 className="mt-3 font-semibold">No professionals found</h3>
               <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-                Try clearing filters or add professional accounts with profile details in the database.
+                Try clearing filters or add professional accounts with profile details in the
+                database.
               </p>
             </div>
           )}
@@ -633,7 +658,8 @@ function ProfessionalResultCard({
 }) {
   const fullName = `${professional.firstName} ${professional.lastName}`.trim();
   const verified = Boolean(professional.isVerified);
-  const category = professional.professionalCategory || professional.industry || professional.companyName;
+  const category =
+    professional.professionalCategory || professional.industry || professional.companyName;
   const city =
     professional.professionalCity ||
     professional.serviceArea ||
@@ -641,7 +667,8 @@ function ProfessionalResultCard({
   const averageRating = Number(professional.averageRating || 0);
   const reviewCount = Number(professional.reviewCount || 0);
   const availabilityLabel = formatAvailability(professional.availabilityStatus);
-  const hourlyRateLabel = professional.hourlyRate != null ? `$${professional.hourlyRate}/hr` : "Contact for rate";
+  const hourlyRateLabel =
+    professional.hourlyRate != null ? `$${professional.hourlyRate}/hr` : "Contact for rate";
   const fixedRateLabel = professional.fixedRate != null ? `$${professional.fixedRate}` : "Flexible";
 
   return (
@@ -649,7 +676,10 @@ function ProfessionalResultCard({
       <div className="flex items-start gap-3">
         <div className="relative shrink-0">
           <img
-            src={professional.avatarUrl || `https://i.pravatar.cc/100?u=discover-pro-${professional.id}`}
+            src={
+              professional.avatarUrl ||
+              `https://i.pravatar.cc/100?u=discover-pro-${professional.id}`
+            }
             alt={fullName}
             className="h-16 w-16 rounded-xl object-cover"
           />
@@ -660,7 +690,9 @@ function ProfessionalResultCard({
           ) : null}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-base font-semibold text-foreground">{fullName || "Professional"}</h3>
+          <h3 className="truncate text-base font-semibold text-foreground">
+            {fullName || "Professional"}
+          </h3>
           <p className="truncate text-sm text-muted-foreground">
             {category || "Professional account"}
           </p>
@@ -668,7 +700,9 @@ function ProfessionalResultCard({
             <Badge className="rounded-full" variant={verified ? "default" : "secondary"}>
               {verified ? "Verified" : "Not verified"}
             </Badge>
-            <Badge className="rounded-full" variant="outline">{availabilityLabel}</Badge>
+            <Badge className="rounded-full" variant="outline">
+              {availabilityLabel}
+            </Badge>
           </div>
         </div>
       </div>
@@ -676,7 +710,10 @@ function ProfessionalResultCard({
       <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
         <MetaPill label="Hourly" value={hourlyRateLabel} />
         <MetaPill label="Fixed" value={fixedRateLabel} />
-        <MetaPill label="Radius" value={professional.serviceRadiusKm ? `${professional.serviceRadiusKm} km` : "Not set"} />
+        <MetaPill
+          label="Radius"
+          value={professional.serviceRadiusKm ? `${professional.serviceRadiusKm} km` : "Not set"}
+        />
       </div>
 
       {professional.companyDescription ? (
@@ -691,7 +728,9 @@ function ProfessionalResultCard({
         <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
           <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-muted px-3 py-1">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{formatApproximateLocation(city || professional.address, "Location not added")}</span>
+            <span className="truncate">
+              {formatApproximateLocation(city || professional.address, "Location not added")}
+            </span>
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1">
             <LocateFixed className="h-3.5 w-3.5 shrink-0" />
@@ -717,7 +756,9 @@ function ProfessionalResultCard({
 function MetaPill({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-border bg-muted/60 px-3 py-2">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
       <p className="mt-1 truncate font-medium text-foreground">{value}</p>
     </div>
   );
@@ -735,7 +776,11 @@ function MapProfessionalRow({
   onSelect: () => void;
 }) {
   const fullName = `${professional.firstName} ${professional.lastName}`.trim();
-  const category = professional.professionalCategory || professional.industry || professional.companyName || "Professional services";
+  const category =
+    professional.professionalCategory ||
+    professional.industry ||
+    professional.companyName ||
+    "Professional services";
   const city =
     professional.professionalCity ||
     professional.serviceArea ||
@@ -743,7 +788,8 @@ function MapProfessionalRow({
     "Location not added";
   const averageRating = Number(professional.averageRating || 0);
   const reviewCount = Number(professional.reviewCount || 0);
-  const hourlyRateLabel = professional.hourlyRate != null ? `$${professional.hourlyRate}/hr` : "Contact";
+  const hourlyRateLabel =
+    professional.hourlyRate != null ? `$${professional.hourlyRate}/hr` : "Contact";
 
   return (
     <div
@@ -820,21 +866,27 @@ function MapProfessionalRow({
 function FilterSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-t border-border py-4 first:border-t-0 first:pt-0">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h3>
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h3>
       <div className="space-y-2">{children}</div>
     </div>
   );
 }
 
 function getProfessionalLocationQueries(professional: ProfessionalDiscoveryUser) {
-  return Array.from(new Set([
-    professional.address,
-    professional.serviceArea,
-    professional.professionalCity,
-    getCityFromAddress(professional.address),
-  ]
-    .map((value) => value?.trim())
-    .filter((value): value is string => Boolean(value))));
+  return Array.from(
+    new Set(
+      [
+        professional.address,
+        professional.serviceArea,
+        professional.professionalCity,
+        getCityFromAddress(professional.address),
+      ]
+        .map((value) => value?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  );
 }
 
 async function geocodeAddress(address: string, googleMapsApiKey: string) {
@@ -869,18 +921,24 @@ function loadGoogleMapsApi(googleMapsApiKey: string) {
     return Promise.resolve(win.google);
   }
 
-  const existingScript = document.querySelector<HTMLScriptElement>('script[src*="maps.googleapis.com/maps/api/js"]');
+  const existingScript = document.querySelector<HTMLScriptElement>(
+    'script[src*="maps.googleapis.com/maps/api/js"]',
+  );
 
   if (existingScript) {
     return new Promise<any>((resolve, reject) => {
-      existingScript.addEventListener("load", () => {
-        if (win.google?.maps?.Geocoder) {
-          resolve(win.google);
-          return;
-        }
+      existingScript.addEventListener(
+        "load",
+        () => {
+          if (win.google?.maps?.Geocoder) {
+            resolve(win.google);
+            return;
+          }
 
-        reject(new Error("Google Maps geocoder unavailable."));
-      }, { once: true });
+          reject(new Error("Google Maps geocoder unavailable."));
+        },
+        { once: true },
+      );
       existingScript.addEventListener("error", reject, { once: true });
     });
   }
@@ -891,14 +949,18 @@ function loadGoogleMapsApi(googleMapsApiKey: string) {
     script.async = true;
     script.defer = true;
     script.dataset.googleMapsDiscovery = "true";
-    script.addEventListener("load", () => {
-      if (win.google?.maps?.Geocoder) {
-        resolve(win.google);
-        return;
-      }
+    script.addEventListener(
+      "load",
+      () => {
+        if (win.google?.maps?.Geocoder) {
+          resolve(win.google);
+          return;
+        }
 
-      reject(new Error("Google Maps geocoder unavailable."));
-    }, { once: true });
+        reject(new Error("Google Maps geocoder unavailable."));
+      },
+      { once: true },
+    );
     script.addEventListener("error", reject, { once: true });
     document.head.appendChild(script);
   });
@@ -941,10 +1003,12 @@ function getCityFromAddress(address: string | null) {
     return "";
   }
 
-  return address
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean)[0] || "";
+  return (
+    address
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean)[0] || ""
+  );
 }
 
 function formatAvailability(value: string | null | undefined) {

@@ -75,7 +75,11 @@ export function Project() {
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">{job.title}</h1>
           <div className="mt-3 flex flex-wrap gap-2">
             <Badge variant="secondary">{job.category}</Badge>
-            <Badge variant={job.status === "OPEN" ? "default" : job.status === "DRAFT" ? "secondary" : "outline"}>
+            <Badge
+              variant={
+                job.status === "OPEN" ? "default" : job.status === "DRAFT" ? "secondary" : "outline"
+              }
+            >
               {statusLabel}
             </Badge>
             <Badge variant={job.urgency === "HIGH" ? "destructive" : "outline"}>
@@ -123,7 +127,8 @@ export function Project() {
               <div>
                 <h2 className="font-semibold">Project is incomplete</h2>
                 <p className="mt-1 text-sm">
-                  This project is still saved as a draft. Complete the missing details and post it before professionals can see it or send requests.
+                  This project is still saved as a draft. Complete the missing details and post it
+                  before professionals can see it or send requests.
                 </p>
               </div>
             </div>
@@ -141,7 +146,11 @@ export function Project() {
           { label: "Budget", value: budgetLabel, icon: BriefcaseBusiness },
           { label: "Work mode", value: formatWorkMode(job.workMode), icon: Search },
           { label: "Deadline", value: formatDate(job.deadline), icon: CalendarDays },
-          { label: "Tracking", value: isDraft ? "Incomplete" : tracking ? "Active" : "Ready", icon: Send },
+          {
+            label: "Tracking",
+            value: isDraft ? "Incomplete" : tracking ? "Active" : "Ready",
+            icon: Send,
+          },
         ].map((item) => (
           <div key={item.label} className="rounded-xl border border-border bg-card p-5 shadow-soft">
             <item.icon className="h-5 w-5 text-primary" />
@@ -163,7 +172,9 @@ export function Project() {
           <div className="rounded-xl border border-border bg-card p-6 shadow-soft">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
-                <h2 className="text-lg font-semibold">{tracking ? "Tracking overview" : "Hire and work requests"}</h2>
+                <h2 className="text-lg font-semibold">
+                  {tracking ? "Tracking overview" : "Hire and work requests"}
+                </h2>
                 <p className="text-sm text-muted-foreground">
                   {tracking
                     ? "Live status and activity pulled from the project tracking records in the database."
@@ -201,13 +212,17 @@ export function Project() {
                     <p className="text-sm text-muted-foreground">Tracking status</p>
                     <div className="mt-2 flex items-center gap-2">
                       <Badge>{formatEnum(tracking.status)}</Badge>
-                      <span className="text-sm text-muted-foreground">accepted {formatDate(tracking.acceptedAt)}</span>
+                      <span className="text-sm text-muted-foreground">
+                        accepted {formatDate(tracking.acceptedAt)}
+                      </span>
                     </div>
                   </div>
                   <div className="rounded-lg border border-border p-4">
                     <p className="text-sm text-muted-foreground">Professional</p>
                     <p className="mt-2 font-medium">{tracking.professionalName}</p>
-                    <p className="text-sm text-muted-foreground">{tracking.professionalCategory || "Professional"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {tracking.professionalCategory || "Professional"}
+                    </p>
                   </div>
                 </div>
 
@@ -217,7 +232,13 @@ export function Project() {
                       <CheckCircle2 className="h-4 w-4" />
                       <p className="font-semibold">Milestones</p>
                     </div>
-                    <p className="mt-3 text-2xl font-semibold">{tracking.milestones.filter((milestone) => milestone.status === "DONE").length}/{tracking.milestones.length}</p>
+                    <p className="mt-3 text-2xl font-semibold">
+                      {
+                        tracking.milestones.filter((milestone) => milestone.status === "DONE")
+                          .length
+                      }
+                      /{tracking.milestones.length}
+                    </p>
                     <p className="text-sm text-muted-foreground">Completed from the database</p>
                   </div>
 
@@ -235,7 +256,12 @@ export function Project() {
                       <FileText className="h-4 w-4" />
                       <p className="font-semibold">Revision requests</p>
                     </div>
-                    <p className="mt-3 text-2xl font-semibold">{tracking.revisionRequests.filter((item) => item.status === "REQUESTED").length}</p>
+                    <p className="mt-3 text-2xl font-semibold">
+                      {
+                        tracking.revisionRequests.filter((item) => item.status === "REQUESTED")
+                          .length
+                      }
+                    </p>
                     <p className="text-sm text-muted-foreground">Pending review items</p>
                   </div>
                 </div>
@@ -246,7 +272,9 @@ export function Project() {
                       <ReceiptText className="h-4 w-4" />
                       <p className="font-semibold">Completion requests</p>
                     </div>
-                    <p className="mt-3 text-2xl font-semibold">{tracking.completionRequests.length}</p>
+                    <p className="mt-3 text-2xl font-semibold">
+                      {tracking.completionRequests.length}
+                    </p>
                     <p className="text-sm text-muted-foreground">Saved approval requests</p>
                   </div>
                   <div className="rounded-lg border border-border p-4">
@@ -265,7 +293,8 @@ export function Project() {
               <div className="mt-5 rounded-lg border border-dashed border-warning/40 bg-warning/5 p-5">
                 <h3 className="font-semibold text-warning-foreground">Finish this draft first</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Once the project is posted, you can request work, hire professionals, and begin tracking progress from here.
+                  Once the project is posted, you can request work, hire professionals, and begin
+                  tracking progress from here.
                 </p>
                 <Button className="mt-4" asChild>
                   <Link to="/post-job" search={{ draftId: String(job.id) } as never}>
@@ -278,7 +307,8 @@ export function Project() {
                 <div className="rounded-lg border border-border p-4">
                   <h3 className="font-semibold">Request work from this project</h3>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Share the project scope with a professional, discuss availability, and move into messages.
+                    Share the project scope with a professional, discuss availability, and move into
+                    messages.
                   </p>
                   <Button className="mt-4 w-full" variant="outline" asChild>
                     <Link to="/discover">
@@ -290,7 +320,8 @@ export function Project() {
                 <div className="rounded-lg border border-border p-4">
                   <h3 className="font-semibold">Create a hire request</h3>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Choose a professional from Discover, then send a hire request with the title, budget, files, and dates.
+                    Choose a professional from Discover, then send a hire request with the title,
+                    budget, files, and dates.
                   </p>
                   <Button className="mt-4 w-full" asChild>
                     <Link to="/discover">Hire from project</Link>
@@ -312,7 +343,8 @@ export function Project() {
                 <span className="text-muted-foreground">Posted:</span> {formatDate(job.createdAt)}
               </p>
               <p>
-                <span className="text-muted-foreground">Job date:</span> {job.jobDate ? formatDate(job.jobDate) : "Not set"}
+                <span className="text-muted-foreground">Job date:</span>{" "}
+                {job.jobDate ? formatDate(job.jobDate) : "Not set"}
               </p>
               <p>
                 <span className="text-muted-foreground">Status:</span> {statusLabel}
@@ -325,11 +357,16 @@ export function Project() {
             {job.attachments.length > 0 ? (
               <ul className="mt-4 space-y-3 text-sm">
                 {job.attachments.map((file: any) => (
-                  <li key={file.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
+                  <li
+                    key={file.id}
+                    className="flex items-center gap-3 rounded-lg border border-border p-3"
+                  >
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm">{file.fileName}</p>
-                      <p className="text-xs text-muted-foreground">{formatFileSize(file.fileSize)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatFileSize(file.fileSize)}
+                      </p>
                     </div>
                   </li>
                 ))}

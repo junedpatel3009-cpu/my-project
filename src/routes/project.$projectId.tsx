@@ -6,7 +6,7 @@ export const Route = createFileRoute("/project/$projectId")({
   head: () => ({ meta: [{ title: "Project tracking — Servio" }] }),
   beforeLoad: async ({ location }) => {
     const auth = await checkProjectAuth();
-    
+
     if (!auth.authenticated) {
       throw redirect({
         to: "/login",
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/project/$projectId")({
   },
   loader: async ({ params }) => {
     const result = await getProjectData({ data: params.projectId });
-    
+
     if (!result || !result.job) {
       throw notFound();
     }
@@ -49,4 +49,3 @@ export const Route = createFileRoute("/project/$projectId")({
     </div>
   ),
 });
-

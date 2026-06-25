@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createServerFn } from "@tanstack/react-start";
-import { createFileRoute, Link, redirect, useLoaderData, useNavigate, useSearch } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useLoaderData,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 import { io } from "socket.io-client";
 import {
   BriefcaseBusiness,
@@ -162,7 +169,11 @@ const urgencyOptions = [
 ] as const;
 
 const timingTypes = [
-  { value: "FIXED", label: "Fixed project", description: "Set one total budget and delivery dates." },
+  {
+    value: "FIXED",
+    label: "Fixed project",
+    description: "Set one total budget and delivery dates.",
+  },
   { value: "HOURLY", label: "Hourly", description: "Set the budget as an hourly rate." },
   { value: "WEEKLY", label: "Weekly", description: "Set the budget as a weekly rate." },
 ] as const;
@@ -199,7 +210,10 @@ function PostJob() {
 
   const activeStep = wizardSteps[currentStep];
   const ActiveStepIcon = activeStep.icon;
-  const completedPercent = useMemo(() => calculateCompletion({ ...form, attachments }), [form, attachments]);
+  const completedPercent = useMemo(
+    () => calculateCompletion({ ...form, attachments }),
+    [form, attachments],
+  );
   const displayName = clientProfile?.fullName || `${viewer.firstName} ${viewer.lastName}`.trim();
 
   useEffect(() => {
@@ -253,25 +267,27 @@ function PostJob() {
           locationLng: draft.locationLng,
           status: draft.status,
         });
-        setCurrentStep(getFirstIncompleteStep({
-          category: draft.category,
-          title: draft.title,
-          description: draft.description,
-          attachments: draftAttachments,
-          budgetMin: draft.budgetMin,
-          budgetMax: draft.budgetMax,
-          urgency: draft.urgency,
-          timingType: draft.timingType ?? "FIXED",
-          hourlyRate: draft.hourlyRate ?? null,
-          jobDate: toDateInputValue(draft.jobDate),
-          deadline: toDateInputValue(draft.deadline),
-          workMode: draft.workMode,
-          locationLabel: draft.locationLabel || "Selected job location",
-          locationAddress: draft.locationAddress || "",
-          locationLat: draft.locationLat,
-          locationLng: draft.locationLng,
-          status: draft.status,
-        }));
+        setCurrentStep(
+          getFirstIncompleteStep({
+            category: draft.category,
+            title: draft.title,
+            description: draft.description,
+            attachments: draftAttachments,
+            budgetMin: draft.budgetMin,
+            budgetMax: draft.budgetMax,
+            urgency: draft.urgency,
+            timingType: draft.timingType ?? "FIXED",
+            hourlyRate: draft.hourlyRate ?? null,
+            jobDate: toDateInputValue(draft.jobDate),
+            deadline: toDateInputValue(draft.deadline),
+            workMode: draft.workMode,
+            locationLabel: draft.locationLabel || "Selected job location",
+            locationAddress: draft.locationAddress || "",
+            locationLat: draft.locationLat,
+            locationLng: draft.locationLng,
+            status: draft.status,
+          }),
+        );
       })
       .catch((error) => {
         if (active) {
@@ -360,14 +376,22 @@ function PostJob() {
         await navigate({ to: "/dashboard" });
       }
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Could not save this job. Please check the details.");
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Could not save this job. Please check the details.",
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <AppShell userName={displayName} userRole="Client" userAvatarUrl={clientProfile?.avatarUrl || viewer.avatarUrl}>
+    <AppShell
+      userName={displayName}
+      userRole="Client"
+      userAvatarUrl={clientProfile?.avatarUrl || viewer.avatarUrl}
+    >
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
           <div>
@@ -398,7 +422,10 @@ function PostJob() {
                 <span>{completedPercent}%</span>
               </div>
               <div className="h-2 rounded-full bg-muted">
-                <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${completedPercent}%` }} />
+                <div
+                  className="h-2 rounded-full bg-primary transition-all"
+                  style={{ width: `${completedPercent}%` }}
+                />
               </div>
             </div>
 
@@ -463,11 +490,21 @@ function PostJob() {
 
               <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex gap-3">
-                  <Button type="button" variant="outline" onClick={goBack} disabled={currentStep === 0 || isSaving}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={goBack}
+                    disabled={currentStep === 0 || isSaving}
+                  >
                     <ChevronLeft className="h-4 w-4" />
                     Back
                   </Button>
-                  <Button type="button" variant="ghost" onClick={() => saveJob("DRAFT")} disabled={isSaving}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => saveJob("DRAFT")}
+                    disabled={isSaving}
+                  >
                     <Save className="h-4 w-4" />
                     Save draft
                   </Button>
@@ -489,9 +526,14 @@ function PostJob() {
             <div className="border-t border-border bg-muted/30 px-5 py-3">
               <div className="flex items-center gap-3">
                 <div className="h-2 flex-1 rounded-full bg-muted">
-                  <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${completedPercent}%` }} />
+                  <div
+                    className="h-2 rounded-full bg-primary transition-all"
+                    style={{ width: `${completedPercent}%` }}
+                  />
                 </div>
-                <span className="text-xs font-medium text-muted-foreground">{completedPercent}% done</span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {completedPercent}% done
+                </span>
               </div>
             </div>
           </section>
@@ -544,7 +586,9 @@ function StepButton({
         <div className="min-w-0">
           <p className="font-medium">{step.title}</p>
           <p className="text-xs text-muted-foreground">{step.subtitle}</p>
-          {!isActive && !isComplete ? <p className="mt-1 text-xs font-medium text-warning-foreground">Pending</p> : null}
+          {!isActive && !isComplete ? (
+            <p className="mt-1 text-xs font-medium text-warning-foreground">Pending</p>
+          ) : null}
         </div>
       </div>
     </button>
@@ -570,7 +614,9 @@ function BasicsStep({
               key={category.name}
               onClick={() => updateField("category", category.name)}
               className={`flex min-h-12 items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
-                form.category === category.name ? "border-primary bg-primary/5 text-primary" : "border-border hover:bg-muted"
+                form.category === category.name
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border hover:bg-muted"
               }`}
             >
               <BriefcaseBusiness className="h-4 w-4 shrink-0" />
@@ -633,7 +679,9 @@ function FilesStep({
             type="number"
             min="0"
             value={form.budgetMin ?? ""}
-            onChange={(event) => updateField("budgetMin", event.target.value ? Number(event.target.value) : null)}
+            onChange={(event) =>
+              updateField("budgetMin", event.target.value ? Number(event.target.value) : null)
+            }
             placeholder={form.timingType === "FIXED" ? "$ Min" : `$ Min / ${budgetUnit}`}
           />
         </Field>
@@ -642,13 +690,18 @@ function FilesStep({
             type="number"
             min="0"
             value={form.budgetMax ?? ""}
-            onChange={(event) => updateField("budgetMax", event.target.value ? Number(event.target.value) : null)}
+            onChange={(event) =>
+              updateField("budgetMax", event.target.value ? Number(event.target.value) : null)
+            }
             placeholder={form.timingType === "FIXED" ? "$ Max" : `$ Max / ${budgetUnit}`}
           />
         </Field>
       </div>
 
-      <Field label="Photos / documents" hint="Upload briefs, photos, screenshots, PDFs, or documents.">
+      <Field
+        label="Photos / documents"
+        hint="Upload briefs, photos, screenshots, PDFs, or documents."
+      >
         <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-background py-10 text-center transition-colors hover:border-primary/40 hover:bg-primary/5">
           <Upload className="h-6 w-6 text-muted-foreground" />
           <p className="mt-2 text-sm font-medium">Drop files here or click to upload</p>
@@ -666,9 +719,16 @@ function FilesStep({
       {attachments.length ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {attachments.map((attachment) => (
-            <div key={attachment.fileName} className="flex items-center gap-3 rounded-lg border border-border bg-background p-3">
+            <div
+              key={attachment.fileName}
+              className="flex items-center gap-3 rounded-lg border border-border bg-background p-3"
+            >
               {attachment.previewUrl ? (
-                <img src={attachment.previewUrl} alt="" className="h-12 w-12 rounded-md object-cover" />
+                <img
+                  src={attachment.previewUrl}
+                  alt=""
+                  className="h-12 w-12 rounded-md object-cover"
+                />
               ) : (
                 <div className="grid h-12 w-12 place-items-center rounded-md bg-muted">
                   <FileText className="h-5 w-5 text-muted-foreground" />
@@ -676,7 +736,9 @@ function FilesStep({
               )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{attachment.fileName}</p>
-                <p className="text-xs text-muted-foreground">{formatFileSize(attachment.fileSize)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {formatFileSize(attachment.fileSize)}
+                </p>
               </div>
               <button
                 type="button"
@@ -729,7 +791,9 @@ function TimingStep({
               type="button"
               onClick={() => updateTimingType(type.value)}
               className={`rounded-lg border px-4 py-3 text-left transition-colors ${
-                form.timingType === type.value ? "border-primary bg-primary/5 text-primary" : "border-border hover:bg-muted"
+                form.timingType === type.value
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border hover:bg-muted"
               }`}
             >
               <span className="block text-sm font-medium">{type.label}</span>
@@ -747,7 +811,9 @@ function TimingStep({
               type="button"
               onClick={() => updateField("urgency", option.value)}
               className={`rounded-md py-2 text-sm font-medium transition-colors ${
-                form.urgency === option.value ? "bg-card text-foreground shadow-soft" : "text-muted-foreground"
+                form.urgency === option.value
+                  ? "bg-card text-foreground shadow-soft"
+                  : "text-muted-foreground"
               }`}
             >
               {option.label}
@@ -759,7 +825,11 @@ function TimingStep({
       {form.timingType === "FIXED" ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Job date">
-            <Input type="date" value={form.jobDate || ""} onChange={(event) => updateJobDate(event.target.value)} />
+            <Input
+              type="date"
+              value={form.jobDate || ""}
+              onChange={(event) => updateJobDate(event.target.value)}
+            />
           </Field>
           <Field label="Deadline">
             <Input
@@ -786,7 +856,9 @@ function TimingStep({
               type="button"
               onClick={() => updateField("workMode", mode.value)}
               className={`rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
-                form.workMode === mode.value ? "border-primary bg-primary/5 text-primary" : "border-border hover:bg-muted"
+                form.workMode === mode.value
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border hover:bg-muted"
               }`}
             >
               {mode.label}
@@ -831,7 +903,9 @@ function LocationStep({
           <div className="flex items-start gap-3">
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
-              <p className="text-xs font-medium uppercase text-muted-foreground">Saved job location</p>
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Saved job location
+              </p>
               <p className="mt-1 font-medium">
                 {formatApproximateLocation(form.locationAddress, "No location selected yet")}
               </p>
@@ -843,12 +917,21 @@ function LocationStep({
       <div className="grid gap-4 lg:grid-cols-2">
         <ReviewItem label="Title" value={form.title || "Not added"} />
         <ReviewItem label="Category" value={form.category || "Not selected"} />
-        <ReviewItem label="Budget" value={formatBudget(form.budgetMin ?? null, form.budgetMax ?? null, form.timingType)} />
+        <ReviewItem
+          label="Budget"
+          value={formatBudget(form.budgetMin ?? null, form.budgetMax ?? null, form.timingType)}
+        />
         <ReviewItem label="Timing" value={formatTimingType(form.timingType)} />
         <ReviewItem label="Urgency" value={formatEnum(form.urgency)} />
-        <ReviewItem label="Work mode" value={form.workMode === "ON_SITE" ? "On-site" : formatEnum(form.workMode)} />
+        <ReviewItem
+          label="Work mode"
+          value={form.workMode === "ON_SITE" ? "On-site" : formatEnum(form.workMode)}
+        />
         <ReviewItem label="Files" value={`${attachments.length} attached`} />
-        <ReviewItem label="Location" value={formatApproximateLocation(form.locationAddress, "No location selected yet")} />
+        <ReviewItem
+          label="Location"
+          value={formatApproximateLocation(form.locationAddress, "No location selected yet")}
+        />
       </div>
     </>
   );
@@ -900,23 +983,29 @@ function GoogleJobLocationPicker({
     setIsResolvingLocation(true);
     setMapError(null);
 
-    geocoderRef.current?.geocode({ location: { lat: latitude, lng: longitude } }, (results: any[], status: string) => {
-      const locationName = status === "OK" && results?.[0]?.formatted_address
-        ? results[0].formatted_address
-        : fallbackName;
+    geocoderRef.current?.geocode(
+      { location: { lat: latitude, lng: longitude } },
+      (results: any[], status: string) => {
+        const locationName =
+          status === "OK" && results?.[0]?.formatted_address
+            ? results[0].formatted_address
+            : fallbackName;
 
-      onLocationChangeRef.current({
-        locationName,
-        latitude,
-        longitude,
-      });
-      setSearchText(locationName);
-      setIsResolvingLocation(false);
+        onLocationChangeRef.current({
+          locationName,
+          latitude,
+          longitude,
+        });
+        setSearchText(locationName);
+        setIsResolvingLocation(false);
 
-      if (!locationName) {
-        setMapError(status ? `Could not resolve location (${status})` : "Could not resolve location.");
-      }
-    });
+        if (!locationName) {
+          setMapError(
+            status ? `Could not resolve location (${status})` : "Could not resolve location.",
+          );
+        }
+      },
+    );
   };
 
   useEffect(() => {
@@ -992,11 +1081,15 @@ function GoogleJobLocationPicker({
       setMapError(null);
     };
 
-    const existingScript = document.querySelector<HTMLScriptElement>('script[data-google-maps-places="true"]');
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[data-google-maps-places="true"]',
+    );
 
     if (existingScript) {
       existingScript.addEventListener("load", initMap, { once: true });
-      existingScript.addEventListener("error", () => setMapError("Google Maps failed to load."), { once: true });
+      existingScript.addEventListener("error", () => setMapError("Google Maps failed to load."), {
+        once: true,
+      });
     } else {
       const script = document.createElement("script");
       script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places,geometry&v=weekly`;
@@ -1004,7 +1097,9 @@ function GoogleJobLocationPicker({
       script.defer = true;
       script.dataset.googleMapsPlaces = "true";
       script.addEventListener("load", initMap, { once: true });
-      script.addEventListener("error", () => setMapError("Google Maps failed to load."), { once: true });
+      script.addEventListener("error", () => setMapError("Google Maps failed to load."), {
+        once: true,
+      });
       document.head.appendChild(script);
     }
 
@@ -1016,7 +1111,11 @@ function GoogleJobLocationPicker({
   useEffect(() => {
     const query = searchText.trim();
 
-    if (!autocompleteServiceRef.current || query.length < 2 || query === location.locationName.trim()) {
+    if (
+      !autocompleteServiceRef.current ||
+      query.length < 2 ||
+      query === location.locationName.trim()
+    ) {
       setSuggestions([]);
       setIsSearchingPlaces(false);
       return;
@@ -1042,27 +1141,30 @@ function GoogleJobLocationPicker({
     let active = true;
     setIsSearchingPlaces(true);
 
-    autocompleteServiceRef.current.getPlacePredictions(request, (predictions: any[] | null, status: string) => {
-      if (!active) {
-        return;
-      }
-
-      if (status === "OK" && predictions?.length) {
-        setSuggestions(predictions);
-        setMapError(null);
-      } else {
-        setSuggestions([]);
-        if (status === "REQUEST_DENIED") {
-          setMapError(
-            "Google Places search denied. Verify your API key has billing enabled, Maps JavaScript API and Places API enabled, and that this origin is allowed in key restrictions.",
-          );
-        } else if (status !== "ZERO_RESULTS") {
-          setMapError(`Google Places search failed (${status})`);
+    autocompleteServiceRef.current.getPlacePredictions(
+      request,
+      (predictions: any[] | null, status: string) => {
+        if (!active) {
+          return;
         }
-      }
 
-      setIsSearchingPlaces(false);
-    });
+        if (status === "OK" && predictions?.length) {
+          setSuggestions(predictions);
+          setMapError(null);
+        } else {
+          setSuggestions([]);
+          if (status === "REQUEST_DENIED") {
+            setMapError(
+              "Google Places search denied. Verify your API key has billing enabled, Maps JavaScript API and Places API enabled, and that this origin is allowed in key restrictions.",
+            );
+          } else if (status !== "ZERO_RESULTS") {
+            setMapError(`Google Places search failed (${status})`);
+          }
+        }
+
+        setIsSearchingPlaces(false);
+      },
+    );
 
     return () => {
       active = false;
@@ -1096,14 +1198,24 @@ function GoogleJobLocationPicker({
         markerRef.current.setPosition(selectedPosition);
         mapInstanceRef.current.setCenter(selectedPosition);
         mapInstanceRef.current.setZoom(17);
-        autocompleteSessionTokenRef.current = new (window as GoogleMapsWindow).google.maps.places.AutocompleteSessionToken();
-        setLocationFromMapPosition(selectedPosition, place.formatted_address || place.name || suggestion.description);
+        autocompleteSessionTokenRef.current = new (
+          window as GoogleMapsWindow
+        ).google.maps.places.AutocompleteSessionToken();
+        setLocationFromMapPosition(
+          selectedPosition,
+          place.formatted_address || place.name || suggestion.description,
+        );
       },
     );
   };
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !markerRef.current || location.latitude == null || location.longitude == null) {
+    if (
+      !mapInstanceRef.current ||
+      !markerRef.current ||
+      location.latitude == null ||
+      location.longitude == null
+    ) {
       return;
     }
 
@@ -1209,9 +1321,13 @@ function GoogleJobLocationPicker({
                 onClick={() => selectSuggestion(suggestion)}
                 className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
               >
-                <span className="block font-medium">{suggestion.structured_formatting?.main_text || suggestion.description}</span>
+                <span className="block font-medium">
+                  {suggestion.structured_formatting?.main_text || suggestion.description}
+                </span>
                 {suggestion.structured_formatting?.secondary_text ? (
-                  <span className="block text-xs text-muted-foreground">{suggestion.structured_formatting.secondary_text}</span>
+                  <span className="block text-xs text-muted-foreground">
+                    {suggestion.structured_formatting.secondary_text}
+                  </span>
                 ) : null}
               </button>
             ))}
@@ -1220,7 +1336,13 @@ function GoogleJobLocationPicker({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={useCurrentLocation} disabled={isUsingBrowserLocation}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={useCurrentLocation}
+          disabled={isUsingBrowserLocation}
+        >
           <LocateFixed className="mr-2 h-4 w-4" />
           {isUsingBrowserLocation ? "Locating..." : "Use current"}
         </Button>
@@ -1273,7 +1395,13 @@ function GoogleJobLocationPicker({
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <MapPin className="h-3.5 w-3.5" />
           <span>Approx. {formatApproximateCoordinates(location.latitude, location.longitude)}</span>
-          <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={recenterMap}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={recenterMap}
+          >
             <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
             Reset view
           </Button>
@@ -1284,7 +1412,9 @@ function GoogleJobLocationPicker({
           {isResolvingLocation ? "Updating saved location..." : mapError}
         </p>
       ) : null}
-      {isSearchingPlaces ? <p className="text-sm text-muted-foreground">Searching locations...</p> : null}
+      {isSearchingPlaces ? (
+        <p className="text-sm text-muted-foreground">Searching locations...</p>
+      ) : null}
     </div>
   );
 }
@@ -1312,24 +1442,37 @@ function validateStep(step: StepId, values: ClientJobInput & { attachments: Atta
   if (step === "basics") {
     if (!values.category.trim()) return "Select a category.";
     if (!values.title.trim()) return "Add a job title.";
-    if (values.description.trim().length < 40) return "Add a project description with at least 40 characters.";
+    if (values.description.trim().length < 40)
+      return "Add a project description with at least 40 characters.";
   }
 
   if (step === "files") {
-    if (values.budgetMin != null && values.budgetMax != null && values.budgetMin > values.budgetMax) {
+    if (
+      values.budgetMin != null &&
+      values.budgetMax != null &&
+      values.budgetMin > values.budgetMax
+    ) {
       return "Maximum budget must be greater than minimum budget.";
     }
   }
 
   if (step === "timing") {
     if (values.timingType === "FIXED" && !values.deadline.trim()) return "Add a deadline.";
-    if (values.deadline.trim() && values.jobDate?.trim() && compareDateInputs(values.deadline, values.jobDate) < 0) {
+    if (
+      values.deadline.trim() &&
+      values.jobDate?.trim() &&
+      compareDateInputs(values.deadline, values.jobDate) < 0
+    ) {
       return "Deadline must be on or after the job date.";
     }
   }
 
   if (step === "location" && values.workMode !== "REMOTE") {
-    if (!values.locationAddress?.trim() || values.locationLat == null || values.locationLng == null) {
+    if (
+      !values.locationAddress?.trim() ||
+      values.locationLat == null ||
+      values.locationLng == null
+    ) {
       return "Select a job location by choosing a suggestion or dropping the map pin.";
     }
   }
@@ -1339,32 +1482,39 @@ function validateStep(step: StepId, values: ClientJobInput & { attachments: Atta
 
 function isStepComplete(step: StepId, values: ClientJobInput & { attachments: AttachmentDraft[] }) {
   if (step === "basics") {
-    return Boolean(values.category.trim()) && Boolean(values.title.trim()) && values.description.trim().length >= 40;
+    return (
+      Boolean(values.category.trim()) &&
+      Boolean(values.title.trim()) &&
+      values.description.trim().length >= 40
+    );
   }
 
   if (step === "files") {
     const budgetIsValid =
-      values.budgetMin == null ||
-      values.budgetMax == null ||
-      values.budgetMin <= values.budgetMax;
+      values.budgetMin == null || values.budgetMax == null || values.budgetMin <= values.budgetMax;
 
-    return (values.budgetMin != null || values.budgetMax != null || values.attachments.length > 0) && budgetIsValid;
+    return (
+      (values.budgetMin != null || values.budgetMax != null || values.attachments.length > 0) &&
+      budgetIsValid
+    );
   }
 
   if (step === "timing") {
     const deadlineIsValid =
       values.timingType === "HOURLY" ||
       values.timingType === "WEEKLY" ||
-      (Boolean(values.deadline.trim()) && (!values.jobDate?.trim() || compareDateInputs(values.deadline, values.jobDate) >= 0));
+      (Boolean(values.deadline.trim()) &&
+        (!values.jobDate?.trim() || compareDateInputs(values.deadline, values.jobDate) >= 0));
 
     return Boolean(values.timingType) && deadlineIsValid;
   }
 
   if (step === "location") {
-    return values.workMode === "REMOTE" || (
-      Boolean(values.locationAddress?.trim()) &&
-      values.locationLat != null &&
-      values.locationLng != null
+    return (
+      values.workMode === "REMOTE" ||
+      (Boolean(values.locationAddress?.trim()) &&
+        values.locationLat != null &&
+        values.locationLng != null)
     );
   }
 
@@ -1397,13 +1547,16 @@ function calculateCompletion(values: ClientJobInput & { attachments: AttachmentD
     values.attachments.length > 0,
     values.budgetMin != null || values.budgetMax != null,
     Boolean(values.timingType),
-    values.timingType === "FIXED" ? Boolean(values.jobDate?.trim()) : values.budgetMin != null || values.budgetMax != null,
-    values.timingType === "FIXED" ? Boolean(values.deadline?.trim()) : values.budgetMin != null || values.budgetMax != null,
-    values.workMode === "REMOTE" || (
-      Boolean(values.locationAddress?.trim()) &&
-      values.locationLat != null &&
-      values.locationLng != null
-    ),
+    values.timingType === "FIXED"
+      ? Boolean(values.jobDate?.trim())
+      : values.budgetMin != null || values.budgetMax != null,
+    values.timingType === "FIXED"
+      ? Boolean(values.deadline?.trim())
+      : values.budgetMin != null || values.budgetMax != null,
+    values.workMode === "REMOTE" ||
+      (Boolean(values.locationAddress?.trim()) &&
+        values.locationLat != null &&
+        values.locationLng != null),
   ];
 
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
@@ -1488,7 +1641,11 @@ function getSocketUrl() {
   );
 }
 
-function formatBudget(min: number | null, max: number | null, timingType: ClientJobInput["timingType"] = "FIXED") {
+function formatBudget(
+  min: number | null,
+  max: number | null,
+  timingType: ClientJobInput["timingType"] = "FIXED",
+) {
   const suffix = getBudgetSuffix(timingType);
 
   if (min && max) {

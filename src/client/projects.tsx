@@ -30,7 +30,14 @@ import {
   startClientHireProject,
   type ClientHireRequestRecord,
 } from "@/lib/hire-db.server";
-import { deleteClientJob, getClientJobsByUserId, getOpenClientJobById, updateClientJobStatus, type ClientJobRecord, type JobStatus } from "@/lib/job-db.server";
+import {
+  deleteClientJob,
+  getClientJobsByUserId,
+  getOpenClientJobById,
+  updateClientJobStatus,
+  type ClientJobRecord,
+  type JobStatus,
+} from "@/lib/job-db.server";
 import { formatApproximateLocation } from "@/lib/location-privacy";
 import { queueAccountEmailNotification } from "@/lib/notification-email.server";
 import {
@@ -94,7 +101,10 @@ const updateProjectRequest = createServerFn({ method: "POST" })
     const request = updateClientProjectRequestStatus(viewer.id, data.requestId, data.status);
 
     if (request) {
-      const projectTitle = existingRequest?.projectTitle || getOpenClientJobById(request.jobId)?.title || "your project";
+      const projectTitle =
+        existingRequest?.projectTitle ||
+        getOpenClientJobById(request.jobId)?.title ||
+        "your project";
       const clientName = `${viewer.firstName} ${viewer.lastName}`.trim() || viewer.email;
       const statusLabel = data.status === "ACCEPTED" ? "accepted" : "rejected";
 
@@ -228,7 +238,9 @@ function Projects() {
   const [now, setNow] = useState(() => Date.now());
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [expandedTimelineId, setExpandedTimelineId] = useState<number | null>(null);
-  const [ratingDrafts, setRatingDrafts] = useState<Record<number, { rating: number; comment: string }>>({});
+  const [ratingDrafts, setRatingDrafts] = useState<
+    Record<number, { rating: number; comment: string }>
+  >({});
   const [activeProjectFilter, setActiveProjectFilter] = useState<ProjectBucketFilter | null>(null);
 
   useEffect(() => {
@@ -258,13 +270,22 @@ function Projects() {
   const runningProjects = trackedProjects.filter((project) => project.status === "ACTIVE");
   const completedProjects = trackedProjects.filter((project) => project.status === "COMPLETED");
   const visibleHireRequests = hireRequests.filter(
-    (request) => request.status !== "started" && request.status !== "cancelled" && !isExpiredRejectedHireRequest(request, now),
+    (request) =>
+      request.status !== "started" &&
+      request.status !== "cancelled" &&
+      !isExpiredRejectedHireRequest(request, now),
   );
-  const acceptedHireRequests = visibleHireRequests.filter((request) => request.status === "accepted");
-  const startedHireRequests = hireRequests.filter((request) => request.status === "started" && !request.trackingId);
+  const acceptedHireRequests = visibleHireRequests.filter(
+    (request) => request.status === "accepted",
+  );
+  const startedHireRequests = hireRequests.filter(
+    (request) => request.status === "started" && !request.trackingId,
+  );
   const runningProjectCount = runningProjects.length + startedHireRequests.length;
   const showAllProjectBuckets = activeProjectFilter === null;
-  const activeProjectFilterLabel = activeProjectFilter ? getProjectBucketLabel(activeProjectFilter) : null;
+  const activeProjectFilterLabel = activeProjectFilter
+    ? getProjectBucketLabel(activeProjectFilter)
+    : null;
 
   function toggleProjectFilter(filter: ProjectBucketFilter) {
     setActiveProjectFilter((current) => (current === filter ? null : filter));
@@ -417,100 +438,121 @@ function Projects() {
             const removeInMs = getClosedProjectRemovalMs(project, now);
 
             return (
-            <div
-              key={project.id}
-              className="flex min-h-[240px] flex-col rounded-xl border border-border bg-card p-5 shadow-soft transition-colors hover:border-primary/50 hover:bg-primary/5"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">{project.category}</Badge>
-                    <Badge variant={project.status === "OPEN" ? "default" : project.status === "DRAFT" ? "secondary" : "outline"}>
-                      {project.status === "OPEN" ? "Active" : formatEnum(project.status)}
-                    </Badge>
+              <div
+                key={project.id}
+                className="flex min-h-[240px] flex-col rounded-xl border border-border bg-card p-5 shadow-soft transition-colors hover:border-primary/50 hover:bg-primary/5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary">{project.category}</Badge>
+                      <Badge
+                        variant={
+                          project.status === "OPEN"
+                            ? "default"
+                            : project.status === "DRAFT"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {project.status === "OPEN" ? "Active" : formatEnum(project.status)}
+                      </Badge>
+                    </div>
+                    <h2 className="mt-3 line-clamp-2 text-lg font-semibold">{project.title}</h2>
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                      {project.description}
+                    </p>
                   </div>
-                  <h2 className="mt-3 line-clamp-2 text-lg font-semibold">{project.title}</h2>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{project.description}</p>
-                </div>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/project/$projectId" params={{ projectId: String(project.id) }}>
-                    <Search className="h-4 w-4" />
-                    View
-                  </Link>
-                </Button>
-              </div>
-
-              <div className="mt-5 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-                <span className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  {formatBudget(project.budgetMin, project.budgetMax, project.timingType)}
-                </span>
-                <span className="flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
-                  {formatDate(project.deadline)}
-                </span>
-                <span className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4" />
-                  {formatWorkMode(project.workMode)}
-                </span>
-                <span className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  {project.attachments.length} files
-                </span>
-              </div>
-
-              <div className="mt-auto flex items-center gap-2 border-t border-border pt-4 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4 shrink-0" />
-                <span className="truncate">{formatApproximateLocation(project.locationAddress || project.locationLabel, "Remote or no location saved")}</span>
-              </div>
-
-              {removeInMs != null ? (
-                <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning-foreground">
-                  Closed project. Removes in {formatCountdown(removeInMs)}.
-                </div>
-              ) : null}
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button size="sm" asChild>
-                  <Link to="/project/$projectId" params={{ projectId: String(project.id) }}>
-                    View project
-                  </Link>
-                </Button>
-                {project.status === "OPEN" ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleProjectStatus(project.id, "CLOSED")}
-                    disabled={pendingAction !== null}
-                  >
-                    <XCircle className="h-4 w-4" />
-                    {pendingAction === `project-${project.id}-CLOSED` ? "Closing" : "Close project"}
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/project/$projectId" params={{ projectId: String(project.id) }}>
+                      <Search className="h-4 w-4" />
+                      View
+                    </Link>
                   </Button>
+                </div>
+
+                <div className="mt-5 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+                  <span className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    {formatBudget(project.budgetMin, project.budgetMax, project.timingType)}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4" />
+                    {formatDate(project.deadline)}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    {formatWorkMode(project.workMode)}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    {project.attachments.length} files
+                  </span>
+                </div>
+
+                <div className="mt-auto flex items-center gap-2 border-t border-border pt-4 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4 shrink-0" />
+                  <span className="truncate">
+                    {formatApproximateLocation(
+                      project.locationAddress || project.locationLabel,
+                      "Remote or no location saved",
+                    )}
+                  </span>
+                </div>
+
+                {removeInMs != null ? (
+                  <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning-foreground">
+                    Closed project. Removes in {formatCountdown(removeInMs)}.
+                  </div>
                 ) : null}
-                {project.status === "CLOSED" ? (
-                  <>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button size="sm" asChild>
+                    <Link to="/project/$projectId" params={{ projectId: String(project.id) }}>
+                      View project
+                    </Link>
+                  </Button>
+                  {project.status === "OPEN" ? (
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleProjectStatus(project.id, "OPEN")}
-                      disabled={pendingAction !== null}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                      {pendingAction === `project-${project.id}-OPEN` ? "Opening" : "Reopen project"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleRemoveProjectNow(project.id)}
+                      onClick={() => handleProjectStatus(project.id, "CLOSED")}
                       disabled={pendingAction !== null}
                     >
                       <XCircle className="h-4 w-4" />
-                      {pendingAction === `project-${project.id}-REMOVE` ? "Removing" : "Close immediately"}
+                      {pendingAction === `project-${project.id}-CLOSED`
+                        ? "Closing"
+                        : "Close project"}
                     </Button>
-                  </>
-                ) : null}
+                  ) : null}
+                  {project.status === "CLOSED" ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleProjectStatus(project.id, "OPEN")}
+                        disabled={pendingAction !== null}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        {pendingAction === `project-${project.id}-OPEN`
+                          ? "Opening"
+                          : "Reopen project"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRemoveProjectNow(project.id)}
+                        disabled={pendingAction !== null}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        {pendingAction === `project-${project.id}-REMOVE`
+                          ? "Removing"
+                          : "Close immediately"}
+                      </Button>
+                    </>
+                  ) : null}
+                </div>
               </div>
-            </div>
             );
           })}
         </div>
@@ -519,7 +561,8 @@ function Projects() {
           <Briefcase className="mx-auto h-9 w-9 text-muted-foreground" />
           <h2 className="mt-3 font-semibold">No projects saved yet</h2>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            Create a project from the job posting form. After it is saved, it will appear here from the database.
+            Create a project from the job posting form. After it is saved, it will appear here from
+            the database.
           </p>
           <Button className="mt-4" asChild>
             <Link to="/post-job">Create new project</Link>
@@ -560,8 +603,15 @@ function Projects() {
 
       {activeProjectFilterLabel ? (
         <div className="mb-6 flex flex-col justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 sm:flex-row sm:items-center">
-          <p className="text-sm font-medium">Showing only {activeProjectFilterLabel.toLowerCase()}.</p>
-          <Button type="button" size="sm" variant="outline" onClick={() => setActiveProjectFilter(null)}>
+          <p className="text-sm font-medium">
+            Showing only {activeProjectFilterLabel.toLowerCase()}.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setActiveProjectFilter(null)}
+          >
             Show all projects
           </Button>
         </div>
@@ -569,172 +619,175 @@ function Projects() {
 
       <div className="mb-6 space-y-6">
         {showAllProjectBuckets || activeProjectFilter === "running" ? (
-        <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-lg font-semibold">Running projects</h2>
-              <p className="text-sm text-muted-foreground">
-                Accepted requests currently in progress.
-              </p>
+          <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="text-lg font-semibold">Running projects</h2>
+                <p className="text-sm text-muted-foreground">
+                  Accepted requests currently in progress.
+                </p>
+              </div>
+              <Badge>{runningProjectCount} running</Badge>
             </div>
-            <Badge>{runningProjectCount} running</Badge>
-          </div>
-          {runningProjectCount ? (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {runningProjects.map((project) => (
-                <TrackedProjectCard
-                  key={`running-${project.id}`}
-                  project={project}
-                  pendingAction={pendingAction}
-                  ratingDraft={
-                    ratingDrafts[project.id] ?? {
-                      rating: project.reviewRating ?? 5,
-                      comment: project.reviewComment ?? "",
+            {runningProjectCount ? (
+              <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                {runningProjects.map((project) => (
+                  <TrackedProjectCard
+                    key={`running-${project.id}`}
+                    project={project}
+                    pendingAction={pendingAction}
+                    ratingDraft={
+                      ratingDrafts[project.id] ?? {
+                        rating: project.reviewRating ?? 5,
+                        comment: project.reviewComment ?? "",
+                      }
                     }
-                  }
-                  onDraftChange={(draft) =>
-                    setRatingDrafts((drafts) => ({
-                      ...drafts,
-                      [project.id]: draft,
-                    }))
-                  }
-                  onRate={() => handleRateProject(project)}
-                  onCancel={() => handleCancelTrackedProject(project)}
-                />
-              ))}
-              {startedHireRequests.map((request) => (
-                <RunningDirectHireCard
-                  key={`running-direct-hire-${request.contractId}`}
-                  request={request}
-                  pendingAction={pendingAction}
-                  onCancel={handleCancelDirectHire}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyProjectBox
-              icon={Clock}
-              title="No running projects"
-              description="Accepted active projects will appear here."
-            />
-          )}
-        </section>
+                    onDraftChange={(draft) =>
+                      setRatingDrafts((drafts) => ({
+                        ...drafts,
+                        [project.id]: draft,
+                      }))
+                    }
+                    onRate={() => handleRateProject(project)}
+                    onCancel={() => handleCancelTrackedProject(project)}
+                  />
+                ))}
+                {startedHireRequests.map((request) => (
+                  <RunningDirectHireCard
+                    key={`running-direct-hire-${request.contractId}`}
+                    request={request}
+                    pendingAction={pendingAction}
+                    onCancel={handleCancelDirectHire}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyProjectBox
+                icon={Clock}
+                title="No running projects"
+                description="Accepted active projects will appear here."
+              />
+            )}
+          </section>
         ) : null}
 
         {showAllProjectBuckets || activeProjectFilter === "direct-hires" ? (
-        <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-lg font-semibold">Direct hires</h2>
-              <p className="text-sm text-muted-foreground">
-                Hire requests you sent directly from professional profiles.
-              </p>
+          <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="text-lg font-semibold">Direct hires</h2>
+                <p className="text-sm text-muted-foreground">
+                  Hire requests you sent directly from professional profiles.
+                </p>
+              </div>
+              <Badge variant="secondary">{visibleHireRequests.length} hires</Badge>
             </div>
-            <Badge variant="secondary">{visibleHireRequests.length} hires</Badge>
-          </div>
-          {visibleHireRequests.length ? (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {visibleHireRequests.map((request) => (
-                <DirectHireCard
-                  key={request.contractId}
-                  request={request}
-                  pendingAction={pendingAction}
-                  onStartProject={handleStartDirectHire}
-                  onDeleteRejected={handleDeleteRejectedDirectHire}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyProjectBox
-              icon={Handshake}
-              title="No direct hires yet"
-              description="When you send a hire request to a professional, it will appear here."
-            />
-          )}
-        </section>
+            {visibleHireRequests.length ? (
+              <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                {visibleHireRequests.map((request) => (
+                  <DirectHireCard
+                    key={request.contractId}
+                    request={request}
+                    pendingAction={pendingAction}
+                    onStartProject={handleStartDirectHire}
+                    onDeleteRejected={handleDeleteRejectedDirectHire}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyProjectBox
+                icon={Handshake}
+                title="No direct hires yet"
+                description="When you send a hire request to a professional, it will appear here."
+              />
+            )}
+          </section>
         ) : null}
 
         {showAllProjectBuckets || activeProjectFilter === "completed" ? (
-        <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-lg font-semibold">Completed projects</h2>
-              <p className="text-sm text-muted-foreground">
-                Finished work ready for review history.
-              </p>
+          <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="text-lg font-semibold">Completed projects</h2>
+                <p className="text-sm text-muted-foreground">
+                  Finished work ready for review history.
+                </p>
+              </div>
+              <Badge variant="secondary">{completedProjects.length} completed</Badge>
             </div>
-            <Badge variant="secondary">{completedProjects.length} completed</Badge>
-          </div>
-          {completedProjects.length ? (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {completedProjects.map((project) => (
-                <TrackedProjectCard
-                  key={`completed-${project.id}`}
-                  project={project}
-                  pendingAction={pendingAction}
-                  ratingDraft={
-                    ratingDrafts[project.id] ?? {
-                      rating: project.reviewRating ?? 5,
-                      comment: project.reviewComment ?? "",
+            {completedProjects.length ? (
+              <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                {completedProjects.map((project) => (
+                  <TrackedProjectCard
+                    key={`completed-${project.id}`}
+                    project={project}
+                    pendingAction={pendingAction}
+                    ratingDraft={
+                      ratingDrafts[project.id] ?? {
+                        rating: project.reviewRating ?? 5,
+                        comment: project.reviewComment ?? "",
+                      }
                     }
-                  }
-                  onDraftChange={(draft) =>
-                    setRatingDrafts((drafts) => ({
-                      ...drafts,
-                      [project.id]: draft,
-                    }))
-                  }
-                  onRate={() => handleRateProject(project)}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyProjectBox
-              icon={CheckCircle2}
-              title="No completed projects"
-              description="Projects accepted as finished will appear here."
-            />
-          )}
-        </section>
+                    onDraftChange={(draft) =>
+                      setRatingDrafts((drafts) => ({
+                        ...drafts,
+                        [project.id]: draft,
+                      }))
+                    }
+                    onRate={() => handleRateProject(project)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyProjectBox
+                icon={CheckCircle2}
+                title="No completed projects"
+                description="Projects accepted as finished will appear here."
+              />
+            )}
+          </section>
         ) : null}
 
         {showAllProjectBuckets || activeProjectFilter === "requests" ? (
-        <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-lg font-semibold">Request projects</h2>
-              <p className="text-sm text-muted-foreground">
-                Professional requests waiting for your action.
-              </p>
+          <section className="rounded-xl border border-border bg-card p-6 shadow-soft">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="text-lg font-semibold">Request projects</h2>
+                <p className="text-sm text-muted-foreground">
+                  Professional requests waiting for your action.
+                </p>
+              </div>
+              <Badge variant="secondary">{projectRequests.length} requests</Badge>
             </div>
-            <Badge variant="secondary">{projectRequests.length} requests</Badge>
-          </div>
 
-          {projectRequests.length ? (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {projectRequests.map((request) => (
-                <ProjectRequestCard
-                  key={request.id}
-                  request={request}
-                  negotiations={projectNegotiations.filter((negotiation) => negotiation.requestId === request.id)}
-                  pendingAction={pendingAction}
-                  isTimelineOpen={expandedTimelineId === request.id}
-                  onToggleTimeline={() => setExpandedTimelineId(expandedTimelineId === request.id ? null : request.id)}
-                  onRequestStatus={handleRequestStatus}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyProjectBox
-              icon={Send}
-              title="No project requests"
-              description="New professional requests will appear here."
-            />
-          )}
-        </section>
+            {projectRequests.length ? (
+              <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                {projectRequests.map((request) => (
+                  <ProjectRequestCard
+                    key={request.id}
+                    request={request}
+                    negotiations={projectNegotiations.filter(
+                      (negotiation) => negotiation.requestId === request.id,
+                    )}
+                    pendingAction={pendingAction}
+                    isTimelineOpen={expandedTimelineId === request.id}
+                    onToggleTimeline={() =>
+                      setExpandedTimelineId(expandedTimelineId === request.id ? null : request.id)
+                    }
+                    onRequestStatus={handleRequestStatus}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyProjectBox
+                icon={Send}
+                title="No project requests"
+                description="New professional requests will appear here."
+              />
+            )}
+          </section>
         ) : null}
       </div>
-
     </AppShell>
   );
 }
@@ -767,7 +820,10 @@ function RunningDirectHireCard({
     <div className="rounded-lg border border-border p-4">
       <div className="flex items-start gap-3">
         <img
-          src={request.professionalAvatarUrl || `https://i.pravatar.cc/100?u=running-direct-hire-${request.professionalId}`}
+          src={
+            request.professionalAvatarUrl ||
+            `https://i.pravatar.cc/100?u=running-direct-hire-${request.professionalId}`
+          }
           alt={professionalName}
           className="h-11 w-11 rounded-lg object-cover"
         />
@@ -782,9 +838,21 @@ function RunningDirectHireCard({
       </div>
 
       <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-        <InfoPill icon={DollarSign} label="Budget" value={formatMoney(request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0)} />
-        <InfoPill icon={Briefcase} label="Work mode" value={formatEnum(request.workMode || "both")} />
-        <InfoPill icon={CalendarDays} label="Accepted" value={request.updatedAt ? formatDateTime(request.updatedAt) : "Not set"} />
+        <InfoPill
+          icon={DollarSign}
+          label="Budget"
+          value={formatMoney(request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0)}
+        />
+        <InfoPill
+          icon={Briefcase}
+          label="Work mode"
+          value={formatEnum(request.workMode || "both")}
+        />
+        <InfoPill
+          icon={CalendarDays}
+          label="Accepted"
+          value={request.updatedAt ? formatDateTime(request.updatedAt) : "Not set"}
+        />
         <InfoPill icon={MapPin} label="Location" value={request.location || "Not set"} />
       </div>
 
@@ -795,7 +863,10 @@ function RunningDirectHireCard({
       <div className="mt-4 flex flex-wrap gap-2">
         {request.trackingId ? (
           <Button size="sm" asChild>
-            <Link to="/project-track/$trackingId" params={{ trackingId: String(request.trackingId) }}>
+            <Link
+              to="/project-track/$trackingId"
+              params={{ trackingId: String(request.trackingId) }}
+            >
               Track project
             </Link>
           </Button>
@@ -852,7 +923,10 @@ function TrackedProjectCard({
     <div className="rounded-lg border border-border p-4">
       <div className="flex items-start gap-3">
         <img
-          src={project.professionalAvatarUrl || `https://i.pravatar.cc/100?u=running-project-${project.professionalId}`}
+          src={
+            project.professionalAvatarUrl ||
+            `https://i.pravatar.cc/100?u=running-project-${project.professionalId}`
+          }
           alt={project.professionalName}
           className="h-11 w-11 rounded-lg object-cover"
         />
@@ -870,7 +944,11 @@ function TrackedProjectCard({
         </div>
       </div>
       <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-        <InfoPill icon={DollarSign} label="Bid" value={project.bidAmount ? `$${project.bidAmount.toLocaleString()}` : "Not set"} />
+        <InfoPill
+          icon={DollarSign}
+          label="Bid"
+          value={project.bidAmount ? `$${project.bidAmount.toLocaleString()}` : "Not set"}
+        />
         <InfoPill icon={Clock} label="Duration" value={project.duration || "Not set"} />
         <InfoPill icon={CalendarDays} label="Accepted" value={formatDateTime(project.acceptedAt)} />
         <InfoPill icon={Briefcase} label="Category" value={project.projectCategory} />
@@ -942,7 +1020,11 @@ function DirectHireCard({
   onDeleteRejected: (request: ClientHireRequestRecord) => void;
 }) {
   const statusLabel =
-    request.status === "accepted" ? "Accepted" : request.status === "rejected" ? "Rejected" : "Waiting";
+    request.status === "accepted"
+      ? "Accepted"
+      : request.status === "rejected"
+        ? "Rejected"
+        : "Waiting";
 
   const openDirectHireMessage = () => {
     const professionalName = request.professionalName || "Professional";
@@ -962,14 +1044,25 @@ function DirectHireCard({
     <div className="rounded-lg border border-border p-4">
       <div className="flex items-start gap-3">
         <img
-          src={request.professionalAvatarUrl || `https://i.pravatar.cc/100?u=direct-hire-${request.professionalId}`}
+          src={
+            request.professionalAvatarUrl ||
+            `https://i.pravatar.cc/100?u=direct-hire-${request.professionalId}`
+          }
           alt={request.professionalName || "Professional"}
           className="h-11 w-11 rounded-lg object-cover"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold">{request.title}</h3>
-            <Badge variant={request.status === "accepted" ? "default" : request.status === "rejected" ? "destructive" : "outline"}>
+            <Badge
+              variant={
+                request.status === "accepted"
+                  ? "default"
+                  : request.status === "rejected"
+                    ? "destructive"
+                    : "outline"
+              }
+            >
               {statusLabel}
             </Badge>
           </div>
@@ -980,8 +1073,16 @@ function DirectHireCard({
       </div>
 
       <div className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-        <InfoPill icon={DollarSign} label="Budget" value={formatMoney(request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0)} />
-        <InfoPill icon={Briefcase} label="Work mode" value={formatEnum(request.workMode || "both")} />
+        <InfoPill
+          icon={DollarSign}
+          label="Budget"
+          value={formatMoney(request.totalAmount ?? request.budgetMax ?? request.budgetMin ?? 0)}
+        />
+        <InfoPill
+          icon={Briefcase}
+          label="Work mode"
+          value={formatEnum(request.workMode || "both")}
+        />
         <InfoPill icon={CalendarDays} label="Sent" value={formatDateTime(request.createdAt)} />
         <InfoPill icon={MapPin} label="Location" value={request.location || "Not set"} />
       </div>
@@ -1003,7 +1104,9 @@ function DirectHireCard({
             disabled={pendingAction === `start-direct-hire-${request.contractId}`}
           >
             <Handshake className="h-4 w-4" />
-            {pendingAction === `start-direct-hire-${request.contractId}` ? "Starting" : "Start project"}
+            {pendingAction === `start-direct-hire-${request.contractId}`
+              ? "Starting"
+              : "Start project"}
           </Button>
         ) : null}
         <Button size="sm" variant="outline" onClick={openDirectHireMessage}>
@@ -1018,7 +1121,9 @@ function DirectHireCard({
             disabled={pendingAction === `delete-rejected-direct-hire-${request.contractId}`}
           >
             <XCircle className="h-4 w-4" />
-            {pendingAction === `delete-rejected-direct-hire-${request.contractId}` ? "Deleting" : "Delete immediately"}
+            {pendingAction === `delete-rejected-direct-hire-${request.contractId}`
+              ? "Deleting"
+              : "Delete immediately"}
           </Button>
         ) : null}
       </div>
@@ -1048,7 +1153,10 @@ function ProjectRequestCard({
     <div className="rounded-lg border border-border p-4">
       <div className="flex items-start gap-3">
         <img
-          src={request.professionalAvatarUrl || `https://i.pravatar.cc/100?u=project-request-${request.professionalId}`}
+          src={
+            request.professionalAvatarUrl ||
+            `https://i.pravatar.cc/100?u=project-request-${request.professionalId}`
+          }
           alt={request.professionalName}
           className="h-11 w-11 rounded-lg object-cover"
         />
@@ -1066,12 +1174,26 @@ function ProjectRequestCard({
       <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">{request.projectCategory}</Badge>
-          {request.trackingStatus ? <Badge variant="outline">Tracking {formatEnum(request.trackingStatus)}</Badge> : null}
-          {negotiations.length ? <Badge variant="outline">{negotiations.length} negotiation offer{negotiations.length === 1 ? "" : "s"}</Badge> : null}
+          {request.trackingStatus ? (
+            <Badge variant="outline">Tracking {formatEnum(request.trackingStatus)}</Badge>
+          ) : null}
+          {negotiations.length ? (
+            <Badge variant="outline">
+              {negotiations.length} negotiation offer{negotiations.length === 1 ? "" : "s"}
+            </Badge>
+          ) : null}
         </div>
         <div className="mt-3 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-          {request.bidAmount ? <InfoPill icon={DollarSign} label="Bid" value={`$${request.bidAmount.toLocaleString()}`} /> : null}
-          {request.duration ? <InfoPill icon={Clock} label="Duration" value={request.duration} /> : null}
+          {request.bidAmount ? (
+            <InfoPill
+              icon={DollarSign}
+              label="Bid"
+              value={`$${request.bidAmount.toLocaleString()}`}
+            />
+          ) : null}
+          {request.duration ? (
+            <InfoPill icon={Clock} label="Duration" value={request.duration} />
+          ) : null}
           <InfoPill icon={Briefcase} label="Project" value={request.projectTitle} />
           <InfoPill icon={CalendarDays} label="Sent" value={formatDateTime(request.createdAt)} />
         </div>
@@ -1240,20 +1362,30 @@ function ProjectRequestTimeline({
       icon: Send,
     },
     {
-      label: status === "DECLINED" ? "Request rejected" : status === "ACCEPTED" ? "Request accepted" : "Waiting for response",
+      label:
+        status === "DECLINED"
+          ? "Request rejected"
+          : status === "ACCEPTED"
+            ? "Request accepted"
+            : "Waiting for response",
       description:
         status === "PENDING"
           ? "Review the bid, cover note, duration, and files before accepting."
           : status === "ACCEPTED"
             ? "Client accepted the request and project tracking started."
             : "Client rejected the request.",
-      time: status === "PENDING" ? "Pending" : formatDateTime(status === "ACCEPTED" ? acceptedAt || updatedAt : updatedAt),
+      time:
+        status === "PENDING"
+          ? "Pending"
+          : formatDateTime(status === "ACCEPTED" ? acceptedAt || updatedAt : updatedAt),
       state: status === "PENDING" ? "current" : status === "ACCEPTED" ? "complete" : "declined",
       icon: status === "DECLINED" ? XCircle : CheckCircle2,
     },
     {
       label: "Track project",
-      description: trackingId ? "Project info, time, money, and next steps are available." : "Tracking appears after accepting the request.",
+      description: trackingId
+        ? "Project info, time, money, and next steps are available."
+        : "Tracking appears after accepting the request.",
       time: trackingId ? `Tracking #${trackingId}` : "Not started",
       state: trackingId ? "complete" : "upcoming",
       icon: Clock,
@@ -1279,17 +1411,25 @@ function ProjectRequestTimeline({
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Badge variant={status === "PENDING" ? "secondary" : status === "ACCEPTED" ? "default" : "outline"}>
+              <Badge
+                variant={
+                  status === "PENDING" ? "secondary" : status === "ACCEPTED" ? "default" : "outline"
+                }
+              >
                 {formatEnum(status)}
               </Badge>
-              {trackingStatus ? <Badge variant="outline">Tracking {formatEnum(trackingStatus)}</Badge> : null}
+              {trackingStatus ? (
+                <Badge variant="outline">Tracking {formatEnum(trackingStatus)}</Badge>
+              ) : null}
             </div>
           </div>
 
           <div className="mt-4 grid gap-3 rounded-lg bg-muted/30 p-3 text-sm text-muted-foreground sm:grid-cols-2">
             <InfoPill icon={Briefcase} label="Project" value={projectTitle} />
             <InfoPill icon={FileText} label="Category" value={projectCategory} />
-            {bidAmount ? <InfoPill icon={DollarSign} label="Bid" value={`$${bidAmount.toLocaleString()}`} /> : null}
+            {bidAmount ? (
+              <InfoPill icon={DollarSign} label="Bid" value={`$${bidAmount.toLocaleString()}`} />
+            ) : null}
             {duration ? <InfoPill icon={Clock} label="Duration" value={duration} /> : null}
             <InfoPill icon={MessageSquare} label="Professional" value={professionalName} />
             <InfoPill icon={CalendarDays} label="Last update" value={formatDateTime(updatedAt)} />
@@ -1303,7 +1443,8 @@ function ProjectRequestTimeline({
             <div>
               <h5 className="text-sm font-semibold">Negotiation details</h5>
               <p className="mt-1 text-sm text-muted-foreground">
-                {professionalName} revised the offer on {formatDateTime(latestNegotiation.createdAt)}.
+                {professionalName} revised the offer on{" "}
+                {formatDateTime(latestNegotiation.createdAt)}.
               </p>
             </div>
             <Badge variant="secondary">Latest offer</Badge>
@@ -1325,9 +1466,13 @@ function ProjectRequestTimeline({
                   <div key={negotiation.id} className="rounded-md bg-muted/40 p-2 text-sm">
                     <div className="flex flex-wrap justify-between gap-2 font-medium">
                       <span>{formatOfferSummary(negotiation)}</span>
-                      <span className="text-xs font-normal text-muted-foreground">{formatDateTime(negotiation.createdAt)}</span>
+                      <span className="text-xs font-normal text-muted-foreground">
+                        {formatDateTime(negotiation.createdAt)}
+                      </span>
                     </div>
-                    <p className="mt-1 whitespace-pre-wrap break-words text-muted-foreground">{negotiation.message}</p>
+                    <p className="mt-1 whitespace-pre-wrap break-words text-muted-foreground">
+                      {negotiation.message}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -1370,7 +1515,9 @@ function ProjectRequestTimeline({
 
           <div className="mt-4 rounded-lg border border-border p-3">
             <h5 className="text-sm font-medium">Request note</h5>
-            <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">{coverLetter}</p>
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">
+              {coverLetter}
+            </p>
           </div>
         </>
       ) : null}
@@ -1380,7 +1527,10 @@ function ProjectRequestTimeline({
           <h5 className="text-sm font-medium">Attached files</h5>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {attachments.map((attachment) => (
-              <div key={attachment.fileName} className="flex min-w-0 items-center gap-2 rounded-md bg-muted/40 p-2 text-sm text-muted-foreground">
+              <div
+                key={attachment.fileName}
+                className="flex min-w-0 items-center gap-2 rounded-md bg-muted/40 p-2 text-sm text-muted-foreground"
+              >
                 <FileText className="h-4 w-4 shrink-0" />
                 <span className="truncate">{attachment.fileName}</span>
               </div>
@@ -1413,12 +1563,18 @@ function OfferCompareBox({
   const hasMessage = Boolean(message?.trim());
 
   return (
-    <div className={`rounded-lg border p-3 ${highlight ? "border-primary/30 bg-card" : "border-border bg-muted/30"}`}>
+    <div
+      className={`rounded-lg border p-3 ${highlight ? "border-primary/30 bg-card" : "border-border bg-muted/30"}`}
+    >
       <p className="text-sm font-medium">{title}</p>
       {hasBid || hasPriceLabel || hasDuration ? (
         <div className="mt-2 grid gap-2 text-sm text-muted-foreground">
           {hasBid || hasPriceLabel ? (
-            <InfoPill icon={DollarSign} label="Price" value={hasBid ? formatMoney(bidAmount) : priceLabel ?? ""} />
+            <InfoPill
+              icon={DollarSign}
+              label="Price"
+              value={hasBid ? formatMoney(bidAmount) : (priceLabel ?? "")}
+            />
           ) : null}
           {hasDuration ? <InfoPill icon={Clock} label="Duration" value={duration ?? ""} /> : null}
         </div>
@@ -1455,7 +1611,7 @@ function RateProfessionalBox({
               ? `You rated ${project.professionalName || "this professional"} ${project.reviewRating}/5.`
               : project.reviewRequestedAt
                 ? `${project.professionalName || "This professional"} requested a review for this completed project.`
-              : `Share how ${project.professionalName || "this professional"} worked on this project.`}
+                : `Share how ${project.professionalName || "this professional"} worked on this project.`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -15,7 +15,10 @@ export const forgotPasswordRequestSchema = z.object({
 export const resetPasswordSchema = z
   .object({
     email: z.string().trim().email("Enter a valid email address."),
-    otp: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit OTP sent to your email."),
+    otp: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, "Enter the 6-digit OTP sent to your email."),
     password: passwordValidation,
     confirmPassword: z.string().min(8, "Confirm your new password."),
   })

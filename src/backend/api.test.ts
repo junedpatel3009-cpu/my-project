@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+﻿import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import Database from "better-sqlite3";
 import { createHash, createHmac } from "node:crypto";
 import {
@@ -135,7 +135,7 @@ describe("Auth Module", () => {
       const now = new Date().toISOString();
       const uniqueEmail = `reg-test-${Date.now()}@example.com`;
       db.prepare(
-        `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`
+        `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       ).run("CLIENT", "John", "Doe", uniqueEmail, "hash123", "LOCAL", now, now);
 
       const user = db.prepare(`SELECT * FROM "User" WHERE email=?`).get(uniqueEmail) as any;
@@ -149,12 +149,12 @@ describe("Auth Module", () => {
       const now = new Date().toISOString();
       const email = `unique-test-${Date.now()}@example.com`;
       db.prepare(
-        `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`
+        `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       ).run("CLIENT", "Jane", "Doe", email, "hash123", "LOCAL", now, now);
 
       expect(() => {
         db.prepare(
-          `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`
+          `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
         ).run("CLIENT", "Jane2", "Doe2", email, "hash456", "LOCAL", now, now);
       }).toThrow();
     });
@@ -163,7 +163,7 @@ describe("Auth Module", () => {
       const now = new Date().toISOString();
       const email = `pro-test-${Date.now()}@example.com`;
       db.prepare(
-        `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`
+        `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       ).run("PROFESSIONAL", "Pro", "User", email, "hash789", "LOCAL", now, now);
 
       const user = db.prepare(`SELECT * FROM "User" WHERE email=?`).get(email) as any;
@@ -179,7 +179,7 @@ describe("Auth Module", () => {
       const email = `login-test-${Date.now()}@example.com`;
 
       db.prepare(
-        `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`
+        `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       ).run("CLIENT", "Login", "Test", email, hash, "LOCAL", now, now);
 
       // Verify password
@@ -208,8 +208,20 @@ describe("Profile Management", () => {
     const now = new Date().toISOString();
     const email = `profile-test-${Date.now()}@example.com`;
     db.prepare(
-      `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt, phone, companyName, address) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)`
-    ).run("CLIENT", "Profile", "Test", email, "hash", "LOCAL", now, now, "+1234567890", "Test Corp", "123 Main St");
+      `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt, phone, companyName, address) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)`,
+    ).run(
+      "CLIENT",
+      "Profile",
+      "Test",
+      email,
+      "hash",
+      "LOCAL",
+      now,
+      now,
+      "+1234567890",
+      "Test Corp",
+      "123 Main St",
+    );
 
     const user = db.prepare(`SELECT * FROM "User" WHERE email=?`).get(email) as any;
     expect(user.phone).toBe("+1234567890");
@@ -220,7 +232,13 @@ describe("Profile Management", () => {
   it("should update user profile fields", () => {
     const user = createTestUser(db);
     const now = new Date().toISOString();
-    db.prepare(`UPDATE "User" SET firstName=?, lastName=?, phone=?, updatedAt=? WHERE id=?`).run("Updated", "Name", "+1111111111", now, user.id);
+    db.prepare(`UPDATE "User" SET firstName=?, lastName=?, phone=?, updatedAt=? WHERE id=?`).run(
+      "Updated",
+      "Name",
+      "+1111111111",
+      now,
+      user.id,
+    );
     const updated = db.prepare(`SELECT * FROM "User" WHERE id=?`).get(user.id) as any;
     expect(updated.firstName).toBe("Updated");
     expect(updated.lastName).toBe("Name");
@@ -231,8 +249,22 @@ describe("Profile Management", () => {
     const now = new Date().toISOString();
     const email = `pro-profile-${Date.now()}@example.com`;
     db.prepare(
-      `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt, professionalCategory, professionalCity, hourlyRate, serviceRadiusKm, professionalSkillsJson) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)`
-    ).run("PROFESSIONAL", "Pro", "Profile", email, "hash", "LOCAL", now, now, "Web Developer", "New York", 75, 50, JSON.stringify(["React", "Node.js"]));
+      `INSERT INTO "User" (role, firstName, lastName, email, passwordHash, authProvider, isActive, createdAt, updatedAt, professionalCategory, professionalCity, hourlyRate, serviceRadiusKm, professionalSkillsJson) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      "PROFESSIONAL",
+      "Pro",
+      "Profile",
+      email,
+      "hash",
+      "LOCAL",
+      now,
+      now,
+      "Web Developer",
+      "New York",
+      75,
+      50,
+      JSON.stringify(["React", "Node.js"]),
+    );
 
     const user = db.prepare(`SELECT * FROM "User" WHERE email=?`).get(email) as any;
     expect(user.professionalCategory).toBe("Web Developer");
@@ -257,7 +289,9 @@ describe("Service Categories", () => {
   });
 
   it("should query categories with ordering", () => {
-    const categories = db.prepare(`SELECT * FROM "ServiceCategory" ORDER BY sortOrder, id`).all() as any[];
+    const categories = db
+      .prepare(`SELECT * FROM "ServiceCategory" ORDER BY sortOrder, id`)
+      .all() as any[];
     expect(categories.length).toBeGreaterThan(0);
     // sortOrder should be ascending
     for (let i = 1; i < categories.length; i++) {
@@ -277,10 +311,12 @@ describe("Services", () => {
     const now = new Date().toISOString();
     const user = createTestUser(db, { role: "PROFESSIONAL" });
     db.prepare(
-      `INSERT INTO "Service" (categoryId, professionalId, name, description, price, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, 1, ?, ?)`
+      `INSERT INTO "Service" (categoryId, professionalId, name, description, price, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, 1, ?, ?)`,
     ).run(1, user.id, "React Development", "Expert React development", 5000, now, now);
 
-    const service = db.prepare(`SELECT * FROM "Service" WHERE professionalId=? ORDER BY id DESC`).get(user.id) as any;
+    const service = db
+      .prepare(`SELECT * FROM "Service" WHERE professionalId=? ORDER BY id DESC`)
+      .get(user.id) as any;
     expect(service).toBeDefined();
     expect(service.name).toBe("React Development");
     expect(service.isActive).toBe(1);
@@ -311,9 +347,23 @@ describe("Jobs", () => {
   it("should create a client job with all fields", () => {
     const now = new Date().toISOString();
     const deadline = new Date(Date.now() + 86400000 * 30).toISOString();
-    const jobId = db.prepare(
-      `INSERT INTO "ClientJob" (userId, category, title, description, budgetMin, budgetMax, urgency, deadline, workMode, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', ?, ?)`
-    ).run(clientUser.id, "Web Development", "Full Stack App", "Build a full stack application", 5000, 10000, "HIGH", deadline, "REMOTE", now, now).lastInsertRowid;
+    const jobId = db
+      .prepare(
+        `INSERT INTO "ClientJob" (userId, category, title, description, budgetMin, budgetMax, urgency, deadline, workMode, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', ?, ?)`,
+      )
+      .run(
+        clientUser.id,
+        "Web Development",
+        "Full Stack App",
+        "Build a full stack application",
+        5000,
+        10000,
+        "HIGH",
+        deadline,
+        "REMOTE",
+        now,
+        now,
+      ).lastInsertRowid;
 
     const job = db.prepare(`SELECT * FROM "ClientJob" WHERE id=?`).get(jobId) as any;
     expect(job).toBeDefined();
@@ -347,11 +397,13 @@ describe("Jobs", () => {
     const now = new Date().toISOString();
     const email = `delete-test-${Date.now()}@example.com`;
     const user = createTestUser(db, { email, role: "CLIENT" }) as any;
-    const result = db.prepare(
-      `INSERT INTO "ClientJob" (userId, category, title, description, deadline, status, createdAt, updatedAt) VALUES (?, 'Test', 'Delete Me', 'To be deleted', ?, 'OPEN', ?, ?)`
-    ).run(user.id, now, now, now);
+    const result = db
+      .prepare(
+        `INSERT INTO "ClientJob" (userId, category, title, description, deadline, status, createdAt, updatedAt) VALUES (?, 'Test', 'Delete Me', 'To be deleted', ?, 'OPEN', ?, ?)`,
+      )
+      .run(user.id, now, now, now);
     const jobId = Number(result.lastInsertRowid);
-    
+
     db.prepare(`DELETE FROM "ClientJob" WHERE id=? AND userId=?`).run(jobId, user.id);
     const deleted = db.prepare(`SELECT * FROM "ClientJob" WHERE id=?`).get(jobId);
     expect(deleted).toBeUndefined();
@@ -373,11 +425,15 @@ describe("Project Requests (Applications)", () => {
 
   it("should create a project request (application)", () => {
     const now = new Date().toISOString();
-    const result = db.prepare(
-      `INSERT INTO "ProjectRequest" (jobId, professionalId, bidAmount, duration, coverLetter, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, 'PENDING', ?, ?)`
-    ).run(job.id, professional.id, 7500, "4 weeks", "I am interested in this project", now, now);
+    const result = db
+      .prepare(
+        `INSERT INTO "ProjectRequest" (jobId, professionalId, bidAmount, duration, coverLetter, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, 'PENDING', ?, ?)`,
+      )
+      .run(job.id, professional.id, 7500, "4 weeks", "I am interested in this project", now, now);
 
-    const app = db.prepare(`SELECT * FROM "ProjectRequest" WHERE id=?`).get(Number(result.lastInsertRowid)) as any;
+    const app = db
+      .prepare(`SELECT * FROM "ProjectRequest" WHERE id=?`)
+      .get(Number(result.lastInsertRowid)) as any;
     expect(app).toBeDefined();
     expect(app.jobId).toBe(job.id);
     expect(app.professionalId).toBe(professional.id);
@@ -385,12 +441,18 @@ describe("Project Requests (Applications)", () => {
   });
 
   it("should list applications for a client", () => {
-    const apps = db.prepare(`SELECT * FROM "ProjectRequest" WHERE jobId IN (SELECT id FROM "ClientJob" WHERE userId=?)`).all(client.id);
+    const apps = db
+      .prepare(
+        `SELECT * FROM "ProjectRequest" WHERE jobId IN (SELECT id FROM "ClientJob" WHERE userId=?)`,
+      )
+      .all(client.id);
     expect(Array.isArray(apps)).toBe(true);
   });
 
   it("should list applications for a professional", () => {
-    const apps = db.prepare(`SELECT * FROM "ProjectRequest" WHERE professionalId=?`).all(professional.id);
+    const apps = db
+      .prepare(`SELECT * FROM "ProjectRequest" WHERE professionalId=?`)
+      .all(professional.id);
     expect(apps.length).toBeGreaterThanOrEqual(1);
   });
 });
@@ -408,7 +470,9 @@ describe("Payments & Wallet", () => {
 
   it("should create a wallet for a user", () => {
     const now = new Date().toISOString();
-    db.prepare(`INSERT INTO "Wallet" (userId, currency, balance, pendingBalance, updatedAt) VALUES (?, 'USD', 0, 0, ?)`).run(professional.id, now);
+    db.prepare(
+      `INSERT INTO "Wallet" (userId, currency, balance, pendingBalance, updatedAt) VALUES (?, 'USD', 0, 0, ?)`,
+    ).run(professional.id, now);
     const wallet = db.prepare(`SELECT * FROM "Wallet" WHERE userId=?`).get(professional.id) as any;
     expect(wallet).toBeDefined();
     expect(wallet.balance).toBe(0);
@@ -418,15 +482,21 @@ describe("Payments & Wallet", () => {
   it("should create a payment", () => {
     const now = new Date().toISOString();
     const idempotencyKey = `payment-${Date.now()}`;
-    
-    // Ensure wallet exists
-    db.prepare(`INSERT OR IGNORE INTO "Wallet" (userId, currency, balance, pendingBalance, updatedAt) VALUES (?, 'USD', 0, 0, ?)`).run(professional.id, now);
-    
-    const result = db.prepare(
-      `INSERT INTO "Payment" (clientId, professionalId, amount, commissionAmount, currency, provider, status, idempotencyKey, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'USD', 'WALLET', 'COMPLETED', ?, ?, ?)`
-    ).run(client.id, professional.id, 10000, 1000, idempotencyKey, now, now);
 
-    const payment = db.prepare(`SELECT * FROM "Payment" WHERE id=?`).get(Number(result.lastInsertRowid)) as any;
+    // Ensure wallet exists
+    db.prepare(
+      `INSERT OR IGNORE INTO "Wallet" (userId, currency, balance, pendingBalance, updatedAt) VALUES (?, 'USD', 0, 0, ?)`,
+    ).run(professional.id, now);
+
+    const result = db
+      .prepare(
+        `INSERT INTO "Payment" (clientId, professionalId, amount, commissionAmount, currency, provider, status, idempotencyKey, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'USD', 'WALLET', 'COMPLETED', ?, ?, ?)`,
+      )
+      .run(client.id, professional.id, 10000, 1000, idempotencyKey, now, now);
+
+    const payment = db
+      .prepare(`SELECT * FROM "Payment" WHERE id=?`)
+      .get(Number(result.lastInsertRowid)) as any;
     expect(payment).toBeDefined();
     expect(payment.amount).toBe(10000);
     expect(payment.status).toBe("COMPLETED");
@@ -435,16 +505,18 @@ describe("Payments & Wallet", () => {
   it("should enforce idempotency (no duplicate payments)", () => {
     const now = new Date().toISOString();
     const idempotencyKey = `idempotent-${Date.now()}`;
-    
-    db.prepare(`INSERT OR IGNORE INTO "Wallet" (userId, currency, balance, pendingBalance, updatedAt) VALUES (?, 'USD', 0, 0, ?)`).run(professional.id, now);
-    
+
     db.prepare(
-      `INSERT INTO "Payment" (clientId, professionalId, amount, commissionAmount, currency, provider, status, idempotencyKey, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'USD', 'WALLET', 'COMPLETED', ?, ?, ?)`
+      `INSERT OR IGNORE INTO "Wallet" (userId, currency, balance, pendingBalance, updatedAt) VALUES (?, 'USD', 0, 0, ?)`,
+    ).run(professional.id, now);
+
+    db.prepare(
+      `INSERT INTO "Payment" (clientId, professionalId, amount, commissionAmount, currency, provider, status, idempotencyKey, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'USD', 'WALLET', 'COMPLETED', ?, ?, ?)`,
     ).run(client.id, professional.id, 5000, 500, idempotencyKey, now, now);
 
     expect(() => {
       db.prepare(
-        `INSERT INTO "Payment" (clientId, professionalId, amount, commissionAmount, currency, provider, status, idempotencyKey, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'USD', 'WALLET', 'COMPLETED', ?, ?, ?)`
+        `INSERT INTO "Payment" (clientId, professionalId, amount, commissionAmount, currency, provider, status, idempotencyKey, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'USD', 'WALLET', 'COMPLETED', ?, ?, ?)`,
       ).run(client.id, professional.id, 5000, 500, idempotencyKey, now, now);
     }).toThrow();
   });
@@ -453,10 +525,12 @@ describe("Payments & Wallet", () => {
     const now = new Date().toISOString();
     const wallet = db.prepare(`SELECT id FROM "Wallet" WHERE userId=?`).get(professional.id) as any;
     db.prepare(
-      `INSERT INTO "WalletTransaction" (walletId, type, amount, status, description, createdAt) VALUES (?, 'CREDIT', 9000, 'COMPLETED', 'Service payment', ?)`
+      `INSERT INTO "WalletTransaction" (walletId, type, amount, status, description, createdAt) VALUES (?, 'CREDIT', 9000, 'COMPLETED', 'Service payment', ?)`,
     ).run(wallet.id, now);
 
-    const transactions = db.prepare(`SELECT * FROM "WalletTransaction" WHERE walletId=?`).all(wallet.id) as any[];
+    const transactions = db
+      .prepare(`SELECT * FROM "WalletTransaction" WHERE walletId=?`)
+      .all(wallet.id) as any[];
     expect(transactions.length).toBeGreaterThanOrEqual(1);
     expect(transactions[0].type).toBe("CREDIT");
   });
@@ -473,11 +547,15 @@ describe("Notification System", () => {
 
   it("should create a notification", () => {
     const now = new Date().toISOString();
-    const result = db.prepare(
-      `INSERT INTO "Notification" (userId, type, title, message, isRead, createdAt) VALUES (?, ?, ?, ?, 0, ?)`
-    ).run(user.id, "JOB_MATCH", "New Job Match", "A new job matches your profile", now);
+    const result = db
+      .prepare(
+        `INSERT INTO "Notification" (userId, type, title, message, isRead, createdAt) VALUES (?, ?, ?, ?, 0, ?)`,
+      )
+      .run(user.id, "JOB_MATCH", "New Job Match", "A new job matches your profile", now);
 
-    const notification = db.prepare(`SELECT * FROM "Notification" WHERE id=?`).get(Number(result.lastInsertRowid)) as any;
+    const notification = db
+      .prepare(`SELECT * FROM "Notification" WHERE id=?`)
+      .get(Number(result.lastInsertRowid)) as any;
     expect(notification).toBeDefined();
     expect(notification.type).toBe("JOB_MATCH");
     expect(notification.isRead).toBe(0);
@@ -486,16 +564,20 @@ describe("Notification System", () => {
   it("should mark notifications as read", () => {
     const now = new Date().toISOString();
     db.prepare(
-      `INSERT INTO "Notification" (userId, type, title, message, isRead, createdAt) VALUES (?, ?, ?, ?, 0, ?)`
+      `INSERT INTO "Notification" (userId, type, title, message, isRead, createdAt) VALUES (?, ?, ?, ?, 0, ?)`,
     ).run(user.id, "MESSAGE", "New Message", "You have a new message", now);
 
     db.prepare(`UPDATE "Notification" SET isRead=1 WHERE userId=? AND isRead=0`).run(user.id);
-    const unread = db.prepare(`SELECT COUNT(*) as count FROM "Notification" WHERE userId=? AND isRead=0`).get(user.id) as any;
+    const unread = db
+      .prepare(`SELECT COUNT(*) as count FROM "Notification" WHERE userId=? AND isRead=0`)
+      .get(user.id) as any;
     expect(unread.count).toBe(0);
   });
 
   it("should query user notifications", () => {
-    const notifications = db.prepare(`SELECT * FROM "Notification" WHERE userId=? ORDER BY createdAt DESC`).all(user.id);
+    const notifications = db
+      .prepare(`SELECT * FROM "Notification" WHERE userId=? ORDER BY createdAt DESC`)
+      .all(user.id);
     expect(Array.isArray(notifications)).toBe(true);
     expect(notifications.length).toBeGreaterThanOrEqual(2);
   });
@@ -504,10 +586,12 @@ describe("Notification System", () => {
     const now = new Date().toISOString();
     const endpoint = `https://example.com/push/${Date.now()}`;
     db.prepare(
-      `INSERT INTO "BrowserSubscription" (userId, endpoint, p256dh, auth, createdAt) VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO "BrowserSubscription" (userId, endpoint, p256dh, auth, createdAt) VALUES (?, ?, ?, ?, ?)`,
     ).run(user.id, endpoint, "p256dh-key", "auth-key", now);
 
-    const sub = db.prepare(`SELECT * FROM "BrowserSubscription" WHERE endpoint=?`).get(endpoint) as any;
+    const sub = db
+      .prepare(`SELECT * FROM "BrowserSubscription" WHERE endpoint=?`)
+      .get(endpoint) as any;
     expect(sub).toBeDefined();
     expect(sub.userId).toBe(user.id);
   });
@@ -522,11 +606,20 @@ describe("CMS (FAQ & Contact)", () => {
 
   it("should create a FAQ entry", () => {
     const now = new Date().toISOString();
-    const result = db.prepare(
-      `INSERT INTO "Faq" (question, answer, sortOrder, isPublished, createdAt, updatedAt) VALUES (?, ?, 1, 1, ?, ?)`
-    ).run("What is Servio?", "Servio is a platform connecting clients with professionals.", now, now);
+    const result = db
+      .prepare(
+        `INSERT INTO "Faq" (question, answer, sortOrder, isPublished, createdAt, updatedAt) VALUES (?, ?, 1, 1, ?, ?)`,
+      )
+      .run(
+        "What is Servio?",
+        "Servio is a platform connecting clients with professionals.",
+        now,
+        now,
+      );
 
-    const faq = db.prepare(`SELECT * FROM "Faq" WHERE id=?`).get(Number(result.lastInsertRowid)) as any;
+    const faq = db
+      .prepare(`SELECT * FROM "Faq" WHERE id=?`)
+      .get(Number(result.lastInsertRowid)) as any;
     expect(faq.question).toBe("What is Servio?");
     expect(faq.isPublished).toBe(1);
   });
@@ -539,20 +632,33 @@ describe("CMS (FAQ & Contact)", () => {
 
   it("should create a contact request", () => {
     const now = new Date().toISOString();
-    const result = db.prepare(
-      `INSERT INTO "ContactRequest" (name, email, subject, message, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'OPEN', ?, ?)`
-    ).run("John Doe", "john@example.com", "Inquiry", "I would like to know more about your services.", now, now);
+    const result = db
+      .prepare(
+        `INSERT INTO "ContactRequest" (name, email, subject, message, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'OPEN', ?, ?)`,
+      )
+      .run(
+        "John Doe",
+        "john@example.com",
+        "Inquiry",
+        "I would like to know more about your services.",
+        now,
+        now,
+      );
 
-    const contact = db.prepare(`SELECT * FROM "ContactRequest" WHERE id=?`).get(Number(result.lastInsertRowid)) as any;
+    const contact = db
+      .prepare(`SELECT * FROM "ContactRequest" WHERE id=?`)
+      .get(Number(result.lastInsertRowid)) as any;
     expect(contact.name).toBe("John Doe");
     expect(contact.status).toBe("OPEN");
   });
 
   it("should update FAQ entry", () => {
     const now = new Date().toISOString();
-    const result = db.prepare(
-      `INSERT INTO "Faq" (question, answer, sortOrder, isPublished, createdAt, updatedAt) VALUES (?, ?, 2, 0, ?, ?)`
-    ).run("How does pricing work?", "Pricing varies by project scope.", now, now);
+    const result = db
+      .prepare(
+        `INSERT INTO "Faq" (question, answer, sortOrder, isPublished, createdAt, updatedAt) VALUES (?, ?, 2, 0, ?, ?)`,
+      )
+      .run("How does pricing work?", "Pricing varies by project scope.", now, now);
 
     const faqId = Number(result.lastInsertRowid);
     db.prepare(`UPDATE "Faq" SET isPublished=1, updatedAt=? WHERE id=?`).run(now, faqId);
@@ -604,6 +710,9 @@ describe("Admin Features", () => {
   it("should manage professional verification", () => {
     const now = new Date().toISOString();
     const pro = createTestUser(db, { role: "PROFESSIONAL" }) as any;
+    const rawRow = db.prepare('SELECT * FROM "User" WHERE id = ?').get(pro.id);
+    console.log("Raw row:", rawRow);
+    console.log("Keys:", Object.keys(rawRow));
     expect(pro.isVerified).toBe(0);
 
     db.prepare(`UPDATE "User" SET isVerified=?, updatedAt=? WHERE id=?`).run(1, now, pro.id);
@@ -625,11 +734,15 @@ describe("Hire Contracts", () => {
 
   it("should create a hire contract", () => {
     const now = new Date().toISOString();
-    const result = db.prepare(
-      `INSERT INTO "Contract" (clientId, professionalId, bidAmount, duration, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)`
-    ).run(client.id, professional.id, 5000, "2 weeks", now, now);
+    const result = db
+      .prepare(
+        `INSERT INTO "Contract" (clientId, professionalId, bidAmount, duration, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)`,
+      )
+      .run(client.id, professional.id, 5000, "2 weeks", now, now);
 
-    const contract = db.prepare(`SELECT * FROM "Contract" WHERE id=?`).get(Number(result.lastInsertRowid)) as any;
+    const contract = db
+      .prepare(`SELECT * FROM "Contract" WHERE id=?`)
+      .get(Number(result.lastInsertRowid)) as any;
     expect(contract).toBeDefined();
     expect(contract.clientId).toBe(client.id);
     expect(contract.professionalId).toBe(professional.id);
@@ -650,18 +763,22 @@ describe("Project Reviews", () => {
 
   it("should create a project review", () => {
     const now = new Date().toISOString();
-    
+
     // First create a tracking record
-    const trackingResult = db.prepare(
-      `INSERT INTO "ProjectTracking" (clientId, professionalId, status, createdAt, updatedAt) VALUES (?, ?, 'COMPLETED', ?, ?)`
-    ).run(client.id, professional.id, now, now);
+    const trackingResult = db
+      .prepare(
+        `INSERT INTO "ProjectTracking" (clientId, professionalId, status, createdAt, updatedAt) VALUES (?, ?, 'COMPLETED', ?, ?)`,
+      )
+      .run(client.id, professional.id, now, now);
     const trackingId = Number(trackingResult.lastInsertRowid);
 
     db.prepare(
-      `INSERT INTO "ProjectReview" (trackingId, clientId, professionalId, rating, comment, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO "ProjectReview" (trackingId, clientId, professionalId, rating, comment, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)`,
     ).run(trackingId, client.id, professional.id, 5, "Excellent work!", now, now);
 
-    const review = db.prepare(`SELECT * FROM "ProjectReview" WHERE trackingId=?`).get(trackingId) as any;
+    const review = db
+      .prepare(`SELECT * FROM "ProjectReview" WHERE trackingId=?`)
+      .get(trackingId) as any;
     expect(review).toBeDefined();
     expect(review.rating).toBe(5);
     expect(review.comment).toBe("Excellent work!");
@@ -674,10 +791,10 @@ describe("Validation Schemas", () => {
     const invalidEmails = ["notanemail", "@domain.com", "user@", "user@.com"];
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    validEmails.forEach(email => {
+    validEmails.forEach((email) => {
       expect(emailRegex.test(email)).toBe(true);
     });
-    invalidEmails.forEach(email => {
+    invalidEmails.forEach((email) => {
       expect(emailRegex.test(email)).toBe(false);
     });
   });
@@ -692,7 +809,8 @@ describe("Validation Schemas", () => {
   });
 
   it("should validate required fields", () => {
-    const required = (val: unknown) => val !== null && val !== undefined && String(val).trim().length > 0;
+    const required = (val: unknown) =>
+      val !== null && val !== undefined && String(val).trim().length > 0;
     expect(required("hello")).toBe(true);
     expect(required("")).toBe(false);
     expect(required(null)).toBe(false);
@@ -743,7 +861,10 @@ describe("Database Operations", () => {
   it("should handle transactions", () => {
     const result = db.transaction(() => {
       const now = new Date().toISOString();
-      const user = createTestUser(db, { email: `tx-test-${Date.now()}@example.com`, role: "CLIENT" }) as any;
+      const user = createTestUser(db, {
+        email: `tx-test-${Date.now()}@example.com`,
+        role: "CLIENT",
+      }) as any;
       const job = createTestJob(db, user.id);
       return { userId: user.id, jobId: job.id };
     })();
@@ -764,12 +885,16 @@ describe("Database Operations", () => {
   });
 
   it("should handle JOIN queries", () => {
-    const results = db.prepare(`
+    const results = db
+      .prepare(
+        `
       SELECT u.firstName, u.lastName, cj.title 
       FROM "User" u 
       LEFT JOIN "ClientJob" cj ON cj.userId = u.id 
       WHERE u.role = 'CLIENT'
-    `).all();
+    `,
+      )
+      .all();
     expect(Array.isArray(results)).toBe(true);
   });
 });

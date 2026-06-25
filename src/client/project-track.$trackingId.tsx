@@ -305,7 +305,12 @@ function ProjectTrack() {
   const [disputePriority, setDisputePriority] = useState<ProjectDisputePriority>("MEDIUM");
   const [disputeMessage, setDisputeMessage] = useState("");
   const [disputeFiles, setDisputeFiles] = useState<
-    Array<{ fileName: string; fileType: string | null; fileSize: number | null; fileUrl: string | null }>
+    Array<{
+      fileName: string;
+      fileType: string | null;
+      fileSize: number | null;
+      fileUrl: string | null;
+    }>
   >([]);
   const [isRaisingDispute, setIsRaisingDispute] = useState(false);
   const [disputeError, setDisputeError] = useState<string | null>(null);
@@ -356,7 +361,8 @@ function ProjectTrack() {
           <Briefcase className="mx-auto h-10 w-10 text-muted-foreground" />
           <h1 className="mt-4 text-2xl font-semibold">No active project tracking</h1>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Tracking starts after the client accepts a professional request. Accept a request from Projects, then open Track project again.
+            Tracking starts after the client accepts a professional request. Accept a request from
+            Projects, then open Track project again.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Button asChild>
@@ -365,7 +371,9 @@ function ProjectTrack() {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to={isProfessional ? "/professional-messages" : "/messages"}>Open messages</Link>
+              <Link to={isProfessional ? "/professional-messages" : "/messages"}>
+                Open messages
+              </Link>
             </Button>
           </div>
         </div>
@@ -382,17 +390,22 @@ function ProjectTrack() {
   const projectValue = tracking.bidAmount ?? 0;
   const scheduleStartInput = getDateInputValue(tracking.projectJobDate || tracking.acceptedAt);
   const scheduleEndInput = getDateInputValue(tracking.projectDeadline);
-  const canStartProject = !scheduleStartInput || compareDateInputs(getDateInputValue(currentTime.toISOString()), scheduleStartInput) >= 0;
+  const canStartProject =
+    !scheduleStartInput ||
+    compareDateInputs(getDateInputValue(currentTime.toISOString()), scheduleStartInput) >= 0;
   const displayMilestones = tracking.milestones.slice(0, REQUIRED_PROJECT_MILESTONES);
   const nextMilestoneNumber = Math.min(tracking.milestones.length + 1, REQUIRED_PROJECT_MILESTONES);
   const isMilestonePlanComplete = tracking.milestones.length >= REQUIRED_PROJECT_MILESTONES;
   const requiredMilestoneAmount = getRequiredMilestoneAmount(projectValue, nextMilestoneNumber);
-  const completedMilestoneCount = tracking.milestones.filter((milestone) => milestone.status === "PAID").length;
+  const completedMilestoneCount = tracking.milestones.filter(
+    (milestone) => milestone.status === "PAID",
+  ).length;
   const canSubmitFinalWork = completedMilestoneCount >= REQUIRED_PROJECT_MILESTONES;
   const milestonePaidAmount = tracking.milestones
     .filter((milestone) => milestone.status === "PAID")
     .reduce((total, milestone) => total + (milestone.amount ?? 0), 0);
-  const paidAmount = tracking.status === "COMPLETED" ? projectValue : Math.min(projectValue, milestonePaidAmount);
+  const paidAmount =
+    tracking.status === "COMPLETED" ? projectValue : Math.min(projectValue, milestonePaidAmount);
   const remainingAmount = Math.max(0, projectValue - paidAmount);
   const requestAttachments = getRequestAttachments(tracking.attachmentsJson);
   const openRevisionRequests = tracking.revisionRequests.filter(
@@ -438,7 +451,10 @@ function ProjectTrack() {
         fileInputRef.current.value = "";
       }
       toast.success("Work uploaded");
-      emitProjectActivity("New work uploaded", `${displayName || "Professional"} uploaded work for ${tracking.projectTitle}.`);
+      emitProjectActivity(
+        "New work uploaded",
+        `${displayName || "Professional"} uploaded work for ${tracking.projectTitle}.`,
+      );
       await router.invalidate();
     } finally {
       setIsUploading(false);
@@ -479,10 +495,7 @@ function ProjectTrack() {
       ),
     );
 
-    setUploadFiles((files) => [
-      ...files,
-      ...loadedFiles,
-    ]);
+    setUploadFiles((files) => [...files, ...loadedFiles]);
   }
 
   async function handleDisputeFiles(event: ChangeEvent<HTMLInputElement>) {
@@ -495,22 +508,25 @@ function ProjectTrack() {
     const loadedFiles = await Promise.all(
       selectedFiles.map(
         (file) =>
-          new Promise<{ fileName: string; fileType: string | null; fileSize: number | null; fileUrl: string | null }>(
-            (resolve, reject) => {
-              const reader = new FileReader();
+          new Promise<{
+            fileName: string;
+            fileType: string | null;
+            fileSize: number | null;
+            fileUrl: string | null;
+          }>((resolve, reject) => {
+            const reader = new FileReader();
 
-              reader.onload = () => {
-                resolve({
-                  fileName: file.name,
-                  fileType: file.type || null,
-                  fileSize: file.size,
-                  fileUrl: typeof reader.result === "string" ? reader.result : null,
-                });
-              };
-              reader.onerror = () => reject(reader.error);
-              reader.readAsDataURL(file);
-            },
-          ),
+            reader.onload = () => {
+              resolve({
+                fileName: file.name,
+                fileType: file.type || null,
+                fileSize: file.size,
+                fileUrl: typeof reader.result === "string" ? reader.result : null,
+              });
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+          }),
       ),
     );
 
@@ -523,7 +539,10 @@ function ProjectTrack() {
     try {
       await deleteUploadedWork({ data: { uploadId } });
       toast.success("Work file deleted");
-      emitProjectActivity("Work file deleted", `${displayName || "Professional"} deleted a work file from ${tracking.projectTitle}.`);
+      emitProjectActivity(
+        "Work file deleted",
+        `${displayName || "Professional"} deleted a work file from ${tracking.projectTitle}.`,
+      );
       await router.invalidate();
     } finally {
       setDeletingUploadId(null);
@@ -554,7 +573,10 @@ function ProjectTrack() {
       });
       setRevisionNote("");
       toast.success("Revision requested");
-      emitProjectActivity("Revision requested", `${displayName || "Client"} requested changes for ${tracking.projectTitle}.`);
+      emitProjectActivity(
+        "Revision requested",
+        `${displayName || "Client"} requested changes for ${tracking.projectTitle}.`,
+      );
       await router.invalidate();
     } catch (error) {
       setRevisionError(error instanceof Error ? error.message : "Could not request revision.");
@@ -569,7 +591,10 @@ function ProjectTrack() {
     try {
       await clearProjectRevision({ data: { revisionId } });
       toast.success("Revision cleared");
-      emitProjectActivity("Revision cleared", `${displayName || "Client"} cleared a revision request for ${tracking.projectTitle}.`);
+      emitProjectActivity(
+        "Revision cleared",
+        `${displayName || "Client"} cleared a revision request for ${tracking.projectTitle}.`,
+      );
       await router.invalidate();
     } finally {
       setClearingRevisionId(null);
@@ -588,19 +613,28 @@ function ProjectTrack() {
       return;
     }
 
-    const title = milestoneTitle.trim() || `Milestone ${nextMilestoneNumber}/${REQUIRED_PROJECT_MILESTONES}`;
+    const title =
+      milestoneTitle.trim() || `Milestone ${nextMilestoneNumber}/${REQUIRED_PROJECT_MILESTONES}`;
 
     if (title.length < 3) {
       setMilestoneError("Add a milestone title.");
       return;
     }
 
-    if (milestoneDueDate && scheduleStartInput && compareDateInputs(milestoneDueDate, scheduleStartInput) < 0) {
+    if (
+      milestoneDueDate &&
+      scheduleStartInput &&
+      compareDateInputs(milestoneDueDate, scheduleStartInput) < 0
+    ) {
       setMilestoneError("Milestone due date cannot be before the project start date.");
       return;
     }
 
-    if (milestoneDueDate && scheduleEndInput && compareDateInputs(milestoneDueDate, scheduleEndInput) > 0) {
+    if (
+      milestoneDueDate &&
+      scheduleEndInput &&
+      compareDateInputs(milestoneDueDate, scheduleEndInput) > 0
+    ) {
       setMilestoneError("Milestone due date cannot be after the project deadline.");
       return;
     }
@@ -622,9 +656,14 @@ function ProjectTrack() {
       setMilestoneDescription("");
       setMilestoneDueDate("");
       toast.success(`Milestone ${nextMilestoneNumber}/${REQUIRED_PROJECT_MILESTONES} added`);
-      emitProjectActivity("Milestone added", `${displayName || "Client"} added "${title}" to ${tracking.projectTitle}.`);
+      emitProjectActivity(
+        "Milestone added",
+        `${displayName || "Client"} added "${title}" to ${tracking.projectTitle}.`,
+      );
       await router.invalidate();
-      window.requestAnimationFrame(() => milestoneListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      window.requestAnimationFrame(() =>
+        milestoneListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
     } catch (error) {
       setMilestoneError(error instanceof Error ? error.message : "Could not add milestone.");
     } finally {
@@ -669,9 +708,14 @@ function ProjectTrack() {
     try {
       await removeProjectMilestone({ data: { milestoneId } });
       toast.success("Milestone deleted");
-      emitProjectActivity("Milestone deleted", `${displayName || "Client"} deleted a milestone from ${tracking.projectTitle}.`);
+      emitProjectActivity(
+        "Milestone deleted",
+        `${displayName || "Client"} deleted a milestone from ${tracking.projectTitle}.`,
+      );
       await router.invalidate();
-      window.requestAnimationFrame(() => milestoneListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      window.requestAnimationFrame(() =>
+        milestoneListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
     } finally {
       setUpdatingMilestoneId(null);
     }
@@ -685,7 +729,9 @@ function ProjectTrack() {
     }
 
     if (!canSubmitFinalWork) {
-      toast.error(`Complete all ${REQUIRED_PROJECT_MILESTONES} milestones before final submission.`);
+      toast.error(
+        `Complete all ${REQUIRED_PROJECT_MILESTONES} milestones before final submission.`,
+      );
       return;
     }
 
@@ -700,7 +746,10 @@ function ProjectTrack() {
       });
       setCompletionNote("");
       toast.success("Final work submitted");
-      emitProjectActivity("Final work submitted", `${displayName || "Professional"} submitted final work for ${tracking.projectTitle}.`);
+      emitProjectActivity(
+        "Final work submitted",
+        `${displayName || "Professional"} submitted final work for ${tracking.projectTitle}.`,
+      );
       await router.invalidate();
     } finally {
       setIsSubmittingCompletion(false);
@@ -796,7 +845,10 @@ function ProjectTrack() {
       userAvatarUrl={viewer.avatarUrl}
     >
       <div className="mb-5">
-        <Link to={isProfessional ? "/professional-stats" : "/projects"} className="text-sm text-primary hover:underline">
+        <Link
+          to={isProfessional ? "/professional-stats" : "/projects"}
+          className="text-sm text-primary hover:underline"
+        >
           Back to {isProfessional ? "my stats" : "projects"}
         </Link>
       </div>
@@ -810,7 +862,9 @@ function ProjectTrack() {
           </div>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight">{tracking.projectTitle}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isProfessional ? `Client: ${tracking.clientName}` : `Professional: ${tracking.professionalName}`}
+            {isProfessional
+              ? `Client: ${tracking.clientName}`
+              : `Professional: ${tracking.professionalName}`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -826,7 +880,11 @@ function ProjectTrack() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat icon={DollarSign} label="Project value" value={formatMoney(projectValue)} />
         <Stat icon={Clock} label="Expected duration" value={tracking.duration || "Not set"} />
-        <Stat icon={Timer} label="Time tracked" value={`${elapsedDays} day${elapsedDays === 1 ? "" : "s"}`} />
+        <Stat
+          icon={Timer}
+          label="Time tracked"
+          value={`${elapsedDays} day${elapsedDays === 1 ? "" : "s"}`}
+        />
         <Stat icon={DollarSign} label="Remaining money" value={formatMoney(remainingAmount)} />
       </div>
 
@@ -836,7 +894,9 @@ function ProjectTrack() {
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
               <div>
                 <h2 className="text-lg font-semibold">Project timeline</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Request, acceptance, tracking, work, and payment activity in one place.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Request, acceptance, tracking, work, and payment activity in one place.
+                </p>
               </div>
               <Badge variant="secondary">Tracking #{tracking.id}</Badge>
             </div>
@@ -863,7 +923,8 @@ function ProjectTrack() {
                 </p>
               </div>
               <Badge variant={isMilestonePlanComplete ? "default" : "secondary"}>
-                {Math.min(tracking.milestones.length, REQUIRED_PROJECT_MILESTONES)}/{REQUIRED_PROJECT_MILESTONES} milestones
+                {Math.min(tracking.milestones.length, REQUIRED_PROJECT_MILESTONES)}/
+                {REQUIRED_PROJECT_MILESTONES} milestones
               </Badge>
             </div>
             {!isProfessional && !isMilestonePlanComplete ? (
@@ -890,7 +951,9 @@ function ProjectTrack() {
                 requiredCount={REQUIRED_PROJECT_MILESTONES}
                 isProfessional={isProfessional}
                 canStartProject={canStartProject}
-                projectStartLabel={formatScheduleDate(tracking.projectJobDate || tracking.acceptedAt)}
+                projectStartLabel={formatScheduleDate(
+                  tracking.projectJobDate || tracking.acceptedAt,
+                )}
                 updatingMilestoneId={updatingMilestoneId}
                 onStatusChange={handleMilestoneStatus}
                 onDelete={handleDeleteMilestone}
@@ -918,7 +981,9 @@ function ProjectTrack() {
                       : "Files uploaded by the professional will appear here."}
                 </p>
               </div>
-              <Badge variant={!isProfessional && tracking.workUploads.length ? "default" : "secondary"}>
+              <Badge
+                variant={!isProfessional && tracking.workUploads.length ? "default" : "secondary"}
+              >
                 {tracking.workUploads.length} files
               </Badge>
             </div>
@@ -946,7 +1011,9 @@ function ProjectTrack() {
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
               <div>
                 <h2 className="text-lg font-semibold">Project details</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Saved job data and accepted proposal details from the database.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Saved job data and accepted proposal details from the database.
+                </p>
               </div>
               <Badge variant={tracking.projectUrgency === "HIGH" ? "destructive" : "outline"}>
                 {formatEnum(tracking.projectUrgency)} urgency
@@ -956,12 +1023,25 @@ function ProjectTrack() {
               {tracking.projectDescription}
             </p>
             <div className="mt-5 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-              <InfoLine icon={DollarSign} text={`Posted budget ${formatBudget(tracking.projectBudgetMin, tracking.projectBudgetMax, tracking.projectTimingType)}`} />
-              <InfoLine icon={CalendarDays} text={`Start date ${formatScheduleDate(tracking.projectJobDate || tracking.acceptedAt)}`} />
-              <InfoLine icon={CalendarDays} text={`End date ${formatScheduleDate(tracking.projectDeadline)}`} />
+              <InfoLine
+                icon={DollarSign}
+                text={`Posted budget ${formatBudget(tracking.projectBudgetMin, tracking.projectBudgetMax, tracking.projectTimingType)}`}
+              />
+              <InfoLine
+                icon={CalendarDays}
+                text={`Start date ${formatScheduleDate(tracking.projectJobDate || tracking.acceptedAt)}`}
+              />
+              <InfoLine
+                icon={CalendarDays}
+                text={`End date ${formatScheduleDate(tracking.projectDeadline)}`}
+              />
               <InfoLine icon={Briefcase} text={formatEnum(tracking.projectWorkMode)} />
               <InfoLine icon={MapPin} text={tracking.projectLocationLabel || "No location label"} />
-              <InfoLine icon={MapPin} text={tracking.projectLocationAddress || "Remote or no location saved"} wide />
+              <InfoLine
+                icon={MapPin}
+                text={tracking.projectLocationAddress || "Remote or no location saved"}
+                wide
+              />
             </div>
           </section>
 
@@ -982,14 +1062,17 @@ function ProjectTrack() {
               </Badge>
             </div>
             <div className="mt-5 h-2 overflow-hidden rounded-full bg-muted">
-              <div className="h-full rounded-full bg-primary" style={{ width: `${displayProgress}%` }} />
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${displayProgress}%` }}
+              />
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-3">
-              <ProgressBox label="Start date" value={formatScheduleDate(tracking.projectJobDate || tracking.acceptedAt)} />
               <ProgressBox
-                label="End date"
-                value={formatScheduleDate(tracking.projectDeadline)}
+                label="Start date"
+                value={formatScheduleDate(tracking.projectJobDate || tracking.acceptedAt)}
               />
+              <ProgressBox label="End date" value={formatScheduleDate(tracking.projectDeadline)} />
               <ProgressBox
                 label={tracking.status === "COMPLETED" ? "Completed in" : "Days used"}
                 value={`${elapsedDays} day${elapsedDays === 1 ? "" : "s"}`}
@@ -1010,7 +1093,9 @@ function ProjectTrack() {
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
               <div>
                 <h2 className="text-lg font-semibold">Proposal details</h2>
-                <p className="mt-1 text-sm text-muted-foreground">The accepted request from the professional.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  The accepted request from the professional.
+                </p>
               </div>
               <Badge variant="outline">Sent {formatDateTime(tracking.requestCreatedAt)}</Badge>
             </div>
@@ -1018,7 +1103,10 @@ function ProjectTrack() {
               {tracking.coverLetter}
             </p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <ProgressBox label="Professional bid" value={tracking.bidAmount ? formatMoney(tracking.bidAmount) : "Not set"} />
+              <ProgressBox
+                label="Professional bid"
+                value={tracking.bidAmount ? formatMoney(tracking.bidAmount) : "Not set"}
+              />
               <ProgressBox label="Proposed duration" value={tracking.duration || "Not set"} />
             </div>
             {requestAttachments.length ? (
@@ -1026,11 +1114,16 @@ function ProjectTrack() {
                 <h3 className="text-sm font-medium">Attached work samples</h3>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
                   {requestAttachments.map((attachment) => (
-                    <div key={attachment.fileName} className="flex items-center gap-3 rounded-lg border border-border p-3">
+                    <div
+                      key={attachment.fileName}
+                      className="flex items-center gap-3 rounded-lg border border-border p-3"
+                    >
                       <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">{attachment.fileName}</p>
-                        <p className="text-xs text-muted-foreground">{formatFileSize(attachment.fileSize)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatFileSize(attachment.fileSize)}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -1068,7 +1161,9 @@ function ProjectTrack() {
             onPriorityChange={setDisputePriority}
             onMessageChange={setDisputeMessage}
             onFilesChange={handleDisputeFiles}
-            onRemoveFile={(index) => setDisputeFiles((files) => files.filter((_, fileIndex) => fileIndex !== index))}
+            onRemoveFile={(index) =>
+              setDisputeFiles((files) => files.filter((_, fileIndex) => fileIndex !== index))
+            }
             onSubmit={handleRaiseDispute}
           />
 
@@ -1080,10 +1175,12 @@ function ProjectTrack() {
               reviewCreatedAt={tracking.reviewCreatedAt}
               reviewRequestedAt={tracking.reviewRequestedAt}
               reviewRequestNote={tracking.reviewRequestNote}
-              draft={reviewDraft ?? {
-                rating: tracking.reviewRating ?? 5,
-                comment: tracking.reviewComment ?? "",
-              }}
+              draft={
+                reviewDraft ?? {
+                  rating: tracking.reviewRating ?? 5,
+                  comment: tracking.reviewComment ?? "",
+                }
+              }
               isSaving={isSavingReview}
               error={reviewError}
               onDraftChange={setReviewDraft}
@@ -1132,7 +1229,8 @@ function ProjectTrack() {
                     </div>
                   ) : latestRevisionRequest ? (
                     <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-                      Last revision request was addressed {formatDateTime(latestRevisionRequest.updatedAt)}.
+                      Last revision request was addressed{" "}
+                      {formatDateTime(latestRevisionRequest.updatedAt)}.
                     </div>
                   ) : null}
                   <div className="space-y-3">
@@ -1156,7 +1254,10 @@ function ProjectTrack() {
                       onChange={handleBrowseFiles}
                     />
                     {uploadFiles.map((file, index) => (
-                      <div key={`${file.fileName}-${index}`} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-border p-3">
+                      <div
+                        key={`${file.fileName}-${index}`}
+                        className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-border p-3"
+                      >
                         <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
                           {file.fileName}
                           <span className="ml-1 text-xs">({formatFileSize(file.fileSize)})</span>
@@ -1165,7 +1266,11 @@ function ProjectTrack() {
                           type="button"
                           size="sm"
                           variant="outline"
-                          onClick={() => setUploadFiles((files) => files.filter((_, itemIndex) => itemIndex !== index))}
+                          onClick={() =>
+                            setUploadFiles((files) =>
+                              files.filter((_, itemIndex) => itemIndex !== index),
+                            )
+                          }
                         >
                           Remove
                         </Button>
@@ -1177,7 +1282,11 @@ function ProjectTrack() {
                       </div>
                     ) : null}
                   </div>
-                  <Button type="submit" className="w-full" disabled={isUploading || !uploadFiles.length}>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isUploading || !uploadFiles.length}
+                  >
                     <Upload className="h-4 w-4" />
                     {isUploading ? "Uploading" : "Upload work"}
                   </Button>
@@ -1197,13 +1306,18 @@ function ProjectTrack() {
             <h2 className="font-semibold">Professional working</h2>
             <div className="mt-4 flex items-center gap-3">
               <img
-                src={tracking.professionalAvatarUrl || `https://i.pravatar.cc/100?u=tracking-pro-${tracking.professionalId}`}
+                src={
+                  tracking.professionalAvatarUrl ||
+                  `https://i.pravatar.cc/100?u=tracking-pro-${tracking.professionalId}`
+                }
                 alt={tracking.professionalName}
                 className="h-12 w-12 rounded-lg object-cover"
               />
               <div className="min-w-0">
                 <p className="truncate font-medium">{tracking.professionalName}</p>
-                <p className="truncate text-sm text-muted-foreground">{tracking.professionalCategory || "Professional"}</p>
+                <p className="truncate text-sm text-muted-foreground">
+                  {tracking.professionalCategory || "Professional"}
+                </p>
               </div>
             </div>
             <div className="mt-4 space-y-2 text-sm text-muted-foreground">
@@ -1216,7 +1330,10 @@ function ProjectTrack() {
             <h2 className="font-semibold">Client</h2>
             <div className="mt-4 flex items-center gap-3">
               <img
-                src={tracking.clientAvatarUrl || `https://i.pravatar.cc/100?u=tracking-client-${tracking.clientId}`}
+                src={
+                  tracking.clientAvatarUrl ||
+                  `https://i.pravatar.cc/100?u=tracking-client-${tracking.clientId}`
+                }
                 alt={tracking.clientName}
                 className="h-12 w-12 rounded-lg object-cover"
               />
@@ -1294,7 +1411,8 @@ function ProjectTimeline({
     },
     {
       label: requestStatus === "ACCEPTED" ? "Project start" : formatEnum(requestStatus),
-      description: "The client accepted the request and project tracking uses the scheduled start date.",
+      description:
+        "The client accepted the request and project tracking uses the scheduled start date.",
       time: formatScheduleDate(acceptedAt || requestUpdatedAt),
       state: "complete",
       icon: CheckCircle2,
@@ -1346,11 +1464,14 @@ function ProjectTimeline({
             : "Final review and remaining payment happen after delivery.",
       time:
         trackingStatus === "COMPLETED"
-          ? formatDateTime(latestCompletion?.updatedAt || latestCompletion?.submittedAt || acceptedAt)
+          ? formatDateTime(
+              latestCompletion?.updatedAt || latestCompletion?.submittedAt || acceptedAt,
+            )
           : latestCompletion
             ? formatDateTime(latestCompletion.submittedAt)
             : "Upcoming",
-      state: trackingStatus === "COMPLETED" ? "complete" : latestCompletion ? "current" : "upcoming",
+      state:
+        trackingStatus === "COMPLETED" ? "complete" : latestCompletion ? "current" : "upcoming",
       icon: ReceiptText,
     },
   ] as const;
@@ -1420,7 +1541,8 @@ function CompletionPanel({
   if (trackingStatus === "COMPLETED") {
     description = "This project is completed.";
   } else if (!isProfessional && pendingClientReview) {
-    description = "Professional marked this work finished. Review and accept it or request changes.";
+    description =
+      "Professional marked this work finished. Review and accept it or request changes.";
   } else if (isProfessional && !canSubmitFinalWork) {
     description = `Final submission unlocks after ${requiredMilestoneCount} completed milestones.`;
   }
@@ -1445,9 +1567,13 @@ function CompletionPanel({
 
       {latestCompletion ? (
         <div className="mt-4 rounded-lg border border-border bg-muted/20 p-3">
-          <p className="text-sm font-medium">Submitted {formatDateTime(latestCompletion.submittedAt)}</p>
+          <p className="text-sm font-medium">
+            Submitted {formatDateTime(latestCompletion.submittedAt)}
+          </p>
           {latestCompletion.note ? (
-            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{latestCompletion.note}</p>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+              {latestCompletion.note}
+            </p>
           ) : null}
         </div>
       ) : null}
@@ -1476,7 +1602,11 @@ function CompletionPanel({
           />
           <Button type="submit" className="w-full" disabled={isSubmitting || pendingClientReview}>
             <CheckCircle2 className="h-4 w-4" />
-            {pendingClientReview ? "Accept request sent" : isSubmitting ? "Submitting" : "Send accept work request"}
+            {pendingClientReview
+              ? "Accept request sent"
+              : isSubmitting
+                ? "Submitting"
+                : "Send accept work request"}
           </Button>
         </form>
       ) : null}
@@ -1522,7 +1652,12 @@ function DisputePanel({
   issueType: ProjectDisputeType;
   priority: ProjectDisputePriority;
   message: string;
-  files: Array<{ fileName: string; fileType: string | null; fileSize: number | null; fileUrl: string | null }>;
+  files: Array<{
+    fileName: string;
+    fileType: string | null;
+    fileSize: number | null;
+    fileUrl: string | null;
+  }>;
   error: string | null;
   isSubmitting: boolean;
   onIssueTypeChange: (value: ProjectDisputeType) => void;
@@ -1595,10 +1730,15 @@ function DisputePanel({
           {files.length ? (
             <div className="mt-3 grid gap-2">
               {files.map((file, index) => (
-                <div key={`${file.fileName}-${index}`} className="flex items-center justify-between gap-2 rounded-md bg-background p-2 text-sm">
+                <div
+                  key={`${file.fileName}-${index}`}
+                  className="flex items-center justify-between gap-2 rounded-md bg-background p-2 text-sm"
+                >
                   <span className="min-w-0 truncate text-muted-foreground">
                     {file.fileName}
-                    {file.fileSize ? <span className="ml-1 text-xs">({formatFileSize(file.fileSize)})</span> : null}
+                    {file.fileSize ? (
+                      <span className="ml-1 text-xs">({formatFileSize(file.fileSize)})</span>
+                    ) : null}
                   </span>
                   <button
                     type="button"
@@ -1640,12 +1780,17 @@ function DisputePanel({
                         <Badge variant="secondary">{formatDisputeType(dispute.issueType)}</Badge>
                         <Badge variant="outline">{formatEnum(dispute.priority)}</Badge>
                       </div>
-                      <span className="text-xs text-muted-foreground">{formatDateTime(dispute.createdAt)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDateTime(dispute.createdAt)}
+                      </span>
                     </div>
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{dispute.message}</p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+                      {dispute.message}
+                    </p>
                     {attachments.length ? (
                       <div className="mt-2 text-xs text-muted-foreground">
-                        {attachments.length} proof file{attachments.length === 1 ? "" : "s"} attached
+                        {attachments.length} proof file{attachments.length === 1 ? "" : "s"}{" "}
+                        attached
                       </div>
                     ) : null}
                   </div>
@@ -1693,11 +1838,13 @@ function ProjectReviewPanel({
               ? `You rated ${professionalName || "this professional"} ${reviewRating}/5.`
               : reviewRequestedAt
                 ? `${professionalName || "This professional"} requested a review for this completed project.`
-              : `Share how ${professionalName || "this professional"} worked on this project.`}
+                : `Share how ${professionalName || "this professional"} worked on this project.`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {reviewRequestedAt && !reviewRating ? <Badge variant="secondary">Review requested</Badge> : null}
+          {reviewRequestedAt && !reviewRating ? (
+            <Badge variant="secondary">Review requested</Badge>
+          ) : null}
           {reviewCreatedAt ? (
             <Badge variant="outline">Rated {formatDate(reviewCreatedAt)}</Badge>
           ) : null}
@@ -1874,7 +2021,9 @@ function MilestoneList({
               ) : null}
               <div className="mt-3 flex flex-wrap gap-3 text-sm text-muted-foreground">
                 <span>{milestone.amount ? formatMoney(milestone.amount) : "No amount"}</span>
-                <span>{milestone.dueDate ? `Due ${formatDate(milestone.dueDate)}` : "No due date"}</span>
+                <span>
+                  {milestone.dueDate ? `Due ${formatDate(milestone.dueDate)}` : "No due date"}
+                </span>
               </div>
             </div>
           </div>
@@ -2062,9 +2211,13 @@ function RevisionHistory({
                     </Button>
                   ) : null}
                 </div>
-                <span className="text-xs text-muted-foreground">{formatDateTime(revision.createdAt)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {formatDateTime(revision.createdAt)}
+                </span>
               </div>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{revision.note}</p>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+                {revision.note}
+              </p>
             </div>
           ))}
       </div>
@@ -2163,7 +2316,12 @@ function WorkFileItem({
             </Button>
           )}
           {canDelete ? (
-            <Button size="sm" variant="outline" onClick={() => onDelete(upload.id)} disabled={isDeleting}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onDelete(upload.id)}
+              disabled={isDeleting}
+            >
               {isDeleting ? "Deleting" : "Delete"}
             </Button>
           ) : null}
@@ -2172,7 +2330,10 @@ function WorkFileItem({
       {files.length > 1 ? (
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {files.slice(1).map((file) => (
-            <div key={`${upload.id}-${file.fileName}-${file.fileUrl || ""}`} className="flex min-w-0 items-center justify-between gap-2 rounded-md bg-muted/40 p-2 text-sm">
+            <div
+              key={`${upload.id}-${file.fileName}-${file.fileUrl || ""}`}
+              className="flex min-w-0 items-center justify-between gap-2 rounded-md bg-muted/40 p-2 text-sm"
+            >
               <span className="truncate text-muted-foreground">{file.fileName}</span>
               {file.fileUrl ? (
                 <button
@@ -2191,11 +2352,7 @@ function WorkFileItem({
   );
 }
 
-function openWorkFile(file: {
-  fileName: string;
-  fileUrl: string | null;
-  fileType: string | null;
-}) {
+function openWorkFile(file: { fileName: string; fileUrl: string | null; fileType: string | null }) {
   if (!file.fileUrl) {
     return;
   }
@@ -2221,7 +2378,8 @@ function openWorkFile(file: {
 
 function dataUrlToBlob(dataUrl: string, fallbackType: string | null) {
   const [metadata = "", base64 = ""] = dataUrl.split(",");
-  const contentType = metadata.match(/^data:([^;]+)/)?.[1] || fallbackType || "application/octet-stream";
+  const contentType =
+    metadata.match(/^data:([^;]+)/)?.[1] || fallbackType || "application/octet-stream";
   const binary = window.atob(base64);
   const bytes = new Uint8Array(binary.length);
 
@@ -2537,7 +2695,12 @@ function getWorkUploadFiles(upload: ProjectWorkUploadRecord) {
     ];
   }
 
-  return [] as Array<{ fileName: string; fileUrl: string | null; fileType: string | null; fileSize: number | null }>;
+  return [] as Array<{
+    fileName: string;
+    fileUrl: string | null;
+    fileType: string | null;
+    fileSize: number | null;
+  }>;
 }
 
 function getSocketUrl() {

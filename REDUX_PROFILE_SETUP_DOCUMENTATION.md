@@ -34,7 +34,7 @@ import profileReducer from "./slices/profileSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    profile: profileReducer,  // Profile state slice
+    profile: profileReducer, // Profile state slice
   },
 });
 
@@ -43,6 +43,7 @@ export type AppDispatch = typeof store.dispatch;
 ```
 
 **Key Points:**
+
 - Uses `configureStore()` from Redux Toolkit
 - Combines `auth` and `profile` reducers
 - Exports TypeScript types for type-safe state and dispatch
@@ -54,18 +55,20 @@ export type AppDispatch = typeof store.dispatch;
 ### File: `src/store/slices/profileSlice.ts`
 
 **State Interface:**
+
 ```typescript
 interface ProfileState {
-  profilePhotoPreview: string;       // Base64 preview of profile image
-  successMessage: string | null;     // Success notification
-  submitError: string | null;        // Error message
-  newLocationLabel: string;          // Location name input
-  newLocationAddress: string;        // Location address input
-  isLoading: boolean;                // Loading state during save
+  profilePhotoPreview: string; // Base64 preview of profile image
+  successMessage: string | null; // Success notification
+  submitError: string | null; // Error message
+  newLocationLabel: string; // Location name input
+  newLocationAddress: string; // Location address input
+  isLoading: boolean; // Loading state during save
 }
 ```
 
 **Initial State:**
+
 ```typescript
 const initialState: ProfileState = {
   profilePhotoPreview: "",
@@ -79,17 +82,17 @@ const initialState: ProfileState = {
 
 ### Actions (Reducers)
 
-| Action | Type | Purpose |
-|--------|------|---------|
-| `setProfilePhotoPreview` | `string` | Update profile photo preview |
-| `setSuccessMessage` | `string \| null` | Set success message |
-| `setSubmitError` | `string \| null` | Set error message |
-| `setNewLocationLabel` | `string` | Update new location label input |
-| `setNewLocationAddress` | `string` | Update new location address input |
-| `setNewHiringNeed` | `string` | Update hiring need text input |
-| `setIsLoading` | `boolean` | Toggle loading state |
-| `clearMessages` | `void` | Clear success and error messages |
-| `resetProfileState` | `void` | Reset entire profile state |
+| Action                   | Type             | Purpose                           |
+| ------------------------ | ---------------- | --------------------------------- |
+| `setProfilePhotoPreview` | `string`         | Update profile photo preview      |
+| `setSuccessMessage`      | `string \| null` | Set success message               |
+| `setSubmitError`         | `string \| null` | Set error message                 |
+| `setNewLocationLabel`    | `string`         | Update new location label input   |
+| `setNewLocationAddress`  | `string`         | Update new location address input |
+| `setNewHiringNeed`       | `string`         | Update hiring need text input     |
+| `setIsLoading`           | `boolean`        | Toggle loading state              |
+| `clearMessages`          | `void`           | Clear success and error messages  |
+| `resetProfileState`      | `void`           | Reset entire profile state        |
 
 ---
 
@@ -103,6 +106,7 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 ```
 
 **Benefits:**
+
 - Type-safe access to state and dispatch
 - Eliminates need to import types repeatedly
 - Ensures consistency across the app
@@ -132,21 +136,23 @@ import {
 ```typescript
 function ProfileSetup() {
   const dispatch = useAppDispatch();
-  
+
   // Destructure state from Redux store
-  const { 
-    profilePhotoPreview, 
-    successMessage, 
-    submitError, 
-    newLocationLabel, 
-    newLocationAddress, 
-    isLoading 
+  const {
+    profilePhotoPreview,
+    successMessage,
+    submitError,
+    newLocationLabel,
+    newLocationAddress,
+    isLoading,
   } = useAppSelector((state) => state.profile);
-  
+
   // Form state (still using React Hook Form)
   const form = useForm<ClientProfileInput>({
     resolver: zodResolver(clientProfileSchema),
-    defaultValues: { /* ... */ },
+    defaultValues: {
+      /* ... */
+    },
   });
 }
 ```
@@ -154,6 +160,7 @@ function ProfileSetup() {
 #### 3. Dispatching Actions
 
 **Photo Upload:**
+
 ```typescript
 async function handlePhotoUpload(file: File | undefined) {
   if (!file) return;
@@ -161,7 +168,7 @@ async function handlePhotoUpload(file: File | undefined) {
   const reader = new FileReader();
   reader.onload = () => {
     const result = typeof reader.result === "string" ? reader.result : "";
-    dispatch(setProfilePhotoPreview(result));  // Dispatch action
+    dispatch(setProfilePhotoPreview(result)); // Dispatch action
     form.setValue("profilePhotoUrl", result, { shouldValidate: true });
   };
   reader.readAsDataURL(file);
@@ -169,6 +176,7 @@ async function handlePhotoUpload(file: File | undefined) {
 ```
 
 **Add Location:**
+
 ```typescript
 const addSavedLocation = () => {
   if (!newLocationLabel.trim() || !newLocationAddress.trim()) {
@@ -184,11 +192,12 @@ const addSavedLocation = () => {
 ```
 
 **Form Submission:**
+
 ```typescript
 const onSubmit = async (values: ClientProfileInput) => {
   dispatch(setSubmitError(null));
   dispatch(setSuccessMessage(null));
-  dispatch(setIsLoading(true));  // Start loading
+  dispatch(setIsLoading(true)); // Start loading
 
   try {
     const result = await saveClientProfile({ data: values });
@@ -204,7 +213,7 @@ const onSubmit = async (values: ClientProfileInput) => {
 
     dispatch(setSuccessMessage("Profile saved successfully..."));
   } finally {
-    dispatch(setIsLoading(false));  // Stop loading
+    dispatch(setIsLoading(false)); // Stop loading
   }
 };
 ```
@@ -279,25 +288,27 @@ const onSubmit = async (values: ClientProfileInput) => {
 
 ## ✅ Benefits of Redux Implementation
 
-| Benefit | Details |
-|---------|---------|
-| **Centralized State** | All profile state in one place, easy to debug |
-| **Type Safety** | TypeScript types for all state and actions |
-| **Scalability** | Easy to add new state slices for other features |
-| **Testability** | Pure reducers can be tested independently |
-| **Time Travel** | Redux DevTools for debugging state changes |
-| **Predictability** | Unidirectional data flow (actions → reducers → state) |
+| Benefit               | Details                                               |
+| --------------------- | ----------------------------------------------------- |
+| **Centralized State** | All profile state in one place, easy to debug         |
+| **Type Safety**       | TypeScript types for all state and actions            |
+| **Scalability**       | Easy to add new state slices for other features       |
+| **Testability**       | Pure reducers can be tested independently             |
+| **Time Travel**       | Redux DevTools for debugging state changes            |
+| **Predictability**    | Unidirectional data flow (actions → reducers → state) |
 
 ---
 
 ## 🛠️ Usage Patterns
 
 ### Pattern 1: Simple State Update
+
 ```typescript
 dispatch(setProfilePhotoPreview(newPhoto));
 ```
 
 ### Pattern 2: Conditional State Update
+
 ```typescript
 if (error) {
   dispatch(setSubmitError(error.message));
@@ -307,6 +318,7 @@ if (error) {
 ```
 
 ### Pattern 3: Multiple State Updates
+
 ```typescript
 dispatch(setIsLoading(true));
 dispatch(setSubmitError(null));
@@ -314,6 +326,7 @@ dispatch(setSuccessMessage(null));
 ```
 
 ### Pattern 4: State-Based Rendering
+
 ```typescript
 {isLoading ? "Saving..." : "Save client profile"}
 {successMessage && <div>{successMessage}</div>}
@@ -325,11 +338,13 @@ dispatch(setSuccessMessage(null));
 ## 🧪 Testing with Redux DevTools
 
 **Installation:**
+
 ```bash
 npm install --save-dev redux-devtools
 ```
 
 **Features:**
+
 - Time travel debugging
 - Action history
 - State snapshots
@@ -342,6 +357,7 @@ npm install --save-dev redux-devtools
 The profile setup page communicates with the server through two main server functions in `src/client/profile-setup.tsx`.
 
 ### Get Profile Data
+
 This GET handler runs before the page loads, ensures the user is signed in, and fetches the current profile data for a client.
 
 ```typescript
@@ -361,6 +377,7 @@ const getProfileSetupData = createServerFn({ method: "GET" }).handler(async () =
 - Returned values are available through `useLoaderData()` in the component.
 
 ### Save Profile Data
+
 The POST handler validates the incoming profile data and writes it to the database.
 
 ```typescript
@@ -452,6 +469,7 @@ The database code in `src/lib/user-db.server.ts` ensures the tables exist and re
 ### Why this matters
 
 The profile setup flow is not just a UI form:
+
 - it validates input,
 - it writes consistent structured data,
 - and it keeps client onboarding data available for later dashboard pages.
@@ -461,16 +479,25 @@ The profile setup flow is not just a UI form:
 ## 🔐 Validation & Error Handling
 
 **Form Validation (Zod):**
+
 ```typescript
 const clientProfileSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters."),
   email: z.string().trim().email("Enter a valid email address."),
   phone: z.string().trim().min(6, "Phone number must be at least 6 digits."),
-  companyName: z.string().trim().min(2, "Company name must be at least 2 characters.").max(120, "Company name is too long."),
+  companyName: z
+    .string()
+    .trim()
+    .min(2, "Company name must be at least 2 characters.")
+    .max(120, "Company name is too long."),
   companyWebsite: z.string().trim().url("Enter a valid website URL.").optional().or(z.literal("")),
   industry: z.string().trim().min(2, "Choose or enter an industry."),
   teamSize: z.string().trim().min(1, "Select a team size."),
-  companyDescription: z.string().trim().min(20, "Company description must be at least 20 characters.").max(600, "Company description is too long."),
+  companyDescription: z
+    .string()
+    .trim()
+    .min(20, "Company description must be at least 20 characters.")
+    .max(600, "Company description is too long."),
   address: z.string().trim().min(5, "Address must be at least 5 characters."),
   profilePhotoUrl: z.string().trim().optional().or(z.literal("")),
   savedLocations: z.array(savedLocationSchema).min(1, "Add at least one saved location."),
@@ -479,6 +506,7 @@ const clientProfileSchema = z.object({
 ```
 
 **Server-Side Error Handling:**
+
 ```typescript
 if (!result.ok) {
   dispatch(setSubmitError(result.formError));
@@ -503,21 +531,26 @@ if (!result.ok) {
 ## 🎓 Key Concepts
 
 ### Redux Toolkit
+
 - Simplifies Redux setup with `configureStore()`
 - Built-in support for Immer (immutable state updates)
 - `createSlice()` combines actions and reducers
 
 ### Selectors
+
 ```typescript
-useAppSelector((state) => state.profile.isLoading)
+useAppSelector((state) => state.profile.isLoading);
 ```
+
 - Retrieves data from Redux store
 - Triggers re-render on value change
 
 ### Dispatch
+
 ```typescript
-dispatch(setIsLoading(true))
+dispatch(setIsLoading(true));
 ```
+
 - Triggers reducer functions
 - Updates store state
 - Causes components using that state to re-render
@@ -537,6 +570,7 @@ dispatch(setIsLoading(true))
 ## 📞 Support & Questions
 
 For questions about Redux implementation or state management patterns, refer to:
+
 - [Redux Toolkit Documentation](https://redux-toolkit.js.org/)
 - [React-Redux Hooks](https://react-redux.js.org/api/hooks)
 - [Redux DevTools](https://github.com/reduxjs/redux-devtools)

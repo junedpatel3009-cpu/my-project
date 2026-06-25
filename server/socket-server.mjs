@@ -154,7 +154,9 @@ io.on("connection", (socket) => {
         createdAt: activity.createdAt,
       });
       io.to(`user:${activity.recipientId}`).emit("project:activity", activity);
-      io.to(`user:${activity.recipientId}`).emit("notifications:refresh", { reason: "project-activity" });
+      io.to(`user:${activity.recipientId}`).emit("notifications:refresh", {
+        reason: "project-activity",
+      });
     }
 
     io.to("admin").emit("admin:refresh", { reason: "project activity" });

@@ -236,7 +236,8 @@ function LocationAutocompleteInput({
   onChange,
   onLocationSelect,
 }: LocationAutocompleteInputProps) {
-  const googleKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyCZHfjLWVc0CJ4LMg3CP7fcBc3ncdR9Vtw";
+  const googleKey =
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyCZHfjLWVc0CJ4LMg3CP7fcBc3ncdR9Vtw";
   const inputRef = useRef<HTMLInputElement | null>(null);
   const handleChange = useEffectEvent(onChange);
   const handleLocationSelect = useEffectEvent(onLocationSelect);

@@ -4,25 +4,24 @@ import { deleteClientJob, getClientJobById } from "@/lib/job-db.server";
 import { getProjectTrackingDetailsByJob } from "@/lib/project-request-db.server";
 import { seedTestJobs } from "@/lib/seed-jobs.server";
 
-export const checkProjectAuth = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const viewer = getCurrentUser();
-    
-    if (!viewer) {
-      return { authenticated: false, isClient: false };
-    }
+export const checkProjectAuth = createServerFn({ method: "GET" }).handler(async () => {
+  const viewer = getCurrentUser();
 
-    return { 
-      authenticated: true, 
-      isClient: viewer.role === "CLIENT" 
-    };
-  });
+  if (!viewer) {
+    return { authenticated: false, isClient: false };
+  }
+
+  return {
+    authenticated: true,
+    isClient: viewer.role === "CLIENT",
+  };
+});
 
 export const getProjectData = createServerFn({ method: "GET" })
   .inputValidator((id: string) => id)
   .handler(async ({ data }) => {
     const viewer = getCurrentUser();
-    
+
     if (!viewer) {
       return null;
     }
@@ -38,7 +37,7 @@ export const getProjectData = createServerFn({ method: "GET" })
     }
 
     let job = getClientJobById(viewer.id, numericId);
-    
+
     // For development/testing: create test job if it doesn't exist
     if (!job && numericId === 1) {
       const testJobId = seedTestJobs(viewer.id) as number;
@@ -47,7 +46,7 @@ export const getProjectData = createServerFn({ method: "GET" })
       }
     }
 
-    const tracking = job ? getProjectTrackingDetailsByJob(viewer.id, job.id) ?? null : null;
+    const tracking = job ? (getProjectTrackingDetailsByJob(viewer.id, job.id) ?? null) : null;
 
     return { viewer, job, tracking };
   });
