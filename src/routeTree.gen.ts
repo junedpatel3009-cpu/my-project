@@ -42,6 +42,7 @@ import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
 import { Route as AdminNotificationsRouteImport } from './routes/admin-notifications'
+import { Route as AdminCategoriesRouteImport } from './routes/admin-categories'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutUsRouteImport } from './routes/about-us'
 import { Route as LegalPageSlugRouteImport } from './routes/$legalPageSlug'
@@ -218,6 +219,11 @@ const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
   path: '/admin-notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/admin-categories',
+  path: '/admin-categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/$legalPageSlug': typeof LegalPageSlugRoute
   '/about-us': typeof AboutUsRoute
   '/admin': typeof AdminRoute
+  '/admin-categories': typeof AdminCategoriesRoute
   '/admin-notifications': typeof AdminNotificationsRoute
   '/contact-us': typeof ContactUsRoute
   '/dashboard': typeof DashboardRoute
@@ -320,6 +327,7 @@ export interface FileRoutesByTo {
   '/$legalPageSlug': typeof LegalPageSlugRoute
   '/about-us': typeof AboutUsRoute
   '/admin': typeof AdminRoute
+  '/admin-categories': typeof AdminCategoriesRoute
   '/admin-notifications': typeof AdminNotificationsRoute
   '/contact-us': typeof ContactUsRoute
   '/dashboard': typeof DashboardRoute
@@ -366,6 +374,7 @@ export interface FileRoutesById {
   '/$legalPageSlug': typeof LegalPageSlugRoute
   '/about-us': typeof AboutUsRoute
   '/admin': typeof AdminRoute
+  '/admin-categories': typeof AdminCategoriesRoute
   '/admin-notifications': typeof AdminNotificationsRoute
   '/contact-us': typeof ContactUsRoute
   '/dashboard': typeof DashboardRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/$legalPageSlug'
     | '/about-us'
     | '/admin'
+    | '/admin-categories'
     | '/admin-notifications'
     | '/contact-us'
     | '/dashboard'
@@ -458,6 +468,7 @@ export interface FileRouteTypes {
     | '/$legalPageSlug'
     | '/about-us'
     | '/admin'
+    | '/admin-categories'
     | '/admin-notifications'
     | '/contact-us'
     | '/dashboard'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/$legalPageSlug'
     | '/about-us'
     | '/admin'
+    | '/admin-categories'
     | '/admin-notifications'
     | '/contact-us'
     | '/dashboard'
@@ -549,6 +561,7 @@ export interface RootRouteChildren {
   LegalPageSlugRoute: typeof LegalPageSlugRoute
   AboutUsRoute: typeof AboutUsRoute
   AdminRoute: typeof AdminRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   ContactUsRoute: typeof ContactUsRoute
   DashboardRoute: typeof DashboardRoute
@@ -822,6 +835,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-categories': {
+      id: '/admin-categories'
+      path: '/admin-categories'
+      fullPath: '/admin-categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -911,6 +931,7 @@ const rootRouteChildren: RootRouteChildren = {
   LegalPageSlugRoute: LegalPageSlugRoute,
   AboutUsRoute: AboutUsRoute,
   AdminRoute: AdminRoute,
+  AdminCategoriesRoute: AdminCategoriesRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   ContactUsRoute: ContactUsRoute,
   DashboardRoute: DashboardRoute,

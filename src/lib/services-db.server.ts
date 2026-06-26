@@ -4,8 +4,24 @@ import Database from "better-sqlite3";
 type BetterSqlite3Database = InstanceType<typeof Database>;
 
 export type ServiceCategoryRecord = {
+  id: number;
   name: string;
-  count: number;
+  slug: string;
+  description: string;
+  iconName: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  proCount: number;
+  jobCount: number;
+};
+
+export type ServiceCategoryInput = {
+  name: string;
+  slug?: string;
+  description?: string;
+  iconName?: string;
+  sortOrder?: number;
 };
 
 const globalForServicesDb = globalThis as typeof globalThis & {
@@ -54,21 +70,13 @@ export function getServiceCategories() {
   const db = getDatabase();
   const rows = db
     .prepare(
-      `SELECT sc.name, sc.slug, sc.iconName, sc.description, sc.sortOrder,
+      `SELECT sc.id, sc.name, sc.slug, sc.iconName, sc.description, sc.sortOrder, sc.createdAt, sc.updatedAt,
               (SELECT COUNT(*) FROM "User" WHERE "professionalCategory" = sc.name AND role = 'PROFESSIONAL' AND "isActive" = 1) AS proCount,
               (SELECT COUNT(*) FROM "ClientJob" WHERE "category" = sc.name AND status = 'OPEN') AS jobCount
        FROM "ServiceCategory" sc
        ORDER BY sc.sortOrder ASC`,
     )
-    .all() as Array<{
-    name: string;
-    slug: string;
-    iconName: string;
-    description: string;
-    sortOrder: number;
-    proCount: number;
-    jobCount: number;
-  }>;
+    .all() as ServiceCategoryRecord[];
 
   return rows;
 }
@@ -79,4 +87,66 @@ export function getTotalProfessionalsCount(): number {
     .prepare('SELECT COUNT(*) AS count FROM "User" WHERE role = ? AND "isActive" = 1')
     .get("PROFESSIONAL") as { count: number };
   return result.count;
+}
+
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+export function getServiceCategoryById(id: number) {
+  const db = getDatabase();
+  return db
+    .prepare(
+      `SELECT sc.*, 
+              (SELECT COUNT(*) FROM "User" WHERE "professionalCategory" = sc.name AND role = 'PROFESSIONAL' AND "isActive" = 1) AS proCount,
+              (SELECT COUNT(*) FROM "ClientJob" WHERE "category" = sc.name AND status = 'OPEN') AS jobCount
+         FROM "ServiceCategory" sc
+        WHERE sc.id = ?`
+    )
+    .get(id) as ServiceCategoryRecord | undefined;
+}
+
+export function createServiceCategory(input: ServiceCategoryInput) {
+  const db = getDatabase();
+  const slug = input.slug ? slugify(input.slug) : slugify(input.name);
+  const stamp = new Date().toISOString();
+  const result = db
+    .prepare(
+      `INSERT INTO "ServiceCategory" (name, slug, description, iconName, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      input.name.trim(),
+      slug,
+      input.description?.trim() ?? "",
+      input.iconName?.trim() ?? "",
+      input.sortOrder ?? 0,
+      stamp,
+      stamp,
+    );
+  return getServiceCategoryById(Number(result.lastInsertRowid));
+}
+
+export function updateServiceCategory(id: number, input: ServiceCategoryInput) {
+  const db = getDatabase();
+  const fields: Array<[string, unknown]> = [];
+  if (input.name !== undefined) fields.push(["name", input.name.trim()]);
+  if (input.slug !== undefined) fields.push(["slug", slugify(input.slug)]);
+  if (input.description !== undefined) fields.push(["description", input.description.trim()]);
+  if (input.iconName !== undefined) fields.push(["iconName", input.iconName.trim()]);
+  if (input.sortOrder !== undefined) fields.push(["sortOrder", input.sortOrder]);
+  if (!fields.length) return getServiceCategoryById(id);
+
+  const sql = `UPDATE "ServiceCategory" SET ${fields.map(([key]) => `"${key}" = ?`).join(", ")}, "updatedAt" = ? WHERE id = ?`;
+  db.prepare(sql).run(...fields.map(([, value]) => value), new Date().toISOString(), id);
+  return getServiceCategoryById(id);
+}
+
+export function deleteServiceCategory(id: number) {
+  const db = getDatabase();
+  return db.prepare(`DELETE FROM "ServiceCategory" WHERE id = ?`).run(id).changes > 0;
 }
