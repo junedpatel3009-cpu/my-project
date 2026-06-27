@@ -830,6 +830,11 @@ function ProjectTrack() {
       setDisputePriority("MEDIUM");
       setDisputeMessage("");
       setDisputeFiles([]);
+      toast.success("Dispute raised.");
+      emitProjectActivity(
+        "Dispute raised",
+        `${displayName || "Someone"} raised a dispute for ${tracking.projectTitle}.`,
+      );
       await router.invalidate();
     } catch (error) {
       setDisputeError(error instanceof Error ? error.message : "Could not raise dispute.");

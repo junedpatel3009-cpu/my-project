@@ -18,6 +18,9 @@ import {
   UserCog,
   Globe,
   LayoutTemplate,
+  ArrowRight,
+  FileText,
+  Star,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
@@ -62,6 +65,17 @@ const getNotificationSnapshot = createServerFn({ method: "GET" }).handler(async 
 });
 
 const getRealtimeViewer = createServerFn({ method: "GET" }).handler(async () => getCurrentUser());
+
+const loadNotificationPanelData = createServerFn({ method: "GET" }).handler(async () => {
+  const viewer = getCurrentUser();
+
+  if (!viewer) {
+    return { notifications: [] as NotificationPopup[] };
+  }
+
+  const notifications = getUserNotifications(viewer.id, viewer.role);
+  return { notifications: notifications.slice(0, 3) };
+});
 
 type LiveMessage = {
   id: string;
@@ -114,7 +128,10 @@ type MessagePopup = {
   avatarUrl?: string | null;
 };
 
-type NotificationPopup = Pick<UserNotification, "key" | "title" | "description" | "href" | "type">;
+type NotificationPopup = Pick<
+  UserNotification,
+  "key" | "title" | "description" | "href" | "type" | "createdAt"
+>;
 type NotificationPreferences = {
   emailNotificationsEnabled: boolean;
   browserNotificationsEnabled: boolean;
@@ -127,26 +144,26 @@ const clientItems = [
   { to: "/discover", icon: Users, label: "Find pros" },
   { to: "/post-job", icon: PlusCircle, label: "Post a job" },
   { to: "/projects", icon: FolderKanban, label: "Projects" },
+  { to: "/reports", icon: FileText, label: "Reports" },
   { to: "/messages", icon: MessageSquare, label: "Messages" },
   { to: "/earnings", icon: Wallet, label: "Earnings" },
-  { to: "/notifications", icon: BellRing, label: "Notifications" },
 ];
 
 const professionalItems = [
   { to: "/professional-profile", icon: User, label: "Profile" },
-  { to: "/verification", icon: BadgeCheck, label: "Verification" },
+  { to: "/reports", icon: FileText, label: "Reports" },
   { to: "/professional-messages", icon: MessageSquare, label: "Messages" },
   { to: "/professional-stats", icon: Wallet, label: "My stats" },
 ];
 
 const adminItems = [
   { to: "/admin", icon: ShieldCheck, label: "Admin panel" },
-  { to: "/admin-notifications", icon: BellRing, label: "Notifications" },
   { to: "/user-management", icon: UserCog, label: "User management" },
   { to: "/verification-management", icon: BadgeCheck, label: "Verification" },
   { to: "/job-management", icon: Briefcase, label: "Job & Dispute Management" },
+  { to: "/reports", icon: FileText, label: "Reports" },
   { to: "/earnings-reports", icon: Wallet, label: "Earnings & Payouts" },
-  { to: "/website-cms", icon: Globe, label: "Website CMS" },
+  { to: "/admin-categories", icon: FolderKanban, label: "Categories" },
   { to: "/web-editor", icon: LayoutTemplate, label: "Web Editor" },
 ];
 
@@ -160,21 +177,31 @@ const clientMobileItems = [
 
 const professionalMobileItems = [
   { to: "/professional-profile", icon: User, label: "Profile" },
-  { to: "/verification", icon: BadgeCheck, label: "Verification" },
+  { to: "/reports", icon: FileText, label: "Reports" },
   { to: "/professional-messages", icon: MessageSquare, label: "Messages" },
   { to: "/professional-stats", icon: Wallet, label: "Stats" },
 ];
 
 const adminMobileItems = [
   { to: "/admin", icon: ShieldCheck, label: "Admin" },
-  { to: "/admin-notifications", icon: BellRing, label: "Alerts" },
   { to: "/user-management", icon: UserCog, label: "Users" },
   { to: "/verification-management", icon: BadgeCheck, label: "Verify" },
   { to: "/job-management", icon: Briefcase, label: "Jobs" },
+  { to: "/reports", icon: FileText, label: "Reports" },
   { to: "/earnings-reports", icon: Wallet, label: "Payouts" },
-  { to: "/website-cms", icon: Globe, label: "CMS" },
+  { to: "/admin-categories", icon: FolderKanban, label: "Categories" },
   { to: "/web-editor", icon: LayoutTemplate, label: "Editor" },
 ];
+function normalizePath(path: string) {
+  return path.replace(/\/+$/, "") || "/";
+}
+
+function isActivePath(path: string, target: string) {
+  const normalizedPath = normalizePath(path);
+  const normalizedTarget = normalizePath(target);
+  return normalizedPath === normalizedTarget || normalizedPath.startsWith(`${normalizedTarget}/`);
+}
+
 export function AppShell({
   children,
   title,
@@ -201,6 +228,9 @@ export function AppShell({
   const [realtimeViewer, setRealtimeViewer] = useState<PublicUser | null>(null);
   const [messagePopup, setMessagePopup] = useState<MessagePopup | null>(null);
   const [notificationPopup, setNotificationPopup] = useState<NotificationPopup | null>(null);
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [notificationPanelItems, setNotificationPanelItems] = useState<NotificationPopup[]>([]);
+  const [notificationPanelLoading, setNotificationPanelLoading] = useState(false);
   const notificationPreferencesRef = useRef<NotificationPreferences>({
     emailNotificationsEnabled: true,
     browserNotificationsEnabled: true,
@@ -356,13 +386,17 @@ export function AppShell({
         const alerts = (missed.length ? missed : snapshot.unread.slice(0, 1))
           .slice()
           .reverse()
-          .map(({ key, title, description, href, type }) => ({
-            key,
-            title,
-            description,
-            href,
-            type,
-          }));
+          .map(({ key, title, description, href, type }) => {
+            const notification: NotificationPopup = {
+              key,
+              title,
+              description,
+              href,
+              type,
+              createdAt: new Date().toISOString(),
+            };
+            return notification;
+          });
         showQueuedNotificationAlerts(alerts, snapshot.preferences);
       } catch {
         setUnreadNotifications(0);
@@ -452,11 +486,12 @@ export function AppShell({
       setUnreadNotifications((count) => count + 1);
       showNotificationAlert(
         {
-          key: `project-activity:${payload.actorId}:${payload.createdAt || Date.now()}`,
+          key: `project-activity:${payload.actorId}:${payload.createdAt || new Date().toISOString()}`,
           title: payload.title,
           description: payload.description || "",
           href: payload.href || "/notifications",
           type: "project",
+          createdAt: payload.createdAt || new Date().toISOString(),
         },
         preferences,
       );
@@ -521,6 +556,27 @@ export function AppShell({
     window.location.assign(href);
   };
 
+  const loadNotificationPanel = async () => {
+    setNotificationPanelLoading(true);
+    try {
+      const data = await loadNotificationPanelData();
+      setNotificationPanelItems(data.notifications);
+    } catch {
+      setNotificationPanelItems([]);
+    } finally {
+      setNotificationPanelLoading(false);
+    }
+  };
+
+  const toggleNotificationPanel = async () => {
+    const nextOpen = !notificationPanelOpen;
+    setNotificationPanelOpen(nextOpen);
+
+    if (nextOpen) {
+      await loadNotificationPanel();
+    }
+  };
+
   const declineIncomingCall = () => {
     if (!incomingCall || !realtimeViewer) {
       setIncomingCall(null);
@@ -558,13 +614,11 @@ export function AppShell({
           </div>
           <nav className="px-3 py-2">
             {items.map((it) => {
-              const active =
-                path === it.to ||
-                (it.to !== "/dashboard" && path.startsWith(it.to.split("/").slice(0, 2).join("/")));
+              const active = isActivePath(path, it.to);
               return (
                 <Link
                   key={it.to}
-                  to={it.to as any}
+                  to={it.to}
                   className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                     active
                       ? "bg-primary text-primary-foreground font-medium shadow-soft"
@@ -601,7 +655,7 @@ export function AppShell({
                         size="sm"
                         className="gap-2"
                       >
-                        <Link to={item.to as any}>
+                        <Link to={item.to}>
                           <item.icon className="h-4 w-4" />
                           {item.label}
                         </Link>
@@ -627,8 +681,9 @@ export function AppShell({
               </Button>
             </Link>
           ) : null}
-          <Link
-            to={isAdmin ? "/admin-notifications" : "/notifications"}
+          <button
+            type="button"
+            onClick={() => void toggleNotificationPanel()}
             className={`relative grid h-9 w-9 place-items-center rounded-lg hover:bg-muted ${
               unreadNotifications ? "text-cta" : ""
             }`}
@@ -645,7 +700,7 @@ export function AppShell({
                 <span className="relative inline-flex h-3 w-3 rounded-full bg-cta" />
               </span>
             ) : null}
-          </Link>
+          </button>
           <div className="flex items-center gap-2">
             <img
               src={userAvatarUrl || "https://i.pravatar.cc/100?u=me"}
@@ -674,13 +729,11 @@ export function AppShell({
             style={{ gridTemplateColumns: `repeat(${mobileItems.length}, minmax(0, 1fr))` }}
           >
             {mobileItems.map((it) => {
-              const active =
-                path === it.to ||
-                (it.to !== "/dashboard" && path.startsWith(it.to.split("/").slice(0, 2).join("/")));
+              const active = isActivePath(path, it.to);
               return (
                 <Link
                   key={it.label}
-                  to={it.to as any}
+                  to={it.to}
                   className={`flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
                 >
                   <it.icon className="h-5 w-5" />
@@ -691,6 +744,65 @@ export function AppShell({
           </div>
         </nav>
       ) : null}
+
+      {notificationPanelOpen ? (
+        <div className="fixed top-16 right-4 z-50 w-[min(340px,calc(100vw-2rem))] max-h-[calc(100vh-7rem)] overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-3 py-3">
+            <div>
+              <p className="text-sm font-semibold">Recent notifications</p>
+              <p className="text-xs text-muted-foreground">Latest 3 alerts</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setNotificationPanelOpen(false)}
+              className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label="Close notifications"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="divide-y divide-border">
+            {notificationPanelLoading ? (
+              <div className="p-3 text-sm text-muted-foreground">Loading notifications…</div>
+            ) : notificationPanelItems.length ? (
+              notificationPanelItems.map((notification) => {
+                const Icon = getNotificationIcon(notification.type);
+                return (
+                  <div key={notification.key} className="flex items-start gap-3 px-3 py-4">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-muted text-muted-foreground">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm">{notification.title}</p>
+                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                        {notification.description}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {formatNotificationTime(notification.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-4 text-sm text-muted-foreground">No recent notifications.</div>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-3">
+            <Link
+              to={isAdmin ? "/admin-notifications" : "/notifications"}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Button variant="outline" size="sm" onClick={() => setNotificationPanelOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <RealtimePopup
         messagePopup={messagePopup}
         incomingCall={incomingCall}
@@ -843,6 +955,41 @@ function RealtimePopup({
 
 function isMessagePath(path: string) {
   return path === "/messages" || path === "/professional-messages";
+}
+
+function getNotificationIcon(type: string) {
+  if (type === "project") {
+    return Briefcase;
+  }
+
+  if (type === "work") {
+    return FileText;
+  }
+
+  if (type === "message") {
+    return MessageSquare;
+  }
+
+  if (type === "payment") {
+    return Wallet;
+  }
+
+  return Star;
+}
+
+function formatNotificationTime(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
 }
 
 function showBrowserNotification(

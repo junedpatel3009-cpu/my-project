@@ -18,6 +18,7 @@ import { Route as UserManagementRouteImport } from './routes/user-management'
 import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ProfileSetupRouteImport } from './routes/profile-setup'
 import { Route as ProfessionalStatsRouteImport } from './routes/professional-stats'
@@ -97,6 +98,11 @@ const SignupRoute = SignupRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsRoute = ProjectsRouteImport.update({
@@ -306,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/professional-stats': typeof ProfessionalStatsRouteWithChildren
   '/profile-setup': typeof ProfileSetupRoute
   '/projects': typeof ProjectsRoute
+  '/reports': typeof ReportsRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/professional-stats': typeof ProfessionalStatsRouteWithChildren
   '/profile-setup': typeof ProfileSetupRoute
   '/projects': typeof ProjectsRoute
+  '/reports': typeof ReportsRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/professional-stats': typeof ProfessionalStatsRouteWithChildren
   '/profile-setup': typeof ProfileSetupRoute
   '/projects': typeof ProjectsRoute
+  '/reports': typeof ReportsRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -447,6 +456,7 @@ export interface FileRouteTypes {
     | '/professional-stats'
     | '/profile-setup'
     | '/projects'
+    | '/reports'
     | '/services'
     | '/signup'
     | '/terms-and-conditions'
@@ -493,6 +503,7 @@ export interface FileRouteTypes {
     | '/professional-stats'
     | '/profile-setup'
     | '/projects'
+    | '/reports'
     | '/services'
     | '/signup'
     | '/terms-and-conditions'
@@ -539,6 +550,7 @@ export interface FileRouteTypes {
     | '/professional-stats'
     | '/profile-setup'
     | '/projects'
+    | '/reports'
     | '/services'
     | '/signup'
     | '/terms-and-conditions'
@@ -586,6 +598,7 @@ export interface RootRouteChildren {
   ProfessionalStatsRoute: typeof ProfessionalStatsRouteWithChildren
   ProfileSetupRoute: typeof ProfileSetupRoute
   ProjectsRoute: typeof ProjectsRoute
+  ReportsRoute: typeof ReportsRoute
   ServicesRoute: typeof ServicesRoute
   SignupRoute: typeof SignupRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
@@ -665,6 +678,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects': {
@@ -956,6 +976,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfessionalStatsRoute: ProfessionalStatsRouteWithChildren,
   ProfileSetupRoute: ProfileSetupRoute,
   ProjectsRoute: ProjectsRoute,
+  ReportsRoute: ReportsRoute,
   ServicesRoute: ServicesRoute,
   SignupRoute: SignupRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,

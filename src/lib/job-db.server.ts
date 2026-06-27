@@ -1,5 +1,6 @@
 import path from "node:path";
 import Database from "better-sqlite3";
+import { io as clientIo } from "socket.io-client";
 
 import type { ClientJobAttachmentInput, ClientJobInput } from "@/lib/validation/client-job";
 
@@ -297,6 +298,18 @@ export function createClientJob(userId: number, input: ClientJobInput) {
   });
 
   const jobId = createJob(input.attachments ?? []);
+
+  // Notify admin room via socket server (best-effort, do not fail job creation)
+  try {
+    const socketUrl =
+      process.env.SOCKET_URL || `http://localhost:${process.env.SOCKET_PORT || 4001}`;
+    const sock = clientIo(socketUrl, { autoConnect: false });
+    sock.connect();
+    sock.emit("admin:activity", { reason: "client job posted" });
+    sock.disconnect();
+  } catch (e) {
+    // ignore errors — admin refresh is best-effort
+  }
 
   return getClientJobById(userId, jobId);
 }
@@ -681,6 +694,18 @@ export function updateClientJob(userId: number, jobId: number, input: ClientJobI
   });
 
   updateJob(input.attachments ?? []);
+
+  // Notify admin room about updated job (best-effort)
+  try {
+    const socketUrl =
+      process.env.SOCKET_URL || `http://localhost:${process.env.SOCKET_PORT || 4001}`;
+    const sock = clientIo(socketUrl, { autoConnect: false });
+    sock.connect();
+    sock.emit("admin:activity", { reason: "client job updated" });
+    sock.disconnect();
+  } catch (e) {
+    // ignore errors
+  }
 
   return getClientJobById(userId, jobId);
 }

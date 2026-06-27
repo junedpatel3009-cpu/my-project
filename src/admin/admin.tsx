@@ -527,17 +527,11 @@ function Admin() {
               onChange={(event) => setQuery(event.target.value)}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2">
             <Button asChild variant="outline">
               <Link to="/web-editor">
                 <LayoutTemplate className="mr-2 h-4 w-4" />
                 Web Editor
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/admin-categories">
-                <ClipboardList className="mr-2 h-4 w-4" />
-                Categories
               </Link>
             </Button>
           </div>
