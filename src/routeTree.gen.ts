@@ -48,6 +48,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutUsRouteImport } from './routes/about-us'
 import { Route as LegalPageSlugRouteImport } from './routes/$legalPageSlug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReportsNewRouteImport } from './routes/reports.new'
 import { Route as ProjectProjectIdRouteImport } from './routes/project.$projectId'
 import { Route as ProjectTrackTrackingIdRouteImport } from './routes/project-track.$trackingId'
 import { Route as ProfessionalStatsSectionRouteImport } from './routes/professional-stats.$section'
@@ -250,6 +251,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportsNewRoute = ReportsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ReportsRoute,
+} as any)
 const ProjectProjectIdRoute = ProjectProjectIdRouteImport.update({
   id: '/project/$projectId',
   path: '/project/$projectId',
@@ -312,7 +318,7 @@ export interface FileRoutesByFullPath {
   '/professional-stats': typeof ProfessionalStatsRouteWithChildren
   '/profile-setup': typeof ProfileSetupRoute
   '/projects': typeof ProjectsRoute
-  '/reports': typeof ReportsRoute
+  '/reports': typeof ReportsRouteWithChildren
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/professional-stats/$section': typeof ProfessionalStatsSectionRoute
   '/project-track/$trackingId': typeof ProjectTrackTrackingIdRoute
   '/project/$projectId': typeof ProjectProjectIdRoute
+  '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -359,7 +366,7 @@ export interface FileRoutesByTo {
   '/professional-stats': typeof ProfessionalStatsRouteWithChildren
   '/profile-setup': typeof ProfileSetupRoute
   '/projects': typeof ProjectsRoute
-  '/reports': typeof ReportsRoute
+  '/reports': typeof ReportsRouteWithChildren
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -375,6 +382,7 @@ export interface FileRoutesByTo {
   '/professional-stats/$section': typeof ProfessionalStatsSectionRoute
   '/project-track/$trackingId': typeof ProjectTrackTrackingIdRoute
   '/project/$projectId': typeof ProjectProjectIdRoute
+  '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -407,7 +415,7 @@ export interface FileRoutesById {
   '/professional-stats': typeof ProfessionalStatsRouteWithChildren
   '/profile-setup': typeof ProfileSetupRoute
   '/projects': typeof ProjectsRoute
-  '/reports': typeof ReportsRoute
+  '/reports': typeof ReportsRouteWithChildren
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
@@ -423,6 +431,7 @@ export interface FileRoutesById {
   '/professional-stats/$section': typeof ProfessionalStatsSectionRoute
   '/project-track/$trackingId': typeof ProjectTrackTrackingIdRoute
   '/project/$projectId': typeof ProjectProjectIdRoute
+  '/reports/new': typeof ReportsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -472,6 +481,7 @@ export interface FileRouteTypes {
     | '/professional-stats/$section'
     | '/project-track/$trackingId'
     | '/project/$projectId'
+    | '/reports/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -519,6 +529,7 @@ export interface FileRouteTypes {
     | '/professional-stats/$section'
     | '/project-track/$trackingId'
     | '/project/$projectId'
+    | '/reports/new'
   id:
     | '__root__'
     | '/'
@@ -566,6 +577,7 @@ export interface FileRouteTypes {
     | '/professional-stats/$section'
     | '/project-track/$trackingId'
     | '/project/$projectId'
+    | '/reports/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -598,7 +610,7 @@ export interface RootRouteChildren {
   ProfessionalStatsRoute: typeof ProfessionalStatsRouteWithChildren
   ProfileSetupRoute: typeof ProfileSetupRoute
   ProjectsRoute: typeof ProjectsRoute
-  ReportsRoute: typeof ReportsRoute
+  ReportsRoute: typeof ReportsRouteWithChildren
   ServicesRoute: typeof ServicesRoute
   SignupRoute: typeof SignupRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
@@ -890,6 +902,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reports/new': {
+      id: '/reports/new'
+      path: '/new'
+      fullPath: '/reports/new'
+      preLoaderRoute: typeof ReportsNewRouteImport
+      parentRoute: typeof ReportsRoute
+    }
     '/project/$projectId': {
       id: '/project/$projectId'
       path: '/project/$projectId'
@@ -946,6 +965,17 @@ const ProfessionalStatsRouteChildren: ProfessionalStatsRouteChildren = {
 const ProfessionalStatsRouteWithChildren =
   ProfessionalStatsRoute._addFileChildren(ProfessionalStatsRouteChildren)
 
+interface ReportsRouteChildren {
+  ReportsNewRoute: typeof ReportsNewRoute
+}
+
+const ReportsRouteChildren: ReportsRouteChildren = {
+  ReportsNewRoute: ReportsNewRoute,
+}
+
+const ReportsRouteWithChildren =
+  ReportsRoute._addFileChildren(ReportsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LegalPageSlugRoute: LegalPageSlugRoute,
@@ -976,7 +1006,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfessionalStatsRoute: ProfessionalStatsRouteWithChildren,
   ProfileSetupRoute: ProfileSetupRoute,
   ProjectsRoute: ProjectsRoute,
-  ReportsRoute: ReportsRoute,
+  ReportsRoute: ReportsRouteWithChildren,
   ServicesRoute: ServicesRoute,
   SignupRoute: SignupRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,

@@ -23,6 +23,7 @@ import { AppShell } from "@/components/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminReportExportButton } from "@/components/AdminReportExportButton";
 import {
   Select,
   SelectContent,
@@ -150,6 +151,11 @@ function EarningsReports() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <AdminReportExportButton
+            buttonLabel="Download report"
+            reportName="Earnings management export"
+            initialSelected={["Earnings", "Payments"]}
+          />
           <Button variant="outline" type="button" onClick={() => downloadCsv(report)}>
             <Download className="mr-2 h-4 w-4" />
             Export CSV

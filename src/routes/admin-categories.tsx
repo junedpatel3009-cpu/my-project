@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link, useLoaderData, useRouter } from "@tanstack/react-router";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Download } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminReportExportButton } from "@/components/AdminReportExportButton";
 import { Textarea } from "@/components/ui/textarea";
 import { getCurrentUser } from "@/lib/current-user.server";
 import {
@@ -198,6 +200,11 @@ function AdminCategories() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <AdminReportExportButton
+              buttonLabel="Download report"
+              reportName="Admin categories export"
+              initialSelected={["Jobs"]}
+            />
             <Button asChild variant="outline">
               <Link to="/admin">Back to admin</Link>
             </Button>

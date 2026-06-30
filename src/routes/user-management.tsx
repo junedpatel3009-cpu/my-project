@@ -3,6 +3,7 @@ import { createFileRoute, Link, useLoaderData, useRouter } from "@tanstack/react
 import { useState, type FormEvent, type ReactNode } from "react";
 import {
   Banknote,
+  Download,
   BadgeCheck,
   BriefcaseBusiness,
   Building2,
@@ -27,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { AdminReportExportButton } from "@/components/AdminReportExportButton";
 import {
   Dialog,
   DialogContent,
@@ -215,9 +217,16 @@ function UserManagement() {
             Manage account status, professional verification, and profile readiness.
           </p>
         </div>
-        <Button asChild variant="outline">
-          <Link to="/admin">Back to admin</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <AdminReportExportButton
+            buttonLabel="Download report"
+            reportName="User management export"
+            initialSelected={["Users"]}
+          />
+          <Button asChild variant="outline">
+            <Link to="/admin">Back to admin</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

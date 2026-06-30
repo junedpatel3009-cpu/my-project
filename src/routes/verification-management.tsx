@@ -3,6 +3,7 @@ import { createFileRoute, Link, useLoaderData, useRouter } from "@tanstack/react
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BadgeCheck,
+  Download,
   CheckCircle2,
   Clock3,
   ExternalLink,
@@ -23,6 +24,7 @@ import { AppShell } from "@/components/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminReportExportButton } from "@/components/AdminReportExportButton";
 import { getCurrentUser } from "@/lib/current-user.server";
 import {
   getAdminVerificationRecords,
@@ -150,6 +152,11 @@ function VerificationManagement() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <AdminReportExportButton
+            buttonLabel="Download report"
+            reportName="Verification management export"
+            initialSelected={["Verification"]}
+          />
           <Button asChild variant="outline">
             <Link to="/user-management">User Management</Link>
           </Button>

@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Clock3,
   DollarSign,
+  Download,
   Eye,
   FileText,
   Filter,
@@ -30,6 +31,7 @@ import { AppShell } from "@/components/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminReportExportButton } from "@/components/AdminReportExportButton";
 import {
   Select,
   SelectContent,
@@ -203,9 +205,16 @@ function JobManagement() {
             Monitor posted jobs, assigned work, completion activity, and dispute resolution.
           </p>
         </div>
-        <Button asChild variant="outline">
-          <Link to="/admin">Back to admin</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <AdminReportExportButton
+            buttonLabel="Download report"
+            reportName="Job management export"
+            initialSelected={["Jobs"]}
+          />
+          <Button asChild variant="outline">
+            <Link to="/admin">Back to admin</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
